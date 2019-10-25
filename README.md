@@ -1,5 +1,5 @@
-# influxdb-comparisons
-This repo contains code for benchmarking InfluxDB against other databases and time series solutions. You can access the [detailed technical writeups for each here](https://influxdata.com/technical-papers/).
+# timeseriesdatabase-comparisons
+This repo is forked from repo of contains code for benchmarking InfluxDB against other databases and time series solutions. You can access the [detailed technical writeups for each here](https://influxdata.com/technical-papers/).
 
 Current databases supported:
 
