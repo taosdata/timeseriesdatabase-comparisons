@@ -31,7 +31,7 @@ import (
 )
 
 // Output data format choices:
-var formatChoices = []string{"influx-bulk", "es-bulk", "es-bulk6x", "cassandra", "mongo", "opentsdb", "timescaledb-sql", "timescaledb-copyFrom", "graphite-line", "splunk-json"}
+var formatChoices = []string{"influx-bulk", "es-bulk", "es-bulk6x", "cassandra", "mongo", "opentsdb", "timescaledb-sql", "timescaledb-copyFrom", "graphite-line", "splunk-json","tdengine"}
 
 // Program option vars:
 var (
@@ -47,6 +47,7 @@ var (
 
 	timestampStartStr string
 	timestampEndStr   string
+	taosschema        string
 
 	timestampStart time.Time
 	timestampEnd   time.Time
@@ -69,6 +70,7 @@ func init() {
 	flag.Int64Var(&scaleVarOffset, "scale-var-offset", 0, "Scaling variable offset specific to the use case.")
 	flag.DurationVar(&samplingInterval, "sampling-interval", devops.EpochDuration, "Simulated sampling interval.")
 	flag.StringVar(&configFile, "config-file", "", "Simulator config file in TOML format (experimental)")
+	flag.StringVar(&taosschema, "tdschema-file", "", "TDengine schema config file in TOML format (experimental)")
 
 	flag.StringVar(&timestampStartStr, "timestamp-start", common.DefaultDateTimeStart, "Beginning timestamp (RFC3339).")
 	flag.StringVar(&timestampEndStr, "timestamp-end", common.DefaultDateTimeEnd, "Ending timestamp (RFC3339).")
@@ -206,6 +208,8 @@ func main() {
 		serializer = common.NewSerializerGraphiteLine()
 	case "splunk-json":
 		serializer = common.NewSerializerSplunkJson()
+	case "tdengine":
+		serializer = common.NewSerializerTDengine(taosschema, useCase, scaleVar)
 	default:
 		panic("unreachable")
 	}
