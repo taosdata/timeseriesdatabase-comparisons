@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"strconv"
 	"sync"
 
 	"github.com/pelletier/go-toml"
@@ -31,13 +32,15 @@ type TAOSConfig struct {
 }
 
 var dbname string
+var scalevar int64
 var Schematree *toml.Tree
 var IsSTableCreated sync.Map //a map to fast find whether the super table is created
 var IsTableCreated sync.Map  //a map to fast find whether the table is created
 //var Stabletoschema sync.Map      //a map to fast ge the schema
 
-func NewSerializerTDengine(path string, dbn string) *serializerTDengine {
+func NewSerializerTDengine(path string, dbn string, scaleVar int64) *serializerTDengine {
 	var err error
+	scalevar = scaleVar
 	Schematree, err = TAOSNewConfig(path)
 	if err != nil {
 		fmt.Println("load taos config failed: %v", err)
@@ -80,11 +83,12 @@ func (s *serializerTDengine) SerializePoint(w io.Writer, p *Point) error {
 
 	var tbname string
 	s2 := p.TagValues[schema.Suffixpos]
-	tbname = str + "_" + string(s2[:])
-
+	tbindex, _ := strconv.ParseInt(string(s2[:]), 10, 64)
+	tbname = str + "_" + strconv.FormatInt(tbindex, 10)
 	buf := scratchBufPool.Get().([]byte)
 	//buf = append(buf, "Insert into "...)
-	buf = append(buf, ' ')
+	head := fmt.Sprintf("%3d ", tbindex%scalevar)
+	buf = append(buf, head...)
 	buf = append(buf, tbname...)
 	buf = append(buf, " using "...)
 	buf = append(buf, str...)
