@@ -8,21 +8,21 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
-	"github.com/influxdata/influxdb-comparisons/bulk_load"
+	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_load"
 	"log"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/influxdata/influxdb-comparisons/util/report"
+	"github.com/liu0x54/timeseriesdatabase-comparisons/util/report"
 	"github.com/jackc/pgx"
 
 	"bytes"
 	"context"
 	"encoding/binary"
-	"github.com/influxdata/influxdb-comparisons/bulk_data_gen/common"
-	"github.com/influxdata/influxdb-comparisons/timescale_serializaition"
+	"github.com/liu0x54/timeseriesdatabase-comparisons/risons/risons/bulk_data_gen/common"
+	"github.com/liu0x54/timeseriesdatabase-comparisons/timescale_serializaition"
 	"io"
 )
 

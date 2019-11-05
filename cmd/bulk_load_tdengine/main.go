@@ -14,7 +14,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/influxdata/influxdb-comparisons/bulk_data_gen/common"
+	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_data_gen/common"
 	_ "github.com/taosdata/TDengine/src/connector/go/src/taosSql"
 
 	//	"github.com/caict-benchmark/BDC-TS/util/report"

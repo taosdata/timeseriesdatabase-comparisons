@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"github.com/google/flatbuffers/go"
-	"github.com/influxdata/influxdb-comparisons/mongo_serialization"
+	"github.com/liu0x54/timeseriesdatabase-comparisons/mongo_serialization"
 	"io"
 	"reflect"
 )

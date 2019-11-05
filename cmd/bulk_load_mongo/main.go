@@ -9,7 +9,7 @@ import (
 	"encoding/binary"
 	"flag"
 	"fmt"
-	"github.com/influxdata/influxdb-comparisons/bulk_load"
+	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_load"
 	"io"
 	"log"
 	"sync"
@@ -20,9 +20,9 @@ import (
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 
-	"github.com/influxdata/influxdb-comparisons/bulk_query_gen/mongodb"
-	"github.com/influxdata/influxdb-comparisons/mongo_serialization"
-	"github.com/influxdata/influxdb-comparisons/util/report"
+	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_query_gen/mongodb"
+	"github.com/liu0x54/timeseriesdatabase-comparisons/mongo_serialization"
+	"github.com/liu0x54/timeseriesdatabase-comparisons/util/report"
 	"strconv"
 )
 

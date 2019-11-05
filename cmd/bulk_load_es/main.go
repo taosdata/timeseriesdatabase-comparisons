@@ -10,8 +10,8 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/influxdata/influxdb-comparisons/bulk_data_gen/common"
-	"github.com/influxdata/influxdb-comparisons/bulk_load"
+	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_data_gen/common"
+	"github.com/liu0x54/timeseriesdatabase-comparisons/risons/bulk_load"
 	"io"
 	"io/ioutil"
 	"log"
@@ -22,7 +22,7 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/influxdata/influxdb-comparisons/util/report"
+	"github.com/liu0x54/timeseriesdatabase-comparisons/risons/risons/risons/risons/risons/risons/risons/util/report"
 	"github.com/valyala/fasthttp"
 	"strconv"
 )

@@ -8,15 +8,15 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
-	"github.com/influxdata/influxdb-comparisons/bulk_load"
+	"github.com/liu0x54/timeseriesdatabase-comparisons/risons/bulk_load"
 	"io"
 	"log"
 	"sync"
 	"time"
 
 	"github.com/gocql/gocql"
-	"github.com/influxdata/influxdb-comparisons/bulk_data_gen/common"
-	"github.com/influxdata/influxdb-comparisons/util/report"
+	"github.com/liu0x54/timeseriesdatabase-comparisons/risons/risons/risons/bulk_data_gen/common"
+	"github.com/liu0x54/timeseriesdatabase-comparisons/risons/risons/util/report"
 	"strconv"
 	"strings"
 )

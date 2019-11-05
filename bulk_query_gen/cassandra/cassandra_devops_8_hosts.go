@@ -1,7 +1,7 @@
 package cassandra
 
 import (
-	bulkQuerygen "github.com/influxdata/influxdb-comparisons/bulk_query_gen"
+	bulkQuerygen "github.com/liu0x54/timeseriesdatabase-comparisons/bulk_query_gen"
 	"time"
 )
 

@@ -1,7 +1,7 @@
 package iot
 
 import (
-	. "github.com/influxdata/influxdb-comparisons/bulk_data_gen/common"
+	. "github.com/liu0x54/timeseriesdatabase-comparisons/risons/risons/bulk_data_gen/common"
 	"time"
 )
 

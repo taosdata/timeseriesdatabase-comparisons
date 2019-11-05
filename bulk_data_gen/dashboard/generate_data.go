@@ -1,8 +1,8 @@
 package dashboard
 
 import (
-	. "github.com/influxdata/influxdb-comparisons/bulk_data_gen/common"
-	"github.com/influxdata/influxdb-comparisons/bulk_data_gen/devops"
+	. "github.com/liu0x54/timeseriesdatabase-comparisons/bulk_data_gen/common"
+	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_data_gen/devops"
 	"time"
 )
 
