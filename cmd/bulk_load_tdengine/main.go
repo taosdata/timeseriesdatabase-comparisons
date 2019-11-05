@@ -154,8 +154,8 @@ func scan(db *sql.DB, itemsPerBatch int) (int64, int64, int64) {
 	var err error
 	var itemsRead, bytesRead int64
 	var totalPoints, totalValues int64
-	var insertFlag bool = false
-	var cmdinput string
+	//var insertFlag bool = false
+	//var cmdinput string
 
 	//buff := bufPool.Get().([]string)
 	scanner := bufio.NewScanner(os.Stdin)
