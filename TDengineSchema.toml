@@ -1,0 +1,17 @@
+[[window_state_room]]
+stname = "window_state_room"
+suffix = "home_id"
+# sample 40% of the tag set, default is to sample 50%
+suffixpos = 0
+tags = [
+    # common tags
+    { name = "room_id",             type = "string" , sourcetype = 1, sourceposition = 2},
+    { name = "home_id",             type = "string" , sourcetype = 1, sourceposition = 2},
+    { name = "sensor_id",           type = "string" , sourcetype = 1, sourceposition = 2},
+    { name = "window_id",           type = "string" , sourcetype = 1, sourceposition = 2},
+]
+fields = [
+    { name = "ts",                  type = "timestamp" , sourcetype = 1, sourceposition = 2},
+    { name = "state",               type = "float" , sourcetype = 1, sourceposition = 2},
+    { name = "battery_voltage",     type = "float" , sourcetype = 1, sourceposition = 2},
+]
