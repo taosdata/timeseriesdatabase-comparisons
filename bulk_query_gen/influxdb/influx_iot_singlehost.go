@@ -1,7 +1,7 @@
 package influxdb
 
 import "time"
-import bulkQuerygen "github.com/liu0x54/timeseriesdatabase-comparisons/risons/risons/risons/risons/bulk_query_gen"
+import bulkQuerygen "github.com/liu0x54/timeseriesdatabase-comparisons/bulk_query_gen"
 
 // InfluxIotSingleHost produces Influx-specific queries for the devops single-host case.
 type InfluxIotSingleHost struct {

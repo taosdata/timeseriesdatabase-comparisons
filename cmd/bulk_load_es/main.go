@@ -11,7 +11,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_data_gen/common"
-	"github.com/liu0x54/timeseriesdatabase-comparisons/risons/bulk_load"
+	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_load"
 	"io"
 	"io/ioutil"
 	"log"
@@ -22,7 +22,7 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/liu0x54/timeseriesdatabase-comparisons/risons/risons/risons/risons/risons/risons/risons/util/report"
+	"github.com/liu0x54/timeseriesdatabase-comparisons/
 	"github.com/valyala/fasthttp"
 	"strconv"
 )

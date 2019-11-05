@@ -3,7 +3,7 @@ package influxdb
 import "time"
 import (
 	"fmt"
-	bulkQuerygen "github.com/liu0x54/timeseriesdatabase-comparisons/risons/risons/risons/risons/risons/bulk_query_gen"
+	bulkQuerygen "github.com/liu0x54/timeseriesdatabase-comparisons/
 )
 
 // InfluxDashboardRedisMemoryUtilization produces Influx-specific queries for the dashboard single-host case.

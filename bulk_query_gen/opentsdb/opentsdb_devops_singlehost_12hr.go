@@ -1,7 +1,7 @@
 package opentsdb
 
 import "time"
-import bulkQuerygen "github.com/liu0x54/timeseriesdatabase-comparisons/risons/risons/risons/bulk_query_gen"
+import bulkQuerygen "github.com/liu0x54/timeseriesdatabase-comparisons/ery_gen"
 
 // OpenTSDBDevopsSingleHost12hr produces OpenTSDB-specific queries for the devops single-host case over a 12hr period.
 type OpenTSDBDevopsSingleHost12hr struct {

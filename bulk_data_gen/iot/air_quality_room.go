@@ -1,7 +1,7 @@
 package iot
 
 import (
-	. "github.com/liu0x54/timeseriesdatabase-comparisons/risons/bulk_data_gen/common"
+	. "github.com/liu0x54/timeseriesdatabase-comparisons/bulk_data_gen/common"
 	"time"
 )
 

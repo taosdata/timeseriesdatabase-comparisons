@@ -2,7 +2,7 @@ package influxdb
 
 import (
 	"fmt"
-	bulkQuerygen "github.com/liu0x54/timeseriesdatabase-comparisons/risons/risons/risons/bulk_query_gen"
+	bulkQuerygen "github.com/liu0x54/timeseriesdatabase-comparisons/
 	"math/rand"
 	"strings"
 	"time"

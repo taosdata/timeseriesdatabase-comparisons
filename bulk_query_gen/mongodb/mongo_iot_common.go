@@ -3,7 +3,7 @@ package mongodb
 import (
 	"fmt"
 	bulkDataGenIot "github.com/liu0x54/timeseriesdatabase-comparisons/bulk_data_gen/iot"
-	bulkQuerygen "github.com/liu0x54/timeseriesdatabase-comparisons/risons/risons/risons/bulk_query_gen"
+	bulkQuerygen "github.com/liu0x54/timeseriesdatabase-comparisons/
 	"math/rand"
 	"time"
 )

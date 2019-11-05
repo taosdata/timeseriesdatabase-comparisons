@@ -7,7 +7,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_load"
-	"github.com/liu0x54/timeseriesdatabase-comparisons/risons/risons/risons/risons/util/report"
+	"github.com/liu0x54/timeseriesdatabase-comparisons/util/report"
 	"io"
 	"io/ioutil"
 	"log"

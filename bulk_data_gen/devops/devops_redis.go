@@ -2,7 +2,7 @@ package devops
 
 import (
 	"fmt"
-	. "github.com/liu0x54/timeseriesdatabase-comparisons/risons/risons/risons/bulk_data_gen/common"
+	. "github.com/liu0x54/timeseriesdatabase-comparisons/bulk_data_gen/common"
 	"math/rand"
 	"time"
 )

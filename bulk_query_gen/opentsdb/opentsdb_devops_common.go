@@ -3,7 +3,7 @@ package opentsdb
 import (
 	"bytes"
 	"fmt"
-	bulkQuerygen "github.com/liu0x54/timeseriesdatabase-comparisons/risons/risons/risons/risons/bulk_query_gen"
+	bulkQuerygen "github.com/liu0x54/timeseriesdatabase-comparisons/bulk_query_gen"
 	"math/rand"
 	"net/url"
 	"strings"

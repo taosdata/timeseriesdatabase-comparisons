@@ -1,7 +1,7 @@
 package mongodb
 
 import "time"
-import bulkQuerygen "github.com/liu0x54/timeseriesdatabase-comparisons/risons/risons/risons/bulk_query_gen"
+import bulkQuerygen "github.com/liu0x54/timeseriesdatabase-comparisons/
 
 // MongoIotSingleHost produces Mongo-specific queries for the devops single-host case.
 type MongoIotSingleHost struct {
