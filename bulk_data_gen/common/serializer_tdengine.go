@@ -303,14 +303,14 @@ func TAOSCreateStable(w io.Writer, p *Point) error {
 	s := fmt.Sprintf("create table %s (ts timestamp ", stablename)
 	buf = append(buf, s...)
 	for i := 0; i < len(taosconfig.Fields); i++ {
-		buf = append(buf, ", "+taosconfig.Fields[i].Name+" "+taosconfig.Fields[i].Type...)
+		buf = append(buf, ", f_"+taosconfig.Fields[i].Name+" "+taosconfig.Fields[i].Type...)
 	}
 	buf = append(buf, ") tags ("...)
 	for i := 0; i < len(taosconfig.Tags); i++ {
 		if i == 0 {
-			buf = append(buf, taosconfig.Tags[i].Name+" "+taosconfig.Tags[i].Type...)
+			buf = append(buf, "t_"+taosconfig.Tags[i].Name+" "+taosconfig.Tags[i].Type...)
 		} else {
-			buf = append(buf, ", "+taosconfig.Tags[i].Name+" "+taosconfig.Tags[i].Type...)
+			buf = append(buf, ", t_"+taosconfig.Tags[i].Name+" "+taosconfig.Tags[i].Type...)
 		}
 	}
 	buf = append(buf, ");\n"...)

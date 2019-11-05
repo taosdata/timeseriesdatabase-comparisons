@@ -99,7 +99,7 @@ func main() {
 
 	if doLoad {
 		log.Println("Creating database ----")
-		db, err := sql.Open(taosDriverName, "root:taosdata@/tcp("+daemonUrl+")/vehicle")
+		db, err := sql.Open(taosDriverName, "root:taosdata@/tcp("+daemonUrl+")/")
 		if err != nil {
 			log.Fatalf("Open database error: %s\n", err)
 		}
@@ -142,6 +142,8 @@ func createDatabase(db *sql.DB) {
 	sqlcmd := fmt.Sprintf("Drop database if exists %s", useCase)
 	_, err := db.Exec(sqlcmd)
 	sqlcmd = fmt.Sprintf("create database %s", useCase)
+	_, err = db.Exec(sqlcmd)
+	sqlcmd = fmt.Sprintf("use %s", useCase)
 	_, err = db.Exec(sqlcmd)
 	checkErr(err)
 
@@ -211,7 +213,7 @@ func scan(db *sql.DB, itemsPerBatch int) (int64, int64, int64) {
 
 func processBatches(iworker int) {
 	var i int
-	db, err := sql.Open(taosDriverName, "root:taosdata@/tcp("+daemonUrl+")/vehicle")
+	db, err := sql.Open(taosDriverName, "root:taosdata@/tcp("+daemonUrl+")/"+useCase)
 	checkErr(err)
 	sqlcmd := make([]string, batchSize+1)
 	i = 0
