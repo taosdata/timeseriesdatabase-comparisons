@@ -71,7 +71,8 @@ func (s *serializerTDengine) SerializePoint(w io.Writer, p *Point) error {
 	out1, ok := IsSTableCreated.Load(str)
 	if ok != true {
 		//fmt.Println("can not load cfg ", str)
-		return nil
+		info := fmt.Errorf("can not load from stbcrted %s ", str)
+		return info
 	}
 	//fmt.Println(out1)
 	//fmt.Println(*out1)

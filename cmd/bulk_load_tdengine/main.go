@@ -121,7 +121,12 @@ func main() {
 
 		start := time.Now()
 		itemsRead, bytesRead, valuesRead := scan(db, batchSize)
+		
 		<-inputDone
+		
+
+		
+
 		for i := 0; i < workers; i++ {
 			close(batchChans[i])
 		}
@@ -151,28 +156,29 @@ func createDatabase(db *sql.DB) {
 }
 
 func scan(db *sql.DB, itemsPerBatch int) (int64, int64, int64) {
-	//var n int
+
 	var vgid int
 	var err error
 	var itemsRead, bytesRead int64
 	var totalPoints, totalValues int64
-	//var insertFlag bool = false
-	//var cmdinput string
+
 
 	//buff := bufPool.Get().([]string)
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
 		line := scanner.Text()
-		totalPoints, totalValues, err = common.CheckTotalValues(line)
-		if totalPoints > 0 || totalValues > 0 {
-			continue
-		}
-		if err != nil {
-			log.Fatal(err)
-		}
+
 		if strings.HasPrefix(line, "create") {
 			_, err = db.Exec(line)
-		} else {
+		} else if strings.HasPrefix(line, "data"){
+			totalPoints, totalValues, err = common.CheckTotalValues(line)
+			if totalPoints > 0 || totalValues > 0 {
+				continue
+			}
+			if err != nil {
+				log.Fatal(err)
+			}
+		}else {
 			itemsRead++
 			bytesRead += int64(len(scanner.Bytes()))
 			if !doLoad {
@@ -188,10 +194,16 @@ func scan(db *sql.DB, itemsPerBatch int) (int64, int64, int64) {
 					n = 0
 				}
 			*/
-			vgid, _ = strconv.Atoi(line[0:2])
+			hun,_:= strconv.Atoi(string(line[0]))
+			ten,_:= strconv.Atoi(string(line[1]))
+			vgid, _ = strconv.Atoi(string(line[2]))
+			vgid = hun*100+ten*10+vgid
 			vgid = vgid % workers
+			
 			batchChans[vgid] <- line[3:]
+			
 		}
+
 	}
 	/*
 		if n > 0 {
@@ -238,8 +250,7 @@ func processBatches(iworker int) {
 			i = 1
 			_, err := db.Exec(strings.Join(sqlcmd, ""))
 			if err != nil {
-				fmt.Println(sqlcmd)
-				log.Fatalf("Error writing: %s\n", err.Error())
+				log.Fatalf("Error writing: %s\n", strings.Join(sqlcmd, ""))//err.Error())
 			}
 		}
 	}
@@ -247,8 +258,7 @@ func processBatches(iworker int) {
 		i = 1
 		_, err := db.Exec(strings.Join(sqlcmd, ""))
 		if err != nil {
-			fmt.Println(sqlcmd)
-			log.Fatalf("Error writing: %s\n", err.Error())
+			log.Fatalf("Error writing: %s\n", strings.Join(sqlcmd, ""))//err.Error())
 		}
 	}
 

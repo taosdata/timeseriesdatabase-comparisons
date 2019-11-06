@@ -62,7 +62,7 @@ func (m *HomeConfigMeasurement) ToPoint(p *Point) bool {
 
 func genRandomString() []byte {
 	//len 10-20k
-	len := int((rand.Int63n(10) + 10) * 1024)
+	len := int((rand.Int63n(10) + 10) * 10)
 	buff := make([]byte, len)
 	for i := 0; i < len; i++ {
 		buff[i] = byte(rand.Int63n(87) + 40)
