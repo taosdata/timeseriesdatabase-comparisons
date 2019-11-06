@@ -65,7 +65,7 @@ func init() {
 	flag.StringVar(&reportUser, "report-user", "", "User for host to send result metrics")
 	flag.StringVar(&reportPassword, "report-password", "", "User password for Host to send result metrics")
 	flag.StringVar(&reportTagsCSV, "report-tags", "", "Comma separated k:v tags to send  alongside result metrics")
-	flag.IntVar(&slaveSource, "slavesource", 0, "if slave source, will not create database")
+	flag.BoolVar(&slaveSource, "slavesource", 0, "if slave source, will not create database")
 
 	flag.Parse()
 
