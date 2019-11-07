@@ -153,7 +153,7 @@ func (l *InfluxBulkLoad) CreateDb() {
 		log.Fatal(err)
 	}
 
-	if len(existingDatabases) > 0 {
+	if len(existingDatabases) > 0 && !slaveSource{
 		if bulk_load.Runner.DoAbortOnExist {
 			log.Fatalf("There are databases already in the data store. If you know what you are doing, run the command:\ncurl 'http://localhost:8086/query?q=drop%%20database%%20%s'\n", existingDatabases[0])
 		} else {
