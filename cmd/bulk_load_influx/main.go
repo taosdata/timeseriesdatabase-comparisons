@@ -97,6 +97,7 @@ type workerConfig struct {
 	writer         *HTTPWriter
 	backingOffSecs float64
 }
+var slaveSource bool
 
 func (l *InfluxBulkLoad) Init() {
 	flag.StringVar(&l.csvDaemonUrls, "urls", "http://localhost:8086", "InfluxDB URLs, comma-separated. Will be used in a round-robin fashion.")
@@ -107,6 +108,7 @@ func (l *InfluxBulkLoad) Init() {
 	flag.BoolVar(&l.useGzip, "gzip", true, "Whether to gzip encode requests (default true).")
 	flag.IntVar(&l.clientIndex, "client-index", 0, "Index of a client host running this tool. Used to distribute load")
 	flag.IntVar(&l.ingestRateLimit, "ingest-rate-limit", -1, "Ingest rate limit in values/s (-1 = no limit).")
+	flag.BoolVar(&slaveSource, "slavesource", false, "if slave source, will not create database")
 }
 
 func (l *InfluxBulkLoad) Validate() {
@@ -159,7 +161,7 @@ func (l *InfluxBulkLoad) CreateDb() {
 		}
 	}
 
-	if len(existingDatabases) == 0 {
+	if len(existingDatabases) == 0 && !slaveSource{
 		err = createDb(l.daemonUrls[0], bulk_load.Runner.DbName, l.replicationFactor, l.consistency)
 		if err != nil {
 			log.Fatal(err)
