@@ -151,7 +151,7 @@ func main() {
 	_, err = db.Exec("use benchmarkreport")
 	sqlcmd = fmt.Sprintf("create table if not exists bmreport (ts timestamp, starttime binary(40), endtime binary(40),itemsread int, bytesread int,valuesread int,timetook float,recordsrate float, bytesrate float,valuesrate float, workers int, batchsize int, usecase binary(20)) tags(host binary(20), proc_id binary(20))")
 	_, err = db.Exec(sqlcmd)
-	sqlcmd = fmt.Sprintf("insert into %s%s using bmreport tags(\"%s\",\"%s\") values(0, \"%s\",\"%s\",%d,%d,%d,%f,%f,%f,%f,%d,%d,\"%s\")", reportHostname,reportTagsCSV,reportHostname,reportTagsCSV,start.Format(time.RFC3339),end.Format(time.RFC3339),itemsRead,bytesRead,valuesRead,took.Seconds(),itemsRate,bytesRate,valuesRate,workers,batchSize,useCase)
+	sqlcmd = fmt.Sprintf("insert into %s_%s using bmreport tags(\"%s\",\"%s\") values(0, \"%s\",\"%s\",%d,%d,%d,%f,%f,%f,%f,%d,%d,\"%s\")", reportHostname,reportTagsCSV,reportHostname,reportTagsCSV,start.Format(time.RFC3339),end.Format(time.RFC3339),itemsRead,bytesRead,valuesRead,took.Seconds(),itemsRate,bytesRate/(1<<20),valuesRate,workers,batchSize,useCase)
 	_, err = db.Exec(sqlcmd)
 	checkErr(err)
 }
@@ -237,6 +237,7 @@ func processBatches(iworker int) {
 	var i int
 	db, err := sql.Open(taosDriverName, "root:taosdata@/tcp("+daemonUrl+")/"+useCase)
 	checkErr(err)
+	defer db.Close()
 	sqlcmd := make([]string, batchSize+1)
 	i = 0
 	sqlcmd[i] = "Insert into"
