@@ -36,6 +36,7 @@ var (
 	reportPassword string
 	reportTagsCSV  string
 	useCase        string
+	loadfile       string 
 )
 
 // Global vars
@@ -48,6 +49,8 @@ var (
 	reportTags     [][2]string
 	reportHostname string
 	taosDriverName string = "taosSql"
+	
+
 )
 
 // Parse args:
@@ -58,7 +61,7 @@ func init() {
 	flag.IntVar(&workers, "workers", 2, "Number of parallel requests to make.")
 	flag.StringVar(&useCase, "use-case", common.UseCaseChoices[0], "Use case to set specific load behavior. Options: "+strings.Join(common.UseCaseChoices, ","))
 
-	flag.BoolVar(&doLoad, "do-load", true, "Whether to write data. Set this flag to false to check input read speed.")
+	flag.BoolVar(&doLoad, "do-load", false, "Whether to read data from file or from stand input. Set this flag to true to get input from file.")
 
 	flag.StringVar(&reportDatabase, "report-database", "vehicle", "Database name where to store result metrics")
 	flag.StringVar(&reportHost, "report-host", "", "Host to send result metrics")
@@ -66,6 +69,8 @@ func init() {
 	flag.StringVar(&reportPassword, "report-password", "", "User password for Host to send result metrics")
 	flag.StringVar(&reportTagsCSV, "report-tags", "", "Comma separated k:v tags to send  alongside result metrics")
 	flag.BoolVar(&slaveSource, "slavesource", false, "if slave source, will not create database")
+	flag.StringVar(&loadfile, "file", "", "Input file")
+
 
 	flag.Parse()
 
@@ -99,52 +104,50 @@ func main() {
 		},
 	}
 
-	if doLoad {
-		log.Println("Creating database ----")
-		db, err := sql.Open(taosDriverName, "root:taosdata@/tcp("+daemonUrl+")/")
-		if err != nil {
-			log.Fatalf("Open database error: %s\n", err)
-		}
-		defer db.Close()
-
-		//fmt.Println(db)
-		if !slaveSource{
-			createDatabase(db)
-		}
-		
-		for i := 0; i < workers; i++ {
-			batchChans = append(batchChans, make(chan string, batchSize))
-		}
-		//batchChan = make(chan []string, workers)
-		inputDone = make(chan struct{})
-		log.Println("Starting workers ----")
-		for i := 0; i < workers; i++ {
-			workersGroup.Add(1)
-			go processBatches(i)
-		}
-
-		start := time.Now()
-		itemsRead, bytesRead, valuesRead := scan(db, batchSize)
-		
-		<-inputDone
-		
-
-		
-
-		for i := 0; i < workers; i++ {
-			close(batchChans[i])
-		}
-		//close(batchChan)
-		workersGroup.Wait()
-		end := time.Now()
-		took := end.Sub(start)
-
-		itemsRate := float64(itemsRead) / float64(took.Seconds())
-		bytesRate := float64(bytesRead) / float64(took.Seconds())
-		valuesRate := float64(valuesRead) / float64(took.Seconds())
-
-		fmt.Printf("loaded %d items in %fsec with %d workers (mean point rate %.2f/s, mean value rate %.2f/s, %.2fMB/sec from stdin)\n", itemsRead, took.Seconds(), workers, itemsRate, valuesRate, bytesRate/(1<<20))
+	
+	log.Println("Creating database ----")
+	db, err := sql.Open(taosDriverName, "root:taosdata@/tcp("+daemonUrl+")/")
+	if err != nil {
+		log.Fatalf("Open database error: %s\n", err)
 	}
+	defer db.Close()
+
+	//fmt.Println(db)
+	if !slaveSource{
+		createDatabase(db)
+	}
+
+	for i := 0; i < workers; i++ {
+		batchChans = append(batchChans, make(chan string, batchSize))
+	}
+	//batchChan = make(chan []string, workers)
+	inputDone = make(chan struct{})
+	log.Println("Starting workers ----")
+
+	for i := 0; i < workers; i++ {
+		workersGroup.Add(1)
+		go processBatches(i)
+	}
+
+	start := time.Now()
+	itemsRead, bytesRead, valuesRead := scan(db, batchSize)
+	
+	<-inputDone
+	
+	for i := 0; i < workers; i++ {
+		close(batchChans[i])
+	}
+	//close(batchChan)
+	workersGroup.Wait()
+	end := time.Now()
+	took := end.Sub(start)
+	
+	itemsRate := float64(itemsRead) / float64(took.Seconds())
+	bytesRate := float64(bytesRead) / float64(took.Seconds())
+	valuesRate := float64(valuesRead) / float64(took.Seconds())
+
+	fmt.Printf("loaded %d items in %fsec with %d workers (mean point rate %.2f/s, mean value rate %.2f/s, %.2fMB/sec from stdin)\n", itemsRead, took.Seconds(), workers, itemsRate, valuesRate, bytesRate/(1<<20))
+	
 }
 
 func createDatabase(db *sql.DB) {
@@ -165,13 +168,24 @@ func scan(db *sql.DB, itemsPerBatch int) (int64, int64, int64) {
 	var err error
 	var itemsRead, bytesRead int64
 	var totalPoints, totalValues int64
+	var sourceReader *os.File
 
 
 	//buff := bufPool.Get().([]string)
-	scanner := bufio.NewScanner(os.Stdin)
+
+	if loadfile != "" && doLoad {
+		if f, err := os.Open(loadfile); err == nil {
+			sourceReader = f
+		} else {
+			log.Fatalf("Error opening %s: %v\n", loadfile, err)
+		}
+	}else {
+		sourceReader = os.Stdin
+	}
+
+	scanner := bufio.NewScanner(sourceReader)
 	for scanner.Scan() {
 		line := scanner.Text()
-
 		if strings.HasPrefix(line, "create") {
 			_, err = db.Exec(line)
 		} else if strings.HasPrefix(line, "data"){
