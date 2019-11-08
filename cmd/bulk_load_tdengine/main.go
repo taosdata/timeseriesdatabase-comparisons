@@ -74,7 +74,7 @@ func init() {
 
 	flag.Parse()
 
-	if reportHost != "" {
+	//if reportHost != "" {
 		fmt.Printf("results report destination: %v\n", reportHost)
 		fmt.Printf("results report database: %v\n", reportDatabase)
 
@@ -86,15 +86,15 @@ func init() {
 		fmt.Printf("hostname for results report: %v\n", reportHostname)
 
 		if reportTagsCSV != "" {
-			pairs := strings.Split(reportTagsCSV, ",")
+			/*pairs := strings.Split(reportTagsCSV, ",")
 			for _, pair := range pairs {
 				fields := strings.SplitN(pair, ":", 2)
 				tagpair := [2]string{fields[0], fields[1]}
 				reportTags = append(reportTags, tagpair)
-			}
+			}*/
 		}
-		fmt.Printf("results report tags: %v\n", reportTags)
-	}
+		fmt.Printf("results report tags: %v\n", reportTagsCSV)
+	//}
 }
 
 func main() {
@@ -112,7 +112,6 @@ func main() {
 	}
 	defer db.Close()
 
-	//fmt.Println(db)
 	if !slaveSource{
 		createDatabase(db)
 	}
@@ -147,7 +146,14 @@ func main() {
 	valuesRate := float64(valuesRead) / float64(took.Seconds())
 
 	fmt.Printf("loaded %d items in %fsec with %d workers (mean point rate %.2f/s, mean value rate %.2f/s, %.2fMB/sec from stdin)\n", itemsRead, took.Seconds(), workers, itemsRate, valuesRate, bytesRate/(1<<20))
-	
+	sqlcmd := fmt.Sprintf("create database if not exists benchmarkreport")
+	_, err = db.Exec(sqlcmd)
+	_, err = db.Exec("use benchmarkreport")
+	sqlcmd = fmt.Sprintf("create table if not exists bmreport (ts timestamp, starttime binary(40), endtime binary(40),itemsread int, bytesread int,valuesread int,timetook float,recordsrate float, bytesrate float,valuesrate float, workers int, batchsize int, usecase binary(20)) tags(host binary(20), proc_id binary(20))")
+	_, err = db.Exec(sqlcmd)
+	sqlcmd = fmt.Sprintf("insert into %s%s using bmreport tags(\"%s\",\"%s\") values(0, \"%s\",\"%s\",%d,%d,%d,%f,%f,%f,%f,%d,%d,\"%s\")", reportHostname,reportTagsCSV,reportHostname,reportTagsCSV,start.Format(time.RFC3339),end.Format(time.RFC3339),itemsRead,bytesRead,valuesRead,took.Seconds(),itemsRate,bytesRate,valuesRate,workers,batchSize,useCase)
+	_, err = db.Exec(sqlcmd)
+	checkErr(err)
 }
 
 func createDatabase(db *sql.DB) {
@@ -198,20 +204,11 @@ func scan(db *sql.DB, itemsPerBatch int) (int64, int64, int64) {
 			}
 		}else {
 			itemsRead++
-			bytesRead += int64(len(scanner.Bytes()))
+			bytesRead += int64(len(scanner.Bytes())) - 3
 			if !doLoad {
 				continue
 			}
-			//buff = append(buff, line)
-			/*
-				n++
-				if n >= itemsPerBatch {
-					batchChan <- buff
-					buff = bufPool.Get().([]string)
-					buff = append(buff, "Insert into")
-					n = 0
-				}
-			*/
+
 			hun,_:= strconv.Atoi(string(line[0]))
 			ten,_:= strconv.Atoi(string(line[1]))
 			vgid, _ = strconv.Atoi(string(line[2]))
@@ -223,11 +220,6 @@ func scan(db *sql.DB, itemsPerBatch int) (int64, int64, int64) {
 		}
 
 	}
-	/*
-		if n > 0 {
-			batchChan <- buff
-		}
-	*/
 
 	// Closing inputDone signals to the application that we've read everything and can now shut down.
 	close(inputDone)
