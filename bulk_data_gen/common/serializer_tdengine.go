@@ -4,9 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"strconv"
+	//"strconv"
 	"sync"
-
 	"github.com/pelletier/go-toml"
 )
 
@@ -84,8 +83,13 @@ func (s *serializerTDengine) SerializePoint(w io.Writer, p *Point) error {
 
 	var tbname string
 	s2 := p.TagValues[schema.Suffixpos]
-	tbindex, _ := strconv.ParseInt(string(s2[:]), 10, 64)
-	tbname = str + "_" + strconv.FormatInt(tbindex, 10)
+	tbindex := TAOShashSuffix(s2) 
+	//if tbindex < 0 {
+	//	tbindex = -tbindex
+	//}
+	//fmt.Println(tbindex)
+	//tbindex, _ := strconv.ParseInt(string(s2[:]), 10, 64)
+	tbname = str + "_" + string(s2[:])
 	buf := scratchBufPool.Get().([]byte)
 	//buf = append(buf, "Insert into "...)
 	head := fmt.Sprintf("%3d ", tbindex%scalevar)
@@ -319,4 +323,12 @@ func TAOSCreateStable(w io.Writer, p *Point) error {
 	buf = buf[:0]
 	scratchBufPool.Put(buf)
 	return nil
+}
+
+func TAOShashSuffix(ba []byte) int64 {
+	var sum int = 0
+	for i :=0; i< len(ba); i++{
+		sum += int(ba[i] - '0')
+	}
+	return int64(sum)
 }
