@@ -247,7 +247,7 @@ func TAOSCreateStable(w io.Writer, p *Point) error {
 			}
 		}
 		if found == 0 {
-			info := fmt.Sprintf("Config error, cannot find tagname %s in the point", tn)
+			info := fmt.Sprintf("Config error, cannot find tagname %s in the point. stable name %s", tn, stablename)
 			panic(info)
 		}
 	}
@@ -277,7 +277,7 @@ func TAOSCreateStable(w io.Writer, p *Point) error {
 			}
 		}
 		if found == 0 {
-			info := fmt.Sprintf("Config error, cannot find fieldname %s in the point", tn)
+			info := fmt.Sprintf("Config error, cannot find fieldname %s in the point. stable name %s", tn,stablename)
 			panic(info)
 		}
 	}

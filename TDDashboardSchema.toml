@@ -1,247 +1,3 @@
-
-[[window_state_room]]
-stname = "window_state_room"
-suffix = "home_id"
-# sample 40% of the tag set, default is to sample 50%
-tags = [
-    # common tags
-    { name = "room_id",             type = "binary(30)" },
-    { name = "home_id",             type = "binary(30)" },
-    { name = "sensor_id",           type = "binary(30)" },
-    { name = "window_id",           type = "binary(30)" },
-]
-fields = [
-#    { name = "ts",                  type = "timestamp" },
-    { name = "state",               type = "float" },
-    { name = "battery_voltage",     type = "float" },
-]
-
-[[radiator_valve_room]]
-stname = "radiator_valve_room"
-suffix = "home_id"
-# sample 40% of the tag set, default is to sample 50%
-tags = [
-    # common tags
-    { name = "room_id",             type = "binary(30)" },
-    { name = "home_id",             type = "binary(30)" },
-    { name = "radiator",            type = "binary(30)" },
-    { name = "sensor_id",           type = "binary(30)" },
-    # specific tags
-]
-fields = [
-#    { name = "ts",                  type = "timestamp" },
-    { name = "opening_level",       type = "float" },
-    { name = "battery_voltage",     type = "float" }
-]
-
-[[air_condition_room]]
-stname = "air_condition_room"
-suffix = "home_id"
-# sample 40% of the tag set, default is to sample 50%
-
-tags = [
-    # common tags
-    { name = "room_id",             type = "binary(30)" },
-    { name = "home_id",             type = "binary(30)" },
-    { name = "sensor_id",           type = "binary(30)" },
-    # specific tags
-]
-fields = [
-#    { name = "ts",                  type = "timestamp" },
-    { name = "temperature",         type = "float" },
-    { name = "humidity",            type = "float" },
-    { name = "battery_voltage",     type = "float" },
-]
-
-[[air_quality_room]]
-stname = "air_quality_room"
-suffix = "home_id"
-# sample 40% of the tag set, default is to sample 50%
-
-tags = [
-    # common tags
-    { name = "room_id",             type = "binary(30)" },
-    { name = "home_id",             type = "binary(30)" },
-    { name = "sensor_id",           type = "binary(30)" },
-    # specific tags
-]
-fields = [
-#    { name = "ts",                  type = "timestamp" },
-    { name = "co2_level",           type = "float" },
-    { name = "co_level",            type = "float" },
-    { name = "battery_voltage",     type = "float" },
-]
-
-[[light_level_room]]
-stname = "light_level_room"
-suffix = "home_id"
-# sample 40% of the tag set, default is to sample 50%
-tags = [
-    # common tags
-    { name = "room_id",             type = "binary(30)" },
-    { name = "home_id",             type = "binary(30)" },
-    { name = "sensor_id",           type = "binary(30)" },
-    # specific tags
-]
-fields = [
-#    { name = "ts",                  type = "timestamp" },
-    { name = "level",               type = "float" },
-    { name = "battery_voltage",     type = "float" },
-]
-
-[[air_condition_outdoor]]
-stname = "air_condition_outdoor"
-suffix = "home_id"
-# sample 40% of the tag set, default is to sample 50%
-tags = [
-    # common tags
-    { name = "home_id",             type = "binary(30)" },
-    { name = "sensor_id",           type = "binary(30)" },
-    # specific tags
-]
-fields = [
-#    { name = "ts",                  type = "timestamp" },
-    { name = "temperature",         type = "float" },
-    { name = "humidity",            type = "float" },
-    { name = "battery_voltage",     type = "float" },
-]
-
-[[home_state]]
-stname = "home_state"
-suffix = "home_id"
-# sample 40% of the tag set, default is to sample 50%
-tags = [
-    # common tags
-    { name = "home_id",             type = "binary(30)" },
-    { name = "sensor_id",           type = "binary(30)" },
-    # specific tags
-]
-fields = [
-#    { name = "ts",                  type = "timestamp" },
-    { name = "state",              type = "binary(20)" },
-    { name = "state_string",            type = "binary(20)" },
-]
-
-[[camera_detection]]
-stname = "camera_detection"
-suffix = "home_id"
-# sample 40% of the tag set, default is to sample 50%
-tags = [
-    # common tags
-    { name = "home_id",             type = "binary(30)" },
-    { name = "sensor_id",           type = "binary(30)" },
-    # specific tags
-]
-fields = [
-#    { name = "ts",                  type = "timestamp" },
-    { name = "object_type",              type = "binary(20)" },
-    { name = "object_kind",            type = "binary(20)" },
-    { name = "battery_voltage",     type = "float" },
-]
-
-[[water_level]]
-stname = "water_level"
-suffix = "home_id"
-# sample 40% of the tag set, default is to sample 50%
-tags = [
-    # common tags
-    { name = "home_id",             type = "binary(30)" },
-    { name = "sensor_id",           type = "binary(30)" },
-    # specific tags
-]
-fields = [
-#    { name = "ts",                  type = "timestamp" },
-    { name = "level",              type = "float" },
-    { name = "battery_voltage",            type = "float" },
-]
-
-[[water_leakage_room]]
-stname = "water_leakage_room"
-suffix = "home_id"
-# sample 40% of the tag set, default is to sample 50%
-tags = [
-    # common tags
-    { name = "room_id",             type = "binary(30)" },
-    { name = "home_id",             type = "binary(30)" },
-    { name = "sensor_id",           type = "binary(30)" },
-    # specific tags
-]
-fields = [
-#    { name = "ts",                  type = "timestamp" },
-    { name = "leakage",               type = "float" },
-    { name = "battery_voltage",     type = "float" },
-]
-
-[[door_state]]
-stname = "door_state"
-suffix = "home_id"
-# sample 40% of the tag set, default is to sample 50%
-tags = [
-    # common tags
-    { name = "home_id",             type = "binary(30)" },
-    { name = "door_id",             type = "binary(30)" },
-    { name = "sensor_id",           type = "binary(30)" },
-    # specific tags
-]
-fields = [
-#    { name = "ts",                  type = "timestamp" },
-    { name = "state",               type = "float" },
-    { name = "battery_voltage",     type = "float" },
-]
-
-[[air_condition_outdoor]]
-stname = "air_condition_outdoor"
-suffix = "home_id"
-# sample 40% of the tag set, default is to sample 50%
-
-tags = [
-    # common tags
-    { name = "home_id",             type = "binary(30)" },
-    { name = "sensor_id",           type = "binary(30)" },
-    # specific tags
-]
-fields = [
-#    { name = "ts",                  type = "timestamp" },
-    { name = "temperature",         type = "float" },
-    { name = "humidity",            type = "float" },
-    { name = "battery_voltage",     type = "float" },
-]
-
-[[weather_outdoor]]
-stname = "weather_outdoor"
-suffix = "home_id"
-# sample 40% of the tag set, default is to sample 50%
-
-tags = [
-    # common tags
-    { name = "home_id",             type = "binary(30)" },
-    { name = "sensor_id",           type = "binary(30)" },
-    # specific tags
-]
-fields = [
-#    { name = "ts",                  type = "timestamp" },
-    { name = "pressure",             type = "float" },
-    { name = "wind_speed",           type = "float" },
-    { name = "wind_direction",       type = "float" },
-    { name = "precipitation",        type = "float" },
-    { name = "battery_voltage",      type = "float" },
-]
-[[home_config]]
-stname = "home_config"
-suffix = "home_id"
-# sample 40% of the tag set, default is to sample 50%
-
-tags = [
-    # common tags
-    { name = "home_id",             type = "binary(30)" },
-    { name = "sensor_id",           type = "binary(30)" },
-    # specific tags
-]
-fields = [
-#    { name = "ts",                  type = "timestamp" },
-    { name = "config_string",             type = "binary(1024)" },
-]
-
 [[cpu]]
 stname = "cpu"
 suffix = "hostname"
@@ -255,7 +11,7 @@ tags = [
     { name = "rack",           type = "binary(30)" },
     { name = "os",             type = "binary(30)" },
     { name = "arch",           type = "binary(30)" },
-    { name = "team",             type = "binary(30)" },
+    { name = "cluster_id",             type = "binary(30)" },
     { name = "service",           type = "binary(30)" }, 
     { name = "service_version",           type = "binary(30)" },
     { name = "service_environment",           type = "binary(30)" },    
@@ -289,7 +45,7 @@ tags = [
     { name = "rack",           type = "binary(30)" },
     { name = "os",             type = "binary(30)" },
     { name = "arch",           type = "binary(30)" },
-    { name = "team",             type = "binary(30)" },
+    { name = "cluster_id",             type = "binary(30)" },
     { name = "service",           type = "binary(30)" }, 
     { name = "service_version",           type = "binary(30)" },
     { name = "service_environment",           type = "binary(30)" },
@@ -319,7 +75,7 @@ tags = [
     { name = "rack",           type = "binary(30)" },
     { name = "os",             type = "binary(30)" },
     { name = "arch",           type = "binary(30)" },
-    { name = "team",             type = "binary(30)" },
+    { name = "cluster_id",             type = "binary(30)" },
     { name = "service",           type = "binary(30)" }, 
     { name = "service_version",           type = "binary(30)" },
     { name = "service_environment",           type = "binary(30)" },
@@ -351,7 +107,7 @@ tags = [
     { name = "rack",           type = "binary(30)" },
     { name = "os",             type = "binary(30)" },
     { name = "arch",           type = "binary(30)" },
-    { name = "team",             type = "binary(30)" },
+    { name = "cluster_id",             type = "binary(30)" },
     { name = "service",           type = "binary(30)" }, 
     { name = "service_version",           type = "binary(30)" },
     { name = "service_environment",           type = "binary(30)" },    
@@ -380,7 +136,7 @@ tags = [
     { name = "rack",           type = "binary(30)" },
     { name = "os",             type = "binary(30)" },
     { name = "arch",           type = "binary(30)" },
-    { name = "team",             type = "binary(30)" },
+    { name = "cluster_id",             type = "binary(30)" },
     { name = "service",           type = "binary(30)" }, 
     { name = "service_version",           type = "binary(30)" },
     { name = "service_environment",           type = "binary(30)" },    
@@ -412,7 +168,7 @@ tags = [
     { name = "rack",           type = "binary(30)" },
     { name = "os",             type = "binary(30)" },
     { name = "arch",           type = "binary(30)" },
-    { name = "team",             type = "binary(30)" },
+    { name = "cluster_id",             type = "binary(30)" },
     { name = "service",           type = "binary(30)" }, 
     { name = "service_version",           type = "binary(30)" },
     { name = "service_environment",           type = "binary(30)" },
@@ -444,7 +200,7 @@ tags = [
     { name = "rack",           type = "binary(30)" },
     { name = "os",             type = "binary(30)" },
     { name = "arch",           type = "binary(30)" },
-    { name = "team",             type = "binary(30)" },
+    { name = "cluster_id",             type = "binary(30)" },
     { name = "service",           type = "binary(30)" }, 
     { name = "service_version",           type = "binary(30)" },
     { name = "service_environment",           type = "binary(30)" },
@@ -476,7 +232,7 @@ tags = [
     { name = "rack",           type = "binary(30)" },
     { name = "os",             type = "binary(30)" },
     { name = "arch",           type = "binary(30)" },
-    { name = "team",             type = "binary(30)" },
+    { name = "cluster_id",             type = "binary(30)" },
     { name = "service",           type = "binary(30)" }, 
     { name = "service_version",           type = "binary(30)" },
     { name = "service_environment",           type = "binary(30)" },
@@ -515,7 +271,7 @@ tags = [
     { name = "rack",           type = "binary(30)" },
     { name = "os",             type = "binary(30)" },
     { name = "arch",           type = "binary(30)" },
-    { name = "team",             type = "binary(30)" },
+    { name = "cluster_id",             type = "binary(30)" },
     { name = "service",           type = "binary(30)" }, 
     { name = "service_version",           type = "binary(30)" },
     { name = "service_environment",           type = "binary(30)" },
@@ -556,4 +312,57 @@ fields = [
     { name = "used_cpu_user",             type = "int" },
     { name = "used_cpu_sys_children",             type = "int" },
     { name = "used_cpu_user_children",             type = "int" },   
+]
+
+[[system]]
+stname = "system"
+suffix = "hostname"
+# sample 40% of the tag set, default is to sample 50%
+
+tags = [
+    # common tags
+    { name = "hostname",             type = "binary(30)" },
+    { name = "region",           type = "binary(30)" },
+    { name = "datacenter",             type = "binary(30)" },
+    { name = "rack",           type = "binary(30)" },
+    { name = "os",             type = "binary(30)" },
+    { name = "arch",           type = "binary(30)" },
+    { name = "cluster_id",             type = "binary(30)" },
+    { name = "service",           type = "binary(30)" }, 
+    { name = "service_version",           type = "binary(30)" },
+    { name = "service_environment",           type = "binary(30)" },
+    # specific tags
+]
+fields = [
+#    { name = "ts",                  type = "timestamp" },
+    { name = "load1",             type = "float" },
+    { name = "load5",             type = "float" },
+    { name = "load15",             type = "float" },
+
+]
+
+[[status]]
+stname = "status"
+suffix = "hostname"
+# sample 40% of the tag set, default is to sample 50%
+
+tags = [
+    # common tags
+    { name = "hostname",             type = "binary(30)" },
+    { name = "region",           type = "binary(30)" },
+    { name = "datacenter",             type = "binary(30)" },
+    { name = "rack",           type = "binary(30)" },
+    { name = "os",             type = "binary(30)" },
+    { name = "arch",           type = "binary(30)" },
+    { name = "cluster_id",             type = "binary(30)" },
+    { name = "service",           type = "binary(30)" }, 
+    { name = "service_version",           type = "binary(30)" },
+    { name = "service_environment",           type = "binary(30)" },
+    # specific tags
+]
+fields = [
+#    { name = "ts",                  type = "timestamp" },
+    { name = "service_up",             type = "int" },
+
+
 ]
