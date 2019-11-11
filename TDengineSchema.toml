@@ -255,14 +255,14 @@ tags = [
     { name = "rack",           type = "binary(30)" },
     { name = "os",             type = "binary(30)" },
     { name = "arch",           type = "binary(30)" },
-    { name = "team",             type = "binary(30)" },
-    { name = "service",           type = "binary(30)" }, 
-    { name = "service_version",           type = "binary(30)" },
-    { name = "service_environment",           type = "binary(30)" },    
     # specific tags
 ]
 fields = [
 #    { name = "ts",                  type = "timestamp" },
+    { name = "team",             type = "binary(30)" },
+    { name = "service",           type = "binary(30)" }, 
+    { name = "service_version",           type = "binary(30)" },
+    { name = "service_environment",           type = "binary(30)" },    
     { name = "usage_user",             type = "float" },
     { name = "usage_system",             type = "float" },
     { name = "usage_idle",             type = "float" },
@@ -289,21 +289,21 @@ tags = [
     { name = "rack",           type = "binary(30)" },
     { name = "os",             type = "binary(30)" },
     { name = "arch",           type = "binary(30)" },
+    # specific tags
+]
+fields = [
+#    { name = "ts",                  type = "timestamp" },
     { name = "team",             type = "binary(30)" },
     { name = "service",           type = "binary(30)" }, 
     { name = "service_version",           type = "binary(30)" },
     { name = "service_environment",           type = "binary(30)" },
     { name = "serial",           type = "binary(30)" },    
-    # specific tags
-]
-fields = [
-#    { name = "ts",                  type = "timestamp" },
-    { name = "reads",             type = "int" },
-    { name = "read_bytes",             type = "int" },
-    { name = "write_bytes",             type = "int" },
-    { name = "read_time",             type = "int" },
-    { name = "write_time",             type = "int" },
-    { name = "io_time",             type = "int" },
+    { name = "reads",             type = "bigint" },
+    { name = "read_bytes",             type = "bigint" },
+    { name = "write_bytes",             type = "bigint" },
+    { name = "read_time",             type = "bigint" },
+    { name = "write_time",             type = "bigint" },
+    { name = "io_time",             type = "bigint" },
 ]
 
 [[disk]]
@@ -319,23 +319,23 @@ tags = [
     { name = "rack",           type = "binary(30)" },
     { name = "os",             type = "binary(30)" },
     { name = "arch",           type = "binary(30)" },
+    # specific tags
+]
+fields = [
+#    { name = "ts",                  type = "timestamp" },
     { name = "team",             type = "binary(30)" },
     { name = "service",           type = "binary(30)" }, 
     { name = "service_version",           type = "binary(30)" },
     { name = "service_environment",           type = "binary(30)" },
     { name = "path",           type = "binary(30)" },    
     { name = "fstype",           type = "binary(30)" },
-    # specific tags
-]
-fields = [
-#    { name = "ts",                  type = "timestamp" },
-    { name = "total",             type = "int" },
-    { name = "free",             type = "int" },
-    { name = "used",             type = "int" },
-    { name = "used_percent",             type = "int" },
-    { name = "inodes_total",             type = "int" },
-    { name = "inodes_free",             type = "int" },
-    { name = "inodes_used",             type = "int" },
+    { name = "total",             type = "bigint" },
+    { name = "free",             type = "bigint" },
+    { name = "used",             type = "bigint" },
+    { name = "used_percent",             type = "float" },
+    { name = "inodes_total",             type = "bigint" },
+    { name = "inodes_free",             type = "bigint" },
+    { name = "inodes_used",             type = "bigint" },
 ]
 
 [[kernel]]
@@ -351,20 +351,20 @@ tags = [
     { name = "rack",           type = "binary(30)" },
     { name = "os",             type = "binary(30)" },
     { name = "arch",           type = "binary(30)" },
-    { name = "team",             type = "binary(30)" },
-    { name = "service",           type = "binary(30)" }, 
-    { name = "service_version",           type = "binary(30)" },
-    { name = "service_environment",           type = "binary(30)" },    
     # specific tags
 ]
 fields = [
 #    { name = "ts",                  type = "timestamp" },
-    { name = "boot_time",             type = "int" },
-    { name = "interrupts",             type = "int" },
-    { name = "context_switches",             type = "int" },
-    { name = "processes_forked",             type = "int" },
-    { name = "disk_pages_in",             type = "int" },
-    { name = "disk_pages_out",             type = "int" },
+    { name = "team",             type = "binary(30)" },
+    { name = "service",           type = "binary(30)" }, 
+    { name = "service_version",           type = "binary(30)" },
+    { name = "service_environment",           type = "binary(30)" },    
+    { name = "boot_time",             type = "bigint" },
+    { name = "interrupts",             type = "bigint" },
+    { name = "context_switches",             type = "bigint" },
+    { name = "processes_forked",             type = "bigint" },
+    { name = "disk_pages_in",             type = "bigint" },
+    { name = "disk_pages_out",             type = "bigint" },
 ]
 
 [[mem]]
@@ -380,20 +380,20 @@ tags = [
     { name = "rack",           type = "binary(30)" },
     { name = "os",             type = "binary(30)" },
     { name = "arch",           type = "binary(30)" },
-    { name = "team",             type = "binary(30)" },
-    { name = "service",           type = "binary(30)" }, 
-    { name = "service_version",           type = "binary(30)" },
-    { name = "service_environment",           type = "binary(30)" },    
     # specific tags
 ]
 fields = [
 #    { name = "ts",                  type = "timestamp" },
-    { name = "total",             type = "int" },
-    { name = "available",             type = "int" },
-    { name = "used",             type = "int" },
-    { name = "free",             type = "int" },
-    { name = "cached",             type = "int" },
-    { name = "buffered",             type = "int" },
+    { name = "team",             type = "binary(30)" },
+    { name = "service",           type = "binary(30)" }, 
+    { name = "service_version",           type = "binary(30)" },
+    { name = "service_environment",           type = "binary(30)" },    
+    { name = "total",             type = "bigint" },
+    { name = "available",             type = "bigint" },
+    { name = "used",             type = "bigint" },
+    { name = "free",             type = "bigint" },
+    { name = "cached",             type = "bigint" },
+    { name = "buffered",             type = "bigint" },
     { name = "used_percent",             type = "float" },
     { name = "available_percent",             type = "float" },
     { name = "buffered_percent",             type = "float" },    
@@ -412,23 +412,23 @@ tags = [
     { name = "rack",           type = "binary(30)" },
     { name = "os",             type = "binary(30)" },
     { name = "arch",           type = "binary(30)" },
+    # specific tags
+]
+fields = [
+#    { name = "ts",                  type = "timestamp" },
     { name = "team",             type = "binary(30)" },
     { name = "service",           type = "binary(30)" }, 
     { name = "service_version",           type = "binary(30)" },
     { name = "service_environment",           type = "binary(30)" },
     { name = "interface",           type = "binary(30)" },    
-    # specific tags
-]
-fields = [
-#    { name = "ts",                  type = "timestamp" },
-    { name = "bytes_sent",             type = "int" },
-    { name = "bytes_recv",             type = "int" },
-    { name = "packets_sent",             type = "int" },
-    { name = "packets_recv",             type = "int" },
-    { name = "err_in",             type = "int" },
-    { name = "err_out",             type = "int" },
-    { name = "drop_in",             type = "int" },
-    { name = "drop_out",             type = "int" },    
+    { name = "bytes_sent",             type = "bigint" },
+    { name = "bytes_recv",             type = "bigint" },
+    { name = "packets_sent",             type = "bigint" },
+    { name = "packets_recv",             type = "bigint" },
+    { name = "err_in",             type = "bigint" },
+    { name = "err_out",             type = "bigint" },
+    { name = "drop_in",             type = "bigint" },
+    { name = "drop_out",             type = "bigint" },    
 ]
 
 [[nginx]]
@@ -444,23 +444,23 @@ tags = [
     { name = "rack",           type = "binary(30)" },
     { name = "os",             type = "binary(30)" },
     { name = "arch",           type = "binary(30)" },
+    # specific tags
+]
+fields = [
+#    { name = "ts",                  type = "timestamp" },
     { name = "team",             type = "binary(30)" },
     { name = "service",           type = "binary(30)" }, 
     { name = "service_version",           type = "binary(30)" },
     { name = "service_environment",           type = "binary(30)" },
     { name = "port",           type = "int" },    
     { name = "server",           type = "binary(30)" },
-    # specific tags
-]
-fields = [
-#    { name = "ts",                  type = "timestamp" },
-    { name = "accepts",             type = "int" },
-    { name = "active",             type = "int" },
-    { name = "handled",             type = "int" },
-    { name = "reading",             type = "int" },
-    { name = "requests",             type = "int" },
-    { name = "waiting",             type = "int" },
-    { name = "writing",             type = "int" },
+    { name = "accepts",             type = "bigint" },
+    { name = "active",             type = "bigint" },
+    { name = "handled",             type = "bigint" },
+    { name = "reading",             type = "bigint" },
+    { name = "requests",             type = "bigint" },
+    { name = "waiting",             type = "bigint" },
+    { name = "writing",             type = "bigint" },
 ]
 
 [[postgresl]]
@@ -476,30 +476,30 @@ tags = [
     { name = "rack",           type = "binary(30)" },
     { name = "os",             type = "binary(30)" },
     { name = "arch",           type = "binary(30)" },
-    { name = "team",             type = "binary(30)" },
-    { name = "service",           type = "binary(30)" }, 
-    { name = "service_version",           type = "binary(30)" },
-    { name = "service_environment",           type = "binary(30)" },
     # specific tags
 ]
 fields = [
 #    { name = "ts",                  type = "timestamp" },
-    { name = "numbackends",             type = "int" },
-    { name = "xact_commit",             type = "int" },
-    { name = "xact_rollback",             type = "int" },
-    { name = "blks_read",             type = "int" },
-    { name = "blks_hit",             type = "int" },
-    { name = "tup_returned",             type = "int" },
-    { name = "tup_fetched",             type = "int" },
-    { name = "tup_inserted",             type = "int" },
-    { name = "tup_updated",             type = "int" },
-    { name = "tup_deleted",             type = "int" },
-    { name = "conflicts",             type = "int" },
-    { name = "temp_files",             type = "int" },
-    { name = "temp_bytes",             type = "int" },
-    { name = "deadlocks",             type = "int" },
-    { name = "blk_read_time",             type = "int" },
-    { name = "blk_write_time",             type = "int" },
+    { name = "team",             type = "binary(30)" },
+    { name = "service",           type = "binary(30)" }, 
+    { name = "service_version",           type = "binary(30)" },
+    { name = "service_environment",           type = "binary(30)" },
+    { name = "numbackends",             type = "bigint" },
+    { name = "xact_commit",             type = "bigint" },
+    { name = "xact_rollback",             type = "bigint" },
+    { name = "blks_read",             type = "bigint" },
+    { name = "blks_hit",             type = "bigint" },
+    { name = "tup_returned",             type = "bigint" },
+    { name = "tup_fetched",             type = "bigint" },
+    { name = "tup_inserted",             type = "bigint" },
+    { name = "tup_updated",             type = "bigint" },
+    { name = "tup_deleted",             type = "bigint" },
+    { name = "conflicts",             type = "bigint" },
+    { name = "temp_files",             type = "bigint" },
+    { name = "temp_bytes",             type = "bigint" },
+    { name = "deadlocks",             type = "bigint" },
+    { name = "blk_read_time",             type = "bigint" },
+    { name = "blk_write_time",             type = "bigint" },
 ]
 
 [[redis]]
@@ -515,45 +515,45 @@ tags = [
     { name = "rack",           type = "binary(30)" },
     { name = "os",             type = "binary(30)" },
     { name = "arch",           type = "binary(30)" },
+    # specific tags
+]
+fields = [
+#    { name = "ts",                  type = "timestamp" },
     { name = "team",             type = "binary(30)" },
     { name = "service",           type = "binary(30)" }, 
     { name = "service_version",           type = "binary(30)" },
     { name = "service_environment",           type = "binary(30)" },
     { name = "port",           type = "int" },
     { name = "server",           type = "binary(30)" },    
-    # specific tags
-]
-fields = [
-#    { name = "ts",                  type = "timestamp" },
-    { name = "uptime_in_seconds",             type = "int" },
-    { name = "total_connections_received",             type = "int" },
-    { name = "expired_keys",             type = "int" },
-    { name = "evicted_keys",             type = "int" },
-    { name = "keyspace_hits",             type = "int" },
-    { name = "keyspace_misses",             type = "int" },
-    { name = "instantaneous_ops_per_sec",             type = "int" },
-    { name = "instantaneous_input_kbps",             type = "int" },
-    { name = "instantaneous_output_kbps",             type = "int" },
-    { name = "connected_clients",             type = "int" },
-    { name = "used_memory",             type = "int" },
-    { name = "used_memory_rss",             type = "int" },
-    { name = "used_memory_peak",             type = "int" },
-    { name = "used_memory_lua",             type = "int" },
-    { name = "rdb_changes_since_last_save",             type = "int" },
-    { name = "sync_full",             type = "int" },
-    { name = "sync_partial_ok",             type = "int" },
-    { name = "sync_partial_err",             type = "int" },
-    { name = "pubsub_channels",             type = "int" },
-    { name = "pubsub_patterns",             type = "int" },
-    { name = "latest_fork_usec",             type = "int" },
-    { name = "connected_slaves",             type = "int" },
-    { name = "master_repl_offset",             type = "int" },
-    { name = "repl_backlog_active",             type = "int" },
-    { name = "repl_backlog_size",             type = "int" },
-    { name = "repl_backlog_histlen",             type = "int" },    
-    { name = "mem_fragmentation_ratio",             type = "int" },
-    { name = "used_cpu_sys",             type = "int" },
-    { name = "used_cpu_user",             type = "int" },
-    { name = "used_cpu_sys_children",             type = "int" },
-    { name = "used_cpu_user_children",             type = "int" },   
+    { name = "uptime_in_seconds",             type = "bigint" },
+    { name = "total_connections_received",             type = "bigint" },
+    { name = "expired_keys",             type = "bigint" },
+    { name = "evicted_keys",             type = "bigint" },
+    { name = "keyspace_hits",             type = "bigint" },
+    { name = "keyspace_misses",             type = "bigint" },
+    { name = "instantaneous_ops_per_sec",             type = "bigint" },
+    { name = "instantaneous_input_kbps",             type = "bigint" },
+    { name = "instantaneous_output_kbps",             type = "bigint" },
+    { name = "connected_clients",             type = "bigint" },
+    { name = "used_memory",             type = "bigint" },
+    { name = "used_memory_rss",             type = "bigint" },
+    { name = "used_memory_peak",             type = "bigint" },
+    { name = "used_memory_lua",             type = "bigint" },
+    { name = "rdb_changes_since_last_save",             type = "bigint" },
+    { name = "sync_full",             type = "bigint" },
+    { name = "sync_partial_ok",             type = "bigint" },
+    { name = "sync_partial_err",             type = "bigint" },
+    { name = "pubsub_channels",             type = "bigint" },
+    { name = "pubsub_patterns",             type = "bigint" },
+    { name = "latest_fork_usec",             type = "bigint" },
+    { name = "connected_slaves",             type = "bigint" },
+    { name = "master_repl_offset",             type = "bigint" },
+    { name = "repl_backlog_active",             type = "bigint" },
+    { name = "repl_backlog_size",             type = "bigint" },
+    { name = "repl_backlog_histlen",             type = "bigint" },    
+    { name = "mem_fragmentation_ratio",             type = "bigint" },
+    { name = "used_cpu_sys",             type = "bigint" },
+    { name = "used_cpu_user",             type = "bigint" },
+    { name = "used_cpu_sys_children",             type = "bigint" },
+    { name = "used_cpu_user_children",             type = "bigint" },   
 ]
