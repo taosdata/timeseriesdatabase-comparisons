@@ -178,7 +178,7 @@ func createTable(tbn string,stbn string,schema Schemaconfig,w io.Writer, p *Poin
 		info := fmt.Sprintf("error type of SourceType %d,pos %d", schema.Tags[len(schema.Tags)-1].SourceType, len(schema.Tags)-1)
 		panic(info)
 	}
-:q
+
 	_, err := w.Write(buf)
 
 	buf = buf[:0]
