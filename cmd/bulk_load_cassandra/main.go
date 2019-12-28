@@ -15,7 +15,7 @@ import (
 	"time"
 
 	"github.com/gocql/gocql"
-	"github.com/liu0x54/timeseriesdatabase-comparisons/common"
+	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_data_gen/common"
 	"github.com/liu0x54/timeseriesdatabase-comparisons/util/report"
 	"strconv"
 	"strings"

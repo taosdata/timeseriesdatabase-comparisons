@@ -149,7 +149,7 @@ func main() {
 	sqlcmd := fmt.Sprintf("create database if not exists benchmarkreport")
 	_, err = db.Exec(sqlcmd)
 	_, err = db.Exec("use benchmarkreport")
-	sqlcmd = fmt.Sprintf("create table if not exists bmreport (ts timestamp, starttime binary(40), endtime binary(40),itemsread int, bytesread int,valuesread int,timetook float,recordsrate float, bytesrate float,valuesrate float, workers int, batchsize int, usecase binary(20)) tags(host binary(20), proc_id binary(20))")
+	sqlcmd = fmt.Sprintf("create table if not exists bmreport (ts timestamp, starttime binary(50), endtime binary(50),itemsread double, bytesread double,valuesread double,timetook double,recordsrate double, bytesrate double,valuesrate double, workers double, batchsize double, usecase binary(50)) tags(host binary(50), proc_id binary(40))")
 	_, err = db.Exec(sqlcmd)
 	sqlcmd = fmt.Sprintf("insert into %s_%s using bmreport tags(\"%s\",\"%s\") values(0, \"%s\",\"%s\",%d,%d,%d,%f,%f,%f,%f,%d,%d,\"%s\")", reportHostname,reportTagsCSV,reportHostname,reportTagsCSV,start.Format(time.RFC3339),end.Format(time.RFC3339),itemsRead,bytesRead,valuesRead,took.Seconds(),itemsRate,bytesRate/(1<<20),valuesRate,workers,batchSize,useCase)
 	_, err = db.Exec(sqlcmd)
@@ -159,7 +159,7 @@ func main() {
 func createDatabase(db *sql.DB) {
 	sqlcmd := fmt.Sprintf("Drop database if exists %s", useCase)
 	_, err := db.Exec(sqlcmd)
-	sqlcmd = fmt.Sprintf("create database %s", useCase)
+	sqlcmd = fmt.Sprintf("create database %s tables 2000 cache 10240 ablocks 4 tblocks 50 ", useCase)
 	_, err = db.Exec(sqlcmd)
 	sqlcmd = fmt.Sprintf("use %s", useCase)
 	_, err = db.Exec(sqlcmd)
@@ -265,7 +265,7 @@ func processBatches(iworker int) {
 			}
 		}
 	}
-	if i > 0 {
+	if i > 1 {
 		i = 1
 		_, err := db.Exec(strings.Join(sqlcmd, ""))
 		if err != nil {

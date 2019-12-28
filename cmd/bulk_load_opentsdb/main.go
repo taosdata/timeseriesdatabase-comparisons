@@ -16,7 +16,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/liu0x54/timeseriesdatabase-comparisons/port"
+	"github.com/liu0x54/timeseriesdatabase-comparisons/util/report"
 	"github.com/klauspost/compress/gzip"
 )
 

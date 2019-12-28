@@ -3,7 +3,7 @@ package influxdb
 import (
 	"fmt"
 	bulkDataGenIot "github.com/liu0x54/timeseriesdatabase-comparisons/bulk_data_gen/iot"
-	bulkQuerygen "github.com/liu0x54/timeseriesdatabase-comparisons/
+	bulkQuerygen "github.com/liu0x54/timeseriesdatabase-comparisons/bulk_query_gen"
 	"math/rand"
 	"strings"
 	"time"
