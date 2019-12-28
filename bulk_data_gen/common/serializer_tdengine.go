@@ -90,6 +90,14 @@ func (s *serializerTDengine) SerializePoint(w io.Writer, p *Point) error {
 	//fmt.Println(tbindex)
 	//tbindex, _ := strconv.ParseInt(string(s2[:]), 10, 64)
 	tbname = str + "_" + string(s2[:])
+	hastb,_:= IsTableCreated.Load(tbname)
+	if hastb == nil {
+		createTable(tbname,str,schema,w,p)
+		IsTableCreated.Store(tbname,true)
+
+	}	
+
+
 	buf := scratchBufPool.Get().([]byte)
 	//buf = append(buf, "Insert into "...)
 	head := fmt.Sprintf("%3d ", tbindex%scalevar)
@@ -162,6 +170,48 @@ func (s *serializerTDengine) SerializePoint(w io.Writer, p *Point) error {
 	buf = buf[:0]
 	scratchBufPool.Put(buf)
 
+	return err
+}
+
+func createTable(tbn string,stbn string,schema Schemaconfig,w io.Writer, p *Point) error {
+	buf := scratchBufPool.Get().([]byte)
+	buf = append(buf, "create table "...)
+	buf = append(buf, tbn...)
+	buf = append(buf, " using "...)
+	buf = append(buf, stbn...)
+	buf = append(buf, " tags("...)
+
+	for i := 0; i < len(schema.Tags)-1; i++ {
+		if schema.Tags[i].SourceType == 1 {
+			v := p.TagValues[schema.Tags[i].SourcePosition]
+			buf = fastFormatAppend(v, buf, false)
+			buf = append(buf, ',')
+		} else if schema.Tags[i].SourceType == 2 {
+			v := p.FieldValues[schema.Tags[i].SourcePosition]
+			buf = fastFormatAppend(v, buf, false)
+			buf = append(buf, ',')
+		} else {
+			info := fmt.Sprintf("error type of tSourceType %d,pos %d", schema.Tags[i].SourceType, i)
+			panic(info)
+		}
+	}
+	if schema.Tags[len(schema.Tags)-1].SourceType == 1 {
+		v := p.TagValues[schema.Tags[len(schema.Tags)-1].SourcePosition]
+		buf = fastFormatAppend(v, buf, false)
+		buf = append(buf, ")"...)
+	} else if schema.Tags[len(schema.Fields)-1].SourceType == 2 {
+		v := p.FieldValues[schema.Tags[len(schema.Tags)-1].SourcePosition]
+		buf = fastFormatAppend(v, buf, false)
+		buf = append(buf, ")"...)
+	} else {
+		info := fmt.Sprintf("error type of SourceType %d,pos %d", schema.Tags[len(schema.Tags)-1].SourceType, len(schema.Tags)-1)
+		panic(info)
+	}
+
+	_, err := w.Write(buf)
+
+	buf = buf[:0]
+	scratchBufPool.Put(buf)
 	return err
 }
 
