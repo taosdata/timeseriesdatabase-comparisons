@@ -102,7 +102,7 @@ func (s *serializerTDengine) SerializePoint(w io.Writer, p *Point) error {
 	//buf = append(buf, "Insert into "...)
 	head := fmt.Sprintf("%3d ", tbindex%scalevar)
 	buf = append(buf, head...)
-	buf = append(buf, tbname...)
+	buf = append(buf, dbname+"."+tbname...)
 	buf = append(buf, " values("...)
 
 	buf = fastFormatAppend(p.Timestamp.UTC().UnixNano()/1000000, buf, true)

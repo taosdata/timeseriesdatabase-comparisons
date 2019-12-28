@@ -37,6 +37,7 @@ var (
 	reportTagsCSV  string
 	useCase        string
 	loadfile       string 
+	fileoutput     bool
 )
 
 // Global vars
@@ -49,7 +50,9 @@ var (
 	reportTags     [][2]string
 	reportHostname string
 	taosDriverName string = "taosSql"
-	
+	tablesqlname string = "data/table.sql"
+	tablesqlfile *os.File
+
 
 )
 
@@ -70,7 +73,7 @@ func init() {
 	flag.StringVar(&reportTagsCSV, "report-tags", "", "Comma separated k:v tags to send  alongside result metrics")
 	flag.BoolVar(&slaveSource, "slavesource", false, "if slave source, will not create database")
 	flag.StringVar(&loadfile, "file", "", "Input file")
-
+	flag.BoolVar(&fileoutput, "fileout", true, "if file out, will out put sql into file")
 
 	flag.Parse()
 
@@ -95,6 +98,12 @@ func init() {
 		}
 		fmt.Printf("results report tags: %v\n", reportTagsCSV)
 	//}
+	createtablesql, err := os.OpenFile(tablesqlname, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	tablesqlfile = createtablesql
 }
 
 func main() {
@@ -154,12 +163,22 @@ func main() {
 	sqlcmd = fmt.Sprintf("insert into %s_%s using bmreport tags(\"%s\",\"%s\") values(0, \"%s\",\"%s\",%d,%d,%d,%f,%f,%f,%f,%d,%d,\"%s\")", reportHostname,reportTagsCSV,reportHostname,reportTagsCSV,start.Format(time.RFC3339),end.Format(time.RFC3339),itemsRead,bytesRead,valuesRead,took.Seconds(),itemsRate,bytesRate/(1<<20),valuesRate,workers,batchSize,useCase)
 	_, err = db.Exec(sqlcmd)
 	checkErr(err)
+	tablesqlfile.Close()
 }
 
 func createDatabase(db *sql.DB) {
+	if fileoutput == true {
+		sqlcmd := fmt.Sprintf("Drop database if exists %s\n", useCase)
+		tablesqlfile.WriteString(sqlcmd)
+		sqlcmd = fmt.Sprintf("create database %s tables 2000 cache 102400 ablocks 4 tblocks 50 \n", useCase)
+		tablesqlfile.WriteString(sqlcmd)
+		sqlcmd = fmt.Sprintf("use %s\n", useCase)
+		tablesqlfile.WriteString(sqlcmd)
+		return
+	}
 	sqlcmd := fmt.Sprintf("Drop database if exists %s", useCase)
 	_, err := db.Exec(sqlcmd)
-	sqlcmd = fmt.Sprintf("create database %s tables 2000 cache 10240 ablocks 4 tblocks 50 ", useCase)
+	sqlcmd = fmt.Sprintf("create database %s tables 2000 cache 102400 ablocks 4 tblocks 50 ", useCase)
 	_, err = db.Exec(sqlcmd)
 	sqlcmd = fmt.Sprintf("use %s", useCase)
 	_, err = db.Exec(sqlcmd)
@@ -193,7 +212,12 @@ func scan(db *sql.DB, itemsPerBatch int) (int64, int64, int64) {
 	for scanner.Scan() {
 		line := scanner.Text()
 		if strings.HasPrefix(line, "create") {
-			_, err = db.Exec(line)
+			if fileoutput == true {
+				tablesqlfile.WriteString(line+"\n")
+			}else {
+				_, err = db.Exec(line)
+			}
+			
 		} else if strings.HasPrefix(line, "data"){
 			totalPoints, totalValues, err = common.CheckTotalValues(line)
 			if totalPoints > 0 || totalValues > 0 {
@@ -235,9 +259,18 @@ func scan(db *sql.DB, itemsPerBatch int) (int64, int64, int64) {
 
 func processBatches(iworker int) {
 	var i int
-	db, err := sql.Open(taosDriverName, "root:taosdata@/tcp("+daemonUrl+")/"+useCase)
-	checkErr(err)
-	defer db.Close()
+	var err error
+	var db *sql.DB
+	var datafile *os.File
+
+	if fileoutput != true {
+		db, err = sql.Open(taosDriverName, "root:taosdata@/tcp("+daemonUrl+")/"+useCase)
+		checkErr(err)
+		defer db.Close()
+	}else {
+		dfn := fmt.Sprintf("data/%d.sql",iworker)
+		datafile,_= os.OpenFile(dfn, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	}
 	sqlcmd := make([]string, batchSize+1)
 	i = 0
 	sqlcmd[i] = "Insert into"
@@ -259,7 +292,12 @@ func processBatches(iworker int) {
 		i++
 		if i > batchSize {
 			i = 1
-			_, err := db.Exec(strings.Join(sqlcmd, ""))
+			if fileoutput != true{
+				_, err = db.Exec(strings.Join(sqlcmd, ""))
+			}else {
+				datafile.WriteString(strings.Join(sqlcmd, "")+"\n")
+			}
+			
 			if err != nil {
 				log.Fatalf("Error writing: %s\n", strings.Join(sqlcmd, ""))//err.Error())
 			}
@@ -268,10 +306,16 @@ func processBatches(iworker int) {
 	if i > 1 {
 		i = 1
 		_, err := db.Exec(strings.Join(sqlcmd, ""))
+		if fileoutput != true{
+			_, err = db.Exec(strings.Join(sqlcmd, ""))
+		}else {
+			datafile.WriteString(strings.Join(sqlcmd, "")+"\n")
+		}		
 		if err != nil {
 			log.Fatalf("Error writing: %s\n", strings.Join(sqlcmd, ""))//err.Error())
 		}
 	}
+	datafile.Close()
 
 	workersGroup.Done()
 }
