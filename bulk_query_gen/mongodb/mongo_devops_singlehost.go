@@ -1,7 +1,7 @@
 package mongodb
 
 import "time"
-import bulkQuerygen "github.com/liu0x54/timeseriesdatabase-comparisons/
+import bulkQuerygen "github.com/liu0x54/timeseriesdatabase-comparisons/bulk_query_gen"
 
 // MongoDevopsSingleHost produces Mongo-specific queries for the devops single-host case.
 type MongoDevopsSingleHost struct {
