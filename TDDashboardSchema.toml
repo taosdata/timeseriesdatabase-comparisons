@@ -11,13 +11,14 @@ tags = [
     { name = "rack",           type = "binary(30)" },
     { name = "os",             type = "binary(30)" },
     { name = "arch",           type = "binary(30)" },
-]
-fields = [
     { name = "cluster_id",             type = "binary(30)" },
     { name = "service",           type = "binary(30)" }, 
     { name = "service_version",           type = "binary(30)" },
     { name = "service_environment",           type = "binary(30)" },    
-    # specific tags
+    # specific tags    
+]
+fields = [
+
 
 #    { name = "ts",                  type = "timestamp" },
     { name = "usage_user",             type = "float" },
@@ -46,15 +47,15 @@ tags = [
     { name = "rack",           type = "binary(30)" },
     { name = "os",             type = "binary(30)" },
     { name = "arch",           type = "binary(30)" },
-    # specific tags
-]
-fields = [
-#    { name = "ts",                  type = "timestamp" },
     { name = "cluster_id",             type = "binary(30)" },
     { name = "service",           type = "binary(30)" }, 
     { name = "service_version",           type = "binary(30)" },
     { name = "service_environment",           type = "binary(30)" },
-    { name = "serial",           type = "binary(30)" },    
+    { name = "serial",           type = "binary(30)" },  
+    # specific tags
+]
+fields = [
+#    { name = "ts",                  type = "timestamp" },
     { name = "reads",             type = "int" },
     { name = "read_bytes",             type = "int" },
     { name = "write_bytes",             type = "int" },
@@ -76,16 +77,16 @@ tags = [
     { name = "rack",           type = "binary(30)" },
     { name = "os",             type = "binary(30)" },
     { name = "arch",           type = "binary(30)" },
-    # specific tags
-]
-fields = [
-#    { name = "ts",                  type = "timestamp" },
     { name = "cluster_id",             type = "binary(30)" },
     { name = "service",           type = "binary(30)" }, 
     { name = "service_version",           type = "binary(30)" },
     { name = "service_environment",           type = "binary(30)" },
     { name = "path",           type = "binary(30)" },    
     { name = "fstype",           type = "binary(30)" },
+    # specific tags
+]
+fields = [
+#    { name = "ts",                  type = "timestamp" },
     { name = "total",             type = "bigint" },
     { name = "free",             type = "bigint" },
     { name = "used",             type = "bigint" },
@@ -108,14 +109,15 @@ tags = [
     { name = "rack",           type = "binary(30)" },
     { name = "os",             type = "binary(30)" },
     { name = "arch",           type = "binary(30)" },
+    { name = "cluster_id",             type = "binary(30)" },
+    { name = "service",           type = "binary(30)" }, 
+    { name = "service_version",           type = "binary(30)" },
+    { name = "service_environment",           type = "binary(30)" },   
     # specific tags
 ]
 fields = [
 #    { name = "ts",                  type = "timestamp" },
-    { name = "cluster_id",             type = "binary(30)" },
-    { name = "service",           type = "binary(30)" }, 
-    { name = "service_version",           type = "binary(30)" },
-    { name = "service_environment",           type = "binary(30)" },    
+
     { name = "boot_time",             type = "int" },
     { name = "interrupts",             type = "int" },
     { name = "context_switches",             type = "int" },
@@ -137,14 +139,15 @@ tags = [
     { name = "rack",           type = "binary(30)" },
     { name = "os",             type = "binary(30)" },
     { name = "arch",           type = "binary(30)" },
+    { name = "cluster_id",             type = "binary(30)" },
+    { name = "service",           type = "binary(30)" }, 
+    { name = "service_version",           type = "binary(30)" },
+    { name = "service_environment",           type = "binary(30)" },        
     # specific tags
 ]
 fields = [
 #    { name = "ts",                  type = "timestamp" },
-    { name = "cluster_id",             type = "binary(30)" },
-    { name = "service",           type = "binary(30)" }, 
-    { name = "service_version",           type = "binary(30)" },
-    { name = "service_environment",           type = "binary(30)" },    
+
     { name = "total",             type = "bigint" },
     { name = "available",             type = "bigint" },
     { name = "used",             type = "bigint" },
@@ -169,15 +172,16 @@ tags = [
     { name = "rack",           type = "binary(30)" },
     { name = "os",             type = "binary(30)" },
     { name = "arch",           type = "binary(30)" },
-    # specific tags
-]
-fields = [
-#    { name = "ts",                  type = "timestamp" },
     { name = "cluster_id",             type = "binary(30)" },
     { name = "service",           type = "binary(30)" }, 
     { name = "service_version",           type = "binary(30)" },
     { name = "service_environment",           type = "binary(30)" },
     { name = "interface",           type = "binary(30)" },    
+    # specific tags
+]
+fields = [
+#    { name = "ts",                  type = "timestamp" },
+
     { name = "bytes_sent",             type = "bigint" },
     { name = "bytes_recv",             type = "bigint" },
     { name = "packets_sent",             type = "bigint" },
@@ -201,16 +205,16 @@ tags = [
     { name = "rack",           type = "binary(30)" },
     { name = "os",             type = "binary(30)" },
     { name = "arch",           type = "binary(30)" },
-    # specific tags
-]
-fields = [
-#    { name = "ts",                  type = "timestamp" },
     { name = "cluster_id",             type = "binary(30)" },
     { name = "service",           type = "binary(30)" }, 
     { name = "service_version",           type = "binary(30)" },
     { name = "service_environment",           type = "binary(30)" },
     { name = "port",           type = "int" },    
     { name = "server",           type = "binary(30)" },
+    # specific tags
+]
+fields = [
+#    { name = "ts",                  type = "timestamp" },
     { name = "accepts",             type = "bigint" },
     { name = "active",             type = "bigint" },
     { name = "handled",             type = "bigint" },
@@ -233,14 +237,15 @@ tags = [
     { name = "rack",           type = "binary(30)" },
     { name = "os",             type = "binary(30)" },
     { name = "arch",           type = "binary(30)" },
+    { name = "cluster_id",             type = "binary(30)" },
+    { name = "service",           type = "binary(30)" }, 
+    { name = "service_version",           type = "binary(30)" },
+    { name = "service_environment",           type = "binary(30)" },    
     # specific tags
 ]
 fields = [
 #    { name = "ts",                  type = "timestamp" },
-    { name = "cluster_id",             type = "binary(30)" },
-    { name = "service",           type = "binary(30)" }, 
-    { name = "service_version",           type = "binary(30)" },
-    { name = "service_environment",           type = "binary(30)" },
+
     { name = "numbackends",             type = "bigint" },
     { name = "xact_commit",             type = "bigint" },
     { name = "xact_rollback",             type = "bigint" },
@@ -272,16 +277,16 @@ tags = [
     { name = "rack",           type = "binary(30)" },
     { name = "os",             type = "binary(30)" },
     { name = "arch",           type = "binary(30)" },
-    # specific tags
-]
-fields = [
-#    { name = "ts",                  type = "timestamp" },
     { name = "cluster_id",             type = "binary(30)" },
     { name = "service",           type = "binary(30)" }, 
     { name = "service_version",           type = "binary(30)" },
     { name = "service_environment",           type = "binary(30)" },
     { name = "port",           type = "int" },
-    { name = "server",           type = "binary(30)" },    
+    { name = "server",           type = "binary(30)" },  
+    # specific tags
+]
+fields = [
+#    { name = "ts",                  type = "timestamp" },
     { name = "uptime_in_seconds",             type = "bigint" },
     { name = "total_connections_received",             type = "bigint" },
     { name = "expired_keys",             type = "bigint" },
@@ -328,14 +333,14 @@ tags = [
     { name = "rack",           type = "binary(30)" },
     { name = "os",             type = "binary(30)" },
     { name = "arch",           type = "binary(30)" },
-    # specific tags
-]
-fields = [
-#    { name = "ts",                  type = "timestamp" },
     { name = "cluster_id",             type = "binary(30)" },
     { name = "service",           type = "binary(30)" }, 
     { name = "service_version",           type = "binary(30)" },
     { name = "service_environment",           type = "binary(30)" },
+    # specific tags
+]
+fields = [
+#    { name = "ts",                  type = "timestamp" },
     { name = "load1",             type = "float" },
     { name = "load5",             type = "float" },
     { name = "load15",             type = "float" },
@@ -355,14 +360,15 @@ tags = [
     { name = "rack",           type = "binary(30)" },
     { name = "os",             type = "binary(30)" },
     { name = "arch",           type = "binary(30)" },
+    { name = "cluster_id",             type = "binary(30)" },
+    { name = "service",           type = "binary(30)" }, 
+    { name = "service_version",           type = "binary(30)" },
+    { name = "service_environment",           type = "binary(30)" },    
     # specific tags
 ]
 fields = [
 #    { name = "ts",                  type = "timestamp" },
-    { name = "cluster_id",             type = "binary(30)" },
-    { name = "service",           type = "binary(30)" }, 
-    { name = "service_version",           type = "binary(30)" },
-    { name = "service_environment",           type = "binary(30)" },
+
     { name = "service_up",             type = "int" },
 
 

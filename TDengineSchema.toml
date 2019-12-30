@@ -255,14 +255,14 @@ tags = [
     { name = "rack",           type = "binary(30)" },
     { name = "os",             type = "binary(30)" },
     { name = "arch",           type = "binary(30)" },
+    { name = "team",             type = "binary(30)" },
+    { name = "service",           type = "binary(30)" }, 
+    { name = "service_version",           type = "binary(30)" },
+    { name = "service_environment",           type = "binary(30)" },        
     # specific tags
 ]
 fields = [
 #    { name = "ts",                  type = "timestamp" },
-    { name = "team",             type = "binary(30)" },
-    { name = "service",           type = "binary(30)" }, 
-    { name = "service_version",           type = "binary(30)" },
-    { name = "service_environment",           type = "binary(30)" },    
     { name = "usage_user",             type = "float" },
     { name = "usage_system",             type = "float" },
     { name = "usage_idle",             type = "float" },
@@ -289,15 +289,15 @@ tags = [
     { name = "rack",           type = "binary(30)" },
     { name = "os",             type = "binary(30)" },
     { name = "arch",           type = "binary(30)" },
-    # specific tags
-]
-fields = [
-#    { name = "ts",                  type = "timestamp" },
     { name = "team",             type = "binary(30)" },
     { name = "service",           type = "binary(30)" }, 
     { name = "service_version",           type = "binary(30)" },
     { name = "service_environment",           type = "binary(30)" },
-    { name = "serial",           type = "binary(30)" },    
+    { name = "serial",           type = "binary(30)" },   
+    # specific tags
+]
+fields = [
+#    { name = "ts",                  type = "timestamp" },
     { name = "reads",             type = "bigint" },
     { name = "read_bytes",             type = "bigint" },
     { name = "write_bytes",             type = "bigint" },
@@ -319,16 +319,16 @@ tags = [
     { name = "rack",           type = "binary(30)" },
     { name = "os",             type = "binary(30)" },
     { name = "arch",           type = "binary(30)" },
-    # specific tags
-]
-fields = [
-#    { name = "ts",                  type = "timestamp" },
     { name = "team",             type = "binary(30)" },
     { name = "service",           type = "binary(30)" }, 
     { name = "service_version",           type = "binary(30)" },
     { name = "service_environment",           type = "binary(30)" },
     { name = "path",           type = "binary(30)" },    
     { name = "fstype",           type = "binary(30)" },
+    # specific tags
+]
+fields = [
+#    { name = "ts",                  type = "timestamp" },
     { name = "total",             type = "bigint" },
     { name = "free",             type = "bigint" },
     { name = "used",             type = "bigint" },
@@ -351,14 +351,14 @@ tags = [
     { name = "rack",           type = "binary(30)" },
     { name = "os",             type = "binary(30)" },
     { name = "arch",           type = "binary(30)" },
+    { name = "team",             type = "binary(30)" },
+    { name = "service",           type = "binary(30)" }, 
+    { name = "service_version",           type = "binary(30)" },
+    { name = "service_environment",           type = "binary(30)" },   
     # specific tags
 ]
 fields = [
 #    { name = "ts",                  type = "timestamp" },
-    { name = "team",             type = "binary(30)" },
-    { name = "service",           type = "binary(30)" }, 
-    { name = "service_version",           type = "binary(30)" },
-    { name = "service_environment",           type = "binary(30)" },    
     { name = "boot_time",             type = "bigint" },
     { name = "interrupts",             type = "bigint" },
     { name = "context_switches",             type = "bigint" },
@@ -380,14 +380,14 @@ tags = [
     { name = "rack",           type = "binary(30)" },
     { name = "os",             type = "binary(30)" },
     { name = "arch",           type = "binary(30)" },
-    # specific tags
-]
-fields = [
-#    { name = "ts",                  type = "timestamp" },
     { name = "team",             type = "binary(30)" },
     { name = "service",           type = "binary(30)" }, 
     { name = "service_version",           type = "binary(30)" },
     { name = "service_environment",           type = "binary(30)" },    
+    # specific tags
+]
+fields = [
+#    { name = "ts",                  type = "timestamp" },
     { name = "total",             type = "bigint" },
     { name = "available",             type = "bigint" },
     { name = "used",             type = "bigint" },
@@ -412,15 +412,15 @@ tags = [
     { name = "rack",           type = "binary(30)" },
     { name = "os",             type = "binary(30)" },
     { name = "arch",           type = "binary(30)" },
-    # specific tags
-]
-fields = [
-#    { name = "ts",                  type = "timestamp" },
     { name = "team",             type = "binary(30)" },
     { name = "service",           type = "binary(30)" }, 
     { name = "service_version",           type = "binary(30)" },
     { name = "service_environment",           type = "binary(30)" },
-    { name = "interface",           type = "binary(30)" },    
+    { name = "interface",           type = "binary(30)" },      
+    # specific tags
+]
+fields = [
+#    { name = "ts",                  type = "timestamp" },
     { name = "bytes_sent",             type = "bigint" },
     { name = "bytes_recv",             type = "bigint" },
     { name = "packets_sent",             type = "bigint" },
@@ -444,14 +444,14 @@ tags = [
     { name = "rack",           type = "binary(30)" },
     { name = "os",             type = "binary(30)" },
     { name = "arch",           type = "binary(30)" },
-    # specific tags
-]
-fields = [
-#    { name = "ts",                  type = "timestamp" },
     { name = "team",             type = "binary(30)" },
     { name = "service",           type = "binary(30)" }, 
     { name = "service_version",           type = "binary(30)" },
     { name = "service_environment",           type = "binary(30)" },
+    # specific tags
+]
+fields = [
+#    { name = "ts",                  type = "timestamp" },
     { name = "port",           type = "int" },    
     { name = "server",           type = "binary(30)" },
     { name = "accepts",             type = "bigint" },
@@ -476,14 +476,14 @@ tags = [
     { name = "rack",           type = "binary(30)" },
     { name = "os",             type = "binary(30)" },
     { name = "arch",           type = "binary(30)" },
-    # specific tags
-]
-fields = [
-#    { name = "ts",                  type = "timestamp" },
     { name = "team",             type = "binary(30)" },
     { name = "service",           type = "binary(30)" }, 
     { name = "service_version",           type = "binary(30)" },
     { name = "service_environment",           type = "binary(30)" },
+    # specific tags
+]
+fields = [
+#    { name = "ts",                  type = "timestamp" },
     { name = "numbackends",             type = "bigint" },
     { name = "xact_commit",             type = "bigint" },
     { name = "xact_rollback",             type = "bigint" },
@@ -515,16 +515,16 @@ tags = [
     { name = "rack",           type = "binary(30)" },
     { name = "os",             type = "binary(30)" },
     { name = "arch",           type = "binary(30)" },
-    # specific tags
-]
-fields = [
-#    { name = "ts",                  type = "timestamp" },
     { name = "team",             type = "binary(30)" },
     { name = "service",           type = "binary(30)" }, 
     { name = "service_version",           type = "binary(30)" },
     { name = "service_environment",           type = "binary(30)" },
     { name = "port",           type = "int" },
-    { name = "server",           type = "binary(30)" },    
+    { name = "server",           type = "binary(30)" },   
+    # specific tags
+]
+fields = [
+#    { name = "ts",                  type = "timestamp" },
     { name = "uptime_in_seconds",             type = "bigint" },
     { name = "total_connections_received",             type = "bigint" },
     { name = "expired_keys",             type = "bigint" },
