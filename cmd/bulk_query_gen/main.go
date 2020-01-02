@@ -17,6 +17,7 @@ import (
 	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_query_gen/opentsdb"
 	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_query_gen/splunk"
 	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_query_gen/timescaledb"
+	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_query_gen/tdengine"
 	"log"
 	"math/rand"
 	"os"
@@ -65,6 +66,7 @@ var useCaseMatrix = map[string]map[string]map[string]bulkQueryGen.QueryGenerator
 			"timescaledb":      timescaledb.NewTimescaleDevopsSingleHost,
 			"graphite":         graphite.NewGraphiteDevopsSingleHost,
 			"splunk":           splunk.NewSplunkDevopsSingleHost,
+			"tdengine":			tdengine.NewtdengineDevopsSingleHost,
 		},
 		DevOpsOneHostTwelveHours: {
 			"cassandra":        cassandra.NewCassandraDevopsSingleHost12hr,
@@ -76,6 +78,7 @@ var useCaseMatrix = map[string]map[string]map[string]bulkQueryGen.QueryGenerator
 			"timescaledb":      timescaledb.NewTimescaleDevopsSingleHost12hr,
 			"graphite":         graphite.NewGraphiteDevopsSingleHost12hr,
 			"splunk":           splunk.NewSplunkDevopsSingleHost12hr,
+			"tdengine":			tdengine.NewtdengineDevopsSingleHost12hr,
 		},
 		DevOpsEightHostsOneHour: {
 			"cassandra":        cassandra.NewCassandraDevops8Hosts,
@@ -87,6 +90,7 @@ var useCaseMatrix = map[string]map[string]map[string]bulkQueryGen.QueryGenerator
 			"timescaledb":      timescaledb.NewTimescaleDevops8Hosts1Hr,
 			"graphite":         graphite.NewGraphiteDevops8Hosts,
 			"splunk":           splunk.NewSplunkDevops8Hosts,
+			"tdengine":		    tdengine.NewtdengineDevops8Hosts,
 		},
 		DevOpsGroupBy: {
 			"cassandra":        cassandra.NewCassandraDevopsGroupBy,
