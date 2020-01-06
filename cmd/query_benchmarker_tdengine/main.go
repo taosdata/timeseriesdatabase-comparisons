@@ -8,11 +8,13 @@ package main
 import (
 	"encoding/gob"
 	"encoding/base64"
+	"database/sql"
 	"flag"
 	"fmt"
 	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_query"
 	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_query/http"
 	"github.com/liu0x54/timeseriesdatabase-comparisons/util/report"
+	_ "github.com/taosdata/TDengine/src/connector/go/src/taosSql"	
 	"io"
 	"log"
 	"math/rand"
@@ -32,13 +34,12 @@ type TDengineQueryBenchmarker struct {
 	httpClientType     string
 	clientIndex        int
 	scanFinished       bool
-
 	queryPool sync.Pool
 	queryChan chan []*http.Query
 }
-
+var cgo int = 0
 var querier = &TDengineQueryBenchmarker{}
-
+var taosDriverName string = "taosSql"
 // Parse args:
 func init() {
 
@@ -57,7 +58,7 @@ func (b *TDengineQueryBenchmarker) Init() {
 	flag.DurationVar(&b.dialTimeout, "dial-timeout", time.Second*15, "TCP dial timeout.")
 	flag.DurationVar(&b.readTimeout, "write-timeout", time.Second*300, "TCP write timeout.")
 	flag.DurationVar(&b.writeTimeout, "read-timeout", time.Second*300, "TCP read timeout.")
-	flag.StringVar(&b.httpClientType, "http-client-type", "fast", "HTTP client type {fast, default}")
+	flag.StringVar(&b.httpClientType, "http-client-type", "fast", "HTTP client type {fast, default,cgo}")
 	flag.IntVar(&b.clientIndex, "client-index", 0, "Index of a client host running this tool. Used to distribute load")
 }
 
@@ -71,6 +72,9 @@ func (b *TDengineQueryBenchmarker) Validate() {
 	if b.httpClientType == "fast" || b.httpClientType == "default" {
 		fmt.Printf("Using HTTP client: %v\n", b.httpClientType)
 		http.UseFastHttp = b.httpClientType == "fast"
+	} else if b.httpClientType == "cgo" {
+		fmt.Printf("Using TDengine C connector: %v\n", b.httpClientType)	
+		cgo = 1	
 	} else {
 		log.Fatalf("Unsupported HTPP client type: %v", b.httpClientType)
 	}
@@ -239,7 +243,13 @@ func (b *TDengineQueryBenchmarker) processSingleQuery(w http.HTTPClient, q *http
 			doneCh <- 1
 		}
 	}()
-	lagMillis, err := w.Do(q, opts)
+	var lagMillis float64
+	var err error
+	if cgo ==1 {
+		lagMillis, err = b.execSql(q)
+	}else {
+		lagMillis, err = w.Do(q, opts)
+	}
 	stat := statPool.Get().(*bulk_query.Stat)
 	stat.Init(q.HumanLabel, lagMillis)
 	statChan <- stat
@@ -255,4 +265,20 @@ func (b *TDengineQueryBenchmarker) processSingleQuery(w http.HTTPClient, q *http
 	}
 
 	return nil
+}
+
+func (b *TDengineQueryBenchmarker)execSql(q *http.Query) (lag float64, err error) {
+	db, err := sql.Open(taosDriverName, "root:taosdata@/tcp("+b.csvDaemonUrls+")/")
+	if err != nil {
+		log.Fatalf("Open database error: %s\n", err)
+	}
+	defer db.Close()
+	sqlcmd:=string(q.Body)
+	start := time.Now()
+	_, err = db.Exec(sqlcmd)
+	lag = float64(time.Since(start).Nanoseconds()) / 1e6 // milliseconds
+	if err != nil {
+		log.Fatalf("Query error: %s\n", err)
+	}
+	return lag, err 
 }
