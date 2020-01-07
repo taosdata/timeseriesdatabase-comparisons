@@ -95,12 +95,12 @@ echo    "------------------------------------------"
 echo    "       tsdb performance comparision       "
 echo    "------------------------------------------"
 echo -e "        writing $DATA records takes:      "
-echo    "   InfluxDB        |    %-4.2f Seconds  \n" $IFWTM 
+printf  "   InfluxDB        |    %-4.2f Seconds  \n" $IFWTM 
 printf  "   TDengine        |    %-4.2f Seconds  \n" $TDWTM
 echo    "------------------------------------------"
 echo    "1000 queries: select max(usage_user) by 1h"
 echo    "takes:                                  "
-echo    "   InfluxDB        |    %-4.2f Seconds  \n" $IFQTM 
+printf  "   InfluxDB        |    %-4.2f Seconds  \n" $IFQTM 
 printf  "   TDengine        |    %-4.2f Seconds  \n" $TDQTM
 echo    "------------------------------------------"
 echo
