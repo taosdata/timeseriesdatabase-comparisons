@@ -91,18 +91,18 @@ IFQTM=`echo ${TMP%s*}`
 
 echo
 echo
-echo    "------------------------------------------"
-echo    "       tsdb performance comparision       "
-echo    "------------------------------------------"
-echo -e "        writing $DATA records takes:      "
-printf  "   InfluxDB        |    %-4.2f Seconds  \n" $IFWTM 
-printf  "   TDengine        |    %-4.2f Seconds  \n" $TDWTM
-echo    "------------------------------------------"
-echo    "1000 queries: select max(usage_user) by 1h"
-echo    "takes:                                  "
-printf  "   InfluxDB        |    %-4.2f Seconds  \n" $IFQTM 
-printf  "   TDengine        |    %-4.2f Seconds  \n" $TDQTM
-echo    "------------------------------------------"
+echo    "-----------------------------------------------"
+echo    "         tsdb performance comparision          "
+echo    "-----------------------------------------------"
+echo -e "         writing $DATA records takes:          "
+printf  "       InfluxDB       |    %-4.2f Seconds    \n" $IFWTM 
+printf  "       TDengine       |    %-4.2f Seconds    \n" $TDWTM
+echo    "-----------------------------------------------"
+echo    "1000 queries: select max(usage_user) groupby 1h"
+echo    "takes:                                         "
+printf  "       InfluxDB       |    %-4.2f Seconds    \n" $IFQTM 
+printf  "       TDengine       |    %-4.2f Seconds    \n" $TDQTM
+echo    "-----------------------------------------------"
 echo
 docker stop $INFLUX >>/dev/null 2>&1
 docker container rm -f $INFLUX >>/dev/null 2>&1
