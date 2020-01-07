@@ -47,7 +47,12 @@ func (d *InfluxDevops) MaxCPUUsageHourByMinuteFourHosts(q bulkQuerygen.Query) {
 func (d *InfluxDevops) MaxCPUUsageHourByMinuteEightHosts(q bulkQuerygen.Query) {
 	d.maxCPUUsageHourByMinuteNHosts(q.(*bulkQuerygen.HTTPQuery), 8, time.Hour)
 }
-
+func (d *InfluxDevops) MaxCPUUsageHourByMinuteEightHosts12HR(q bulkQuerygen.Query) {
+	d.maxCPUUsageHourBy10MinuteNHosts(q.(*bulkQuerygen.HTTPQuery), 8, 12*time.Hour)
+}
+func (d *InfluxDevops) MaxCPUUsageAllByHourEightHosts(q bulkQuerygen.Query) {
+	d.maxCPUUsageAllBy1HourHosts(q.(*bulkQuerygen.HTTPQuery), 8, time.Hour)
+}
 func (d *InfluxDevops) MaxCPUUsageHourByMinuteSixteenHosts(q bulkQuerygen.Query) {
 	d.maxCPUUsageHourByMinuteNHosts(q.(*bulkQuerygen.HTTPQuery), 16, time.Hour)
 }
@@ -85,6 +90,8 @@ func (d *InfluxDevops) maxCPUUsageHourByMinuteNHosts(qi bulkQuerygen.Query, nhos
 	var query string
 	if d.language == InfluxQL {
 		query = fmt.Sprintf("SELECT max(usage_user) from cpu where (%s) and time >= '%s' and time < '%s' group by time(1m)", combinedHostnameClause, interval.StartString(), interval.EndString())
+
+//		query = fmt.Sprintf("SELECT mean(usage_user) from cpu where (%s)  group by time(1h)", combinedHostnameClause)
 	} else { // Flux
 		query = fmt.Sprintf(`from(db:"%s") `+
 			`|> range(start:%s, stop:%s) `+
@@ -103,11 +110,93 @@ func (d *InfluxDevops) maxCPUUsageHourByMinuteNHosts(qi bulkQuerygen.Query, nhos
 	q := qi.(*bulkQuerygen.HTTPQuery)
 	d.getHttpQuery(humanLabel, interval.StartString(), query, q)
 }
+func (d *InfluxDevops) maxCPUUsageHourBy10MinuteNHosts(qi bulkQuerygen.Query, nhosts int, timeRange time.Duration) {
+	interval := d.AllInterval.RandWindow(timeRange)
+	nn := rand.Perm(d.ScaleVar)[:nhosts]
 
+	hostnames := []string{}
+	for _, n := range nn {
+		hostnames = append(hostnames, fmt.Sprintf("host_%d", n))
+	}
+
+	hostnameClauses := []string{}
+	for _, s := range hostnames {
+		if d.language == InfluxQL {
+			hostnameClauses = append(hostnameClauses, fmt.Sprintf("hostname = '%s'", s))
+		} else {
+			hostnameClauses = append(hostnameClauses, fmt.Sprintf(`r.hostname == "%s"`, s))
+		}
+	}
+
+	combinedHostnameClause := strings.Join(hostnameClauses, " or ")
+
+	var query string
+	if d.language == InfluxQL {
+		query = fmt.Sprintf("SELECT max(usage_user) from cpu where (%s) and time >= '%s' and time < '%s' group by time(10m)", combinedHostnameClause, interval.StartString(), interval.EndString())
+
+//		query = fmt.Sprintf("SELECT mean(usage_user) from cpu where (%s)  group by time(1h)", combinedHostnameClause)
+	} else { // Flux
+		query = fmt.Sprintf(`from(db:"%s") `+
+			`|> range(start:%s, stop:%s) `+
+			`|> filter(fn:(r) => r._measurement == "cpu" and r._field == "usage_user" and (%s)) `+
+			`|> keep(columns:["_start", "_stop", "_time", "_value"]) `+
+			`|> window(period:10m) `+
+			`|> max() `+
+			`|> yield()`,
+			d.DatabaseName,
+			interval.StartString(), interval.EndString(),
+			combinedHostnameClause)
+	}
+
+	humanLabel := fmt.Sprintf("InfluxDB (%s) max cpu, rand %4d hosts, rand %s by 10m", d.language.String(), nhosts, timeRange)
+
+	q := qi.(*bulkQuerygen.HTTPQuery)
+	d.getHttpQuery(humanLabel, interval.StartString(), query, q)
+}
+
+func (d *InfluxDevops) maxCPUUsageAllBy1HourHosts(qi bulkQuerygen.Query, nhosts int, timeRange time.Duration) {
+	nn := rand.Perm(d.ScaleVar)[:nhosts]
+
+	hostnames := []string{}
+	for _, n := range nn {
+		hostnames = append(hostnames, fmt.Sprintf("host_%d", n))
+	}
+
+	hostnameClauses := []string{}
+	for _, s := range hostnames {
+		if d.language == InfluxQL {
+			hostnameClauses = append(hostnameClauses, fmt.Sprintf("hostname = '%s'", s))
+		} else {
+			hostnameClauses = append(hostnameClauses, fmt.Sprintf(`r.hostname == "%s"`, s))
+		}
+	}
+
+	combinedHostnameClause := strings.Join(hostnameClauses, " or ")
+
+	var query string
+	if d.language == InfluxQL {
+		query = fmt.Sprintf("SELECT max(usage_user) from cpu where (%s)  group by time(1h)", combinedHostnameClause)
+
+	} else { // Flux
+		query = fmt.Sprintf(`from(db:"%s") `+
+			`|> filter(fn:(r) => r._measurement == "cpu" and r._field == "usage_user" and (%s)) `+
+			`|> keep(columns:["_start", "_stop", "_time", "_value"]) `+
+			`|> window(period:1h) `+
+			`|> max() `+
+			`|> yield()`,
+			d.DatabaseName,
+			combinedHostnameClause)
+	}
+
+	humanLabel := fmt.Sprintf("InfluxDB (%s) max cpu, rand %4d hosts, by 1h", d.language.String(), nhosts)
+
+	q := qi.(*bulkQuerygen.HTTPQuery)
+	d.getHttpQuery(humanLabel, " ", query, q)
+}
 // MeanCPUUsageDayByHourAllHosts populates a Query with a query that looks like:
 // SELECT mean(usage_user) from cpu where time >= '$DAY_START' and time < '$DAY_END' group by time(1h),hostname
 func (d *InfluxDevops) MeanCPUUsageDayByHourAllHostsGroupbyHost(qi bulkQuerygen.Query) {
-	interval := d.AllInterval.RandWindow(24 * time.Hour)
+	interval := d.AllInterval.RandWindow(-24 * time.Hour)
 
 	var query string
 	if d.language == InfluxQL {

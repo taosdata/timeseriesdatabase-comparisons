@@ -43,7 +43,12 @@ func (d *tdengineDevops) MaxCPUUsageHourByMinuteFourHosts(q bulkQuerygen.Query) 
 func (d *tdengineDevops) MaxCPUUsageHourByMinuteEightHosts(q bulkQuerygen.Query) {
 	d.maxCPUUsageHourByMinuteNHosts(q.(*bulkQuerygen.HTTPQuery), 8, time.Hour)
 }
-
+func (d *tdengineDevops) MaxCPUUsageHourByMinuteEightHosts12HR(q bulkQuerygen.Query) {
+	d.maxCPUUsageHourBy10MinuteNHosts(q.(*bulkQuerygen.HTTPQuery), 8, 12*time.Hour)
+}
+func (d *tdengineDevops) MaxCPUUsageAllByHourEightHosts(q bulkQuerygen.Query) {
+	d.maxCPUUsageAllBy1HourHosts(q.(*bulkQuerygen.HTTPQuery), 8, time.Hour)
+}
 func (d *tdengineDevops) MaxCPUUsageHourByMinuteSixteenHosts(q bulkQuerygen.Query) {
 	d.maxCPUUsageHourByMinuteNHosts(q.(*bulkQuerygen.HTTPQuery), 16, time.Hour)
 }
@@ -73,16 +78,65 @@ func (d *tdengineDevops) maxCPUUsageHourByMinuteNHosts(qi bulkQuerygen.Query, nh
 	}
 
 	combinedHostnameClause := strings.Join(hostnameClauses, " or ")
-	
+	//_ := strings.Join(hostnameClauses, " or ")
 	query := fmt.Sprintf("select max(f_usage_user) from devops.cpu where (%s) and ts >= '%s' and ts < '%s' interval(1m)", combinedHostnameClause, interval.StartString(), interval.EndString())
-	 
+//	query := fmt.Sprintf("select avg(f_usage_user) from devops.cpu where (%s)  interval(1h)",  combinedHostnameClause) 
 
 	humanLabel := fmt.Sprintf("TDengine max cpu, rand %4d hosts, rand %s by 1m",  nhosts, timeRange)
 
 	q := qi.(*bulkQuerygen.HTTPQuery)
 	d.getHttpQuery(humanLabel, interval.StartString(), query, q)
 }
+// MaxCPUUsageHourByMinuteThirtyTwoHosts populates a Query with a query that looks like:
+// SELECT max(usage_user) from cpu where (hostname = '$HOSTNAME_1' or ... or hostname = '$HOSTNAME_N') and time >= '$HOUR_START' and time < '$HOUR_END' group by time(1m)
+func (d *tdengineDevops) maxCPUUsageHourBy10MinuteNHosts(qi bulkQuerygen.Query, nhosts int, timeRange time.Duration) {
+	interval := d.AllInterval.RandWindow(timeRange)
+	nn := rand.Perm(d.ScaleVar)[:nhosts]
 
+	hostnames := []string{}
+	for _, n := range nn {
+		hostnames = append(hostnames, fmt.Sprintf("host_%d", n))
+	}
+
+	hostnameClauses := []string{}
+	for _, s := range hostnames {
+		hostnameClauses = append(hostnameClauses, fmt.Sprintf("t_hostname = '%s'", s))
+	}
+
+	combinedHostnameClause := strings.Join(hostnameClauses, " or ")
+	//_ := strings.Join(hostnameClauses, " or ")
+	query := fmt.Sprintf("select max(f_usage_user) from devops.cpu where (%s) and ts >= '%s' and ts < '%s' interval(10m)", combinedHostnameClause, interval.StartString(), interval.EndString())
+//	query := fmt.Sprintf("select avg(f_usage_user) from devops.cpu where (%s)  interval(1h)",  combinedHostnameClause) 
+
+	humanLabel := fmt.Sprintf("TDengine max cpu, rand %4d hosts, rand %s by 10m",  nhosts, timeRange)
+
+	q := qi.(*bulkQuerygen.HTTPQuery)
+	d.getHttpQuery(humanLabel, interval.StartString(), query, q)
+}
+
+func (d *tdengineDevops) maxCPUUsageAllBy1HourHosts(qi bulkQuerygen.Query, nhosts int, timeRange time.Duration) {
+	//interval := d.AllInterval.RandWindow(timeRange)
+	nn := rand.Perm(d.ScaleVar)[:nhosts]
+
+	hostnames := []string{}
+	for _, n := range nn {
+		hostnames = append(hostnames, fmt.Sprintf("host_%d", n))
+	}
+
+	hostnameClauses := []string{}
+	for _, s := range hostnames {
+		hostnameClauses = append(hostnameClauses, fmt.Sprintf("t_hostname = '%s'", s))
+	}
+
+	combinedHostnameClause := strings.Join(hostnameClauses, " or ")
+
+	query := fmt.Sprintf("select max(f_usage_user) from devops.cpu where (%s) interval(1h)", combinedHostnameClause)
+
+	humanLabel := fmt.Sprintf("TDengine max cpu, rand %4d hosts,  by 1 hour",  nhosts)
+
+	q := qi.(*bulkQuerygen.HTTPQuery)
+	d.getHttpQuery(humanLabel, " ", query, q)
+}
 // MeanCPUUsageDayByHourAllHosts populates a Query with a query that looks like:
 // SELECT mean(usage_user) from cpu where time >= '$DAY_START' and time < '$DAY_END' group by time(1h),hostname
 func (d *tdengineDevops) MeanCPUUsageDayByHourAllHostsGroupbyHost(qi bulkQuerygen.Query) {

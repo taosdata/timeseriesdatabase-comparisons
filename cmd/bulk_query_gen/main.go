@@ -29,6 +29,8 @@ const (
 	DevOpsOneHostOneHour            = "1-host-1-hr"
 	DevOpsOneHostTwelveHours        = "1-host-12-hr"
 	DevOpsEightHostsOneHour         = "8-host-1-hr"
+	DevOpsEightHostsTwelveHours     = "8-host-12-hr"
+	DevOpsEightHostsAllbyHours      = "8-host-allbyhr"
 	DevOpsGroupBy                   = "groupby"
 	IotOneHomeTwelveHours           = "1-home-12-hours"
 	DashboardAll                    = "dashboard-all"
@@ -92,6 +94,14 @@ var useCaseMatrix = map[string]map[string]map[string]bulkQueryGen.QueryGenerator
 			"splunk":           splunk.NewSplunkDevops8Hosts,
 			"tdengine":		    tdengine.NewtdengineDevops8Hosts,
 		},
+		DevOpsEightHostsTwelveHours:{
+			"influx-http":      influxdb.NewInfluxQLDevops8Hosts12HR,
+			"tdengine":		    tdengine.NewtdengineDevops8Hosts12HR,
+		},
+		DevOpsEightHostsAllbyHours:{
+			"influx-http":      influxdb.NewInfluxQLDevops8HostsAllBy1Hr,
+			"tdengine":		    tdengine.NewtdengineDevops8HostsAllBy1Hr,
+		},		
 		DevOpsGroupBy: {
 			"cassandra":        cassandra.NewCassandraDevopsGroupBy,
 			"es-http":          elasticsearch.NewElasticSearchDevopsGroupBy,
@@ -231,7 +241,7 @@ func init() {
 
 	hourGroupInterval := 1
 
-	if queryType == DevOpsOneHostTwelveHours {
+	if queryType == DevOpsOneHostTwelveHours || queryType == DevOpsEightHostsTwelveHours {
 		hourGroupInterval = 12
 	}
 
