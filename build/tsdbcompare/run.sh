@@ -103,7 +103,7 @@ TDQS4=`bin/bulk_query_gen  -seed 123 -format tdengine -query-type 8-host-1-hr -s
 echo
 echo -e "${GREEN}TDengine query test case 4 result:${NC}"
 echo -e "${GREEN}$TDQS4${NC}"
-TMP=`echo $TDQS1|awk '{print($4)}'`
+TMP=`echo $TDQS4|awk '{print($4)}'`
 TDQ4=`echo ${TMP%s*}`
 
 sleep 10
