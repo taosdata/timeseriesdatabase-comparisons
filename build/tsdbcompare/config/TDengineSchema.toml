@@ -1,0 +1,559 @@
+
+[[window_state_room]]
+stname = "window_state_room"
+suffix = "home_id"
+# sample 40% of the tag set, default is to sample 50%
+tags = [
+    # common tags
+    { name = "room_id",             type = "binary(30)" },
+    { name = "home_id",             type = "binary(30)" },
+    { name = "sensor_id",           type = "binary(30)" },
+    { name = "window_id",           type = "binary(30)" },
+]
+fields = [
+#    { name = "ts",                  type = "timestamp" },
+    { name = "state",               type = "float" },
+    { name = "battery_voltage",     type = "float" },
+]
+
+[[radiator_valve_room]]
+stname = "radiator_valve_room"
+suffix = "home_id"
+# sample 40% of the tag set, default is to sample 50%
+tags = [
+    # common tags
+    { name = "room_id",             type = "binary(30)" },
+    { name = "home_id",             type = "binary(30)" },
+    { name = "radiator",            type = "binary(30)" },
+    { name = "sensor_id",           type = "binary(30)" },
+    # specific tags
+]
+fields = [
+#    { name = "ts",                  type = "timestamp" },
+    { name = "opening_level",       type = "float" },
+    { name = "battery_voltage",     type = "float" }
+]
+
+[[air_condition_room]]
+stname = "air_condition_room"
+suffix = "home_id"
+# sample 40% of the tag set, default is to sample 50%
+
+tags = [
+    # common tags
+    { name = "room_id",             type = "binary(30)" },
+    { name = "home_id",             type = "binary(30)" },
+    { name = "sensor_id",           type = "binary(30)" },
+    # specific tags
+]
+fields = [
+#    { name = "ts",                  type = "timestamp" },
+    { name = "temperature",         type = "float" },
+    { name = "humidity",            type = "float" },
+    { name = "battery_voltage",     type = "float" },
+]
+
+[[air_quality_room]]
+stname = "air_quality_room"
+suffix = "home_id"
+# sample 40% of the tag set, default is to sample 50%
+
+tags = [
+    # common tags
+    { name = "room_id",             type = "binary(30)" },
+    { name = "home_id",             type = "binary(30)" },
+    { name = "sensor_id",           type = "binary(30)" },
+    # specific tags
+]
+fields = [
+#    { name = "ts",                  type = "timestamp" },
+    { name = "co2_level",           type = "float" },
+    { name = "co_level",            type = "float" },
+    { name = "battery_voltage",     type = "float" },
+]
+
+[[light_level_room]]
+stname = "light_level_room"
+suffix = "home_id"
+# sample 40% of the tag set, default is to sample 50%
+tags = [
+    # common tags
+    { name = "room_id",             type = "binary(30)" },
+    { name = "home_id",             type = "binary(30)" },
+    { name = "sensor_id",           type = "binary(30)" },
+    # specific tags
+]
+fields = [
+#    { name = "ts",                  type = "timestamp" },
+    { name = "level",               type = "float" },
+    { name = "battery_voltage",     type = "float" },
+]
+
+[[air_condition_outdoor]]
+stname = "air_condition_outdoor"
+suffix = "home_id"
+# sample 40% of the tag set, default is to sample 50%
+tags = [
+    # common tags
+    { name = "home_id",             type = "binary(30)" },
+    { name = "sensor_id",           type = "binary(30)" },
+    # specific tags
+]
+fields = [
+#    { name = "ts",                  type = "timestamp" },
+    { name = "temperature",         type = "float" },
+    { name = "humidity",            type = "float" },
+    { name = "battery_voltage",     type = "float" },
+]
+
+[[home_state]]
+stname = "home_state"
+suffix = "home_id"
+# sample 40% of the tag set, default is to sample 50%
+tags = [
+    # common tags
+    { name = "home_id",             type = "binary(30)" },
+    { name = "sensor_id",           type = "binary(30)" },
+    # specific tags
+]
+fields = [
+#    { name = "ts",                  type = "timestamp" },
+    { name = "state",              type = "binary(20)" },
+    { name = "state_string",            type = "binary(20)" },
+]
+
+[[camera_detection]]
+stname = "camera_detection"
+suffix = "home_id"
+# sample 40% of the tag set, default is to sample 50%
+tags = [
+    # common tags
+    { name = "home_id",             type = "binary(30)" },
+    { name = "sensor_id",           type = "binary(30)" },
+    # specific tags
+]
+fields = [
+#    { name = "ts",                  type = "timestamp" },
+    { name = "object_type",              type = "binary(20)" },
+    { name = "object_kind",            type = "binary(20)" },
+    { name = "battery_voltage",     type = "float" },
+]
+
+[[water_level]]
+stname = "water_level"
+suffix = "home_id"
+# sample 40% of the tag set, default is to sample 50%
+tags = [
+    # common tags
+    { name = "home_id",             type = "binary(30)" },
+    { name = "sensor_id",           type = "binary(30)" },
+    # specific tags
+]
+fields = [
+#    { name = "ts",                  type = "timestamp" },
+    { name = "level",              type = "float" },
+    { name = "battery_voltage",            type = "float" },
+]
+
+[[water_leakage_room]]
+stname = "water_leakage_room"
+suffix = "home_id"
+# sample 40% of the tag set, default is to sample 50%
+tags = [
+    # common tags
+    { name = "room_id",             type = "binary(30)" },
+    { name = "home_id",             type = "binary(30)" },
+    { name = "sensor_id",           type = "binary(30)" },
+    # specific tags
+]
+fields = [
+#    { name = "ts",                  type = "timestamp" },
+    { name = "leakage",               type = "float" },
+    { name = "battery_voltage",     type = "float" },
+]
+
+[[door_state]]
+stname = "door_state"
+suffix = "home_id"
+# sample 40% of the tag set, default is to sample 50%
+tags = [
+    # common tags
+    { name = "home_id",             type = "binary(30)" },
+    { name = "door_id",             type = "binary(30)" },
+    { name = "sensor_id",           type = "binary(30)" },
+    # specific tags
+]
+fields = [
+#    { name = "ts",                  type = "timestamp" },
+    { name = "state",               type = "float" },
+    { name = "battery_voltage",     type = "float" },
+]
+
+[[air_condition_outdoor]]
+stname = "air_condition_outdoor"
+suffix = "home_id"
+# sample 40% of the tag set, default is to sample 50%
+
+tags = [
+    # common tags
+    { name = "home_id",             type = "binary(30)" },
+    { name = "sensor_id",           type = "binary(30)" },
+    # specific tags
+]
+fields = [
+#    { name = "ts",                  type = "timestamp" },
+    { name = "temperature",         type = "float" },
+    { name = "humidity",            type = "float" },
+    { name = "battery_voltage",     type = "float" },
+]
+
+[[weather_outdoor]]
+stname = "weather_outdoor"
+suffix = "home_id"
+# sample 40% of the tag set, default is to sample 50%
+
+tags = [
+    # common tags
+    { name = "home_id",             type = "binary(30)" },
+    { name = "sensor_id",           type = "binary(30)" },
+    # specific tags
+]
+fields = [
+#    { name = "ts",                  type = "timestamp" },
+    { name = "pressure",             type = "float" },
+    { name = "wind_speed",           type = "float" },
+    { name = "wind_direction",       type = "float" },
+    { name = "precipitation",        type = "float" },
+    { name = "battery_voltage",      type = "float" },
+]
+[[home_config]]
+stname = "home_config"
+suffix = "home_id"
+# sample 40% of the tag set, default is to sample 50%
+
+tags = [
+    # common tags
+    { name = "home_id",             type = "binary(30)" },
+    { name = "sensor_id",           type = "binary(30)" },
+    # specific tags
+]
+fields = [
+#    { name = "ts",                  type = "timestamp" },
+    { name = "config_string",             type = "binary(1024)" },
+]
+
+[[cpu]]
+stname = "cpu"
+suffix = "hostname"
+# sample 40% of the tag set, default is to sample 50%
+
+tags = [
+    # common tags
+    { name = "hostname",             type = "binary(30)" },
+    { name = "region",           type = "binary(30)" },
+    { name = "datacenter",             type = "binary(30)" },
+    { name = "rack",           type = "binary(30)" },
+    { name = "os",             type = "binary(30)" },
+    { name = "arch",           type = "binary(30)" },
+    { name = "team",             type = "binary(30)" },
+    { name = "service",           type = "binary(30)" }, 
+    { name = "service_version",           type = "binary(30)" },
+    { name = "service_environment",           type = "binary(30)" },        
+    # specific tags
+]
+fields = [
+#    { name = "ts",                  type = "timestamp" },
+    { name = "usage_user",             type = "float" },
+    { name = "usage_system",             type = "float" },
+    { name = "usage_idle",             type = "float" },
+    { name = "usage_nice",             type = "float" },
+    { name = "usage_iowait",             type = "float" },
+    { name = "usage_irq",             type = "float" },
+    { name = "usage_softirq",             type = "float" },
+    { name = "usage_steal",             type = "float" },
+    { name = "usage_guest",             type = "float" },
+    { name = "usage_guest_nice",             type = "float" },
+]
+
+
+[[diskio]]
+stname = "diskio"
+suffix = "hostname"
+# sample 40% of the tag set, default is to sample 50%
+
+tags = [
+    # common tags
+    { name = "hostname",             type = "binary(30)" },
+    { name = "region",           type = "binary(30)" },
+    { name = "datacenter",             type = "binary(30)" },
+    { name = "rack",           type = "binary(30)" },
+    { name = "os",             type = "binary(30)" },
+    { name = "arch",           type = "binary(30)" },
+    { name = "team",             type = "binary(30)" },
+    { name = "service",           type = "binary(30)" }, 
+    { name = "service_version",           type = "binary(30)" },
+    { name = "service_environment",           type = "binary(30)" },
+    { name = "serial",           type = "binary(30)" },   
+    # specific tags
+]
+fields = [
+#    { name = "ts",                  type = "timestamp" },
+    { name = "reads",             type = "bigint" },
+    { name = "read_bytes",             type = "bigint" },
+    { name = "write_bytes",             type = "bigint" },
+    { name = "read_time",             type = "bigint" },
+    { name = "write_time",             type = "bigint" },
+    { name = "io_time",             type = "bigint" },
+]
+
+[[disk]]
+stname = "disk"
+suffix = "hostname"
+# sample 40% of the tag set, default is to sample 50%
+
+tags = [
+    # common tags
+    { name = "hostname",             type = "binary(30)" },
+    { name = "region",           type = "binary(30)" },
+    { name = "datacenter",             type = "binary(30)" },
+    { name = "rack",           type = "binary(30)" },
+    { name = "os",             type = "binary(30)" },
+    { name = "arch",           type = "binary(30)" },
+    { name = "team",             type = "binary(30)" },
+    { name = "service",           type = "binary(30)" }, 
+    { name = "service_version",           type = "binary(30)" },
+    { name = "service_environment",           type = "binary(30)" },
+    { name = "path",           type = "binary(30)" },    
+    { name = "fstype",           type = "binary(30)" },
+    # specific tags
+]
+fields = [
+#    { name = "ts",                  type = "timestamp" },
+    { name = "total",             type = "bigint" },
+    { name = "free",             type = "bigint" },
+    { name = "used",             type = "bigint" },
+    { name = "used_percent",             type = "float" },
+    { name = "inodes_total",             type = "bigint" },
+    { name = "inodes_free",             type = "bigint" },
+    { name = "inodes_used",             type = "bigint" },
+]
+
+[[kernel]]
+stname = "kernel"
+suffix = "hostname"
+# sample 40% of the tag set, default is to sample 50%
+
+tags = [
+    # common tags
+    { name = "hostname",             type = "binary(30)" },
+    { name = "region",           type = "binary(30)" },
+    { name = "datacenter",             type = "binary(30)" },
+    { name = "rack",           type = "binary(30)" },
+    { name = "os",             type = "binary(30)" },
+    { name = "arch",           type = "binary(30)" },
+    { name = "team",             type = "binary(30)" },
+    { name = "service",           type = "binary(30)" }, 
+    { name = "service_version",           type = "binary(30)" },
+    { name = "service_environment",           type = "binary(30)" },   
+    # specific tags
+]
+fields = [
+#    { name = "ts",                  type = "timestamp" },
+    { name = "boot_time",             type = "bigint" },
+    { name = "interrupts",             type = "bigint" },
+    { name = "context_switches",             type = "bigint" },
+    { name = "processes_forked",             type = "bigint" },
+    { name = "disk_pages_in",             type = "bigint" },
+    { name = "disk_pages_out",             type = "bigint" },
+]
+
+[[mem]]
+stname = "mem"
+suffix = "hostname"
+# sample 40% of the tag set, default is to sample 50%
+
+tags = [
+    # common tags
+    { name = "hostname",             type = "binary(30)" },
+    { name = "region",           type = "binary(30)" },
+    { name = "datacenter",             type = "binary(30)" },
+    { name = "rack",           type = "binary(30)" },
+    { name = "os",             type = "binary(30)" },
+    { name = "arch",           type = "binary(30)" },
+    { name = "team",             type = "binary(30)" },
+    { name = "service",           type = "binary(30)" }, 
+    { name = "service_version",           type = "binary(30)" },
+    { name = "service_environment",           type = "binary(30)" },    
+    # specific tags
+]
+fields = [
+#    { name = "ts",                  type = "timestamp" },
+    { name = "total",             type = "bigint" },
+    { name = "available",             type = "bigint" },
+    { name = "used",             type = "bigint" },
+    { name = "free",             type = "bigint" },
+    { name = "cached",             type = "bigint" },
+    { name = "buffered",             type = "bigint" },
+    { name = "used_percent",             type = "float" },
+    { name = "available_percent",             type = "float" },
+    { name = "buffered_percent",             type = "float" },    
+]
+
+[[net]]
+stname = "net"
+suffix = "hostname"
+# sample 40% of the tag set, default is to sample 50%
+
+tags = [
+    # common tags
+    { name = "hostname",             type = "binary(30)" },
+    { name = "region",           type = "binary(30)" },
+    { name = "datacenter",             type = "binary(30)" },
+    { name = "rack",           type = "binary(30)" },
+    { name = "os",             type = "binary(30)" },
+    { name = "arch",           type = "binary(30)" },
+    { name = "team",             type = "binary(30)" },
+    { name = "service",           type = "binary(30)" }, 
+    { name = "service_version",           type = "binary(30)" },
+    { name = "service_environment",           type = "binary(30)" },
+    { name = "interface",           type = "binary(30)" },      
+    # specific tags
+]
+fields = [
+#    { name = "ts",                  type = "timestamp" },
+    { name = "bytes_sent",             type = "bigint" },
+    { name = "bytes_recv",             type = "bigint" },
+    { name = "packets_sent",             type = "bigint" },
+    { name = "packets_recv",             type = "bigint" },
+    { name = "err_in",             type = "bigint" },
+    { name = "err_out",             type = "bigint" },
+    { name = "drop_in",             type = "bigint" },
+    { name = "drop_out",             type = "bigint" },    
+]
+
+[[nginx]]
+stname = "nginx"
+suffix = "hostname"
+# sample 40% of the tag set, default is to sample 50%
+
+tags = [
+    # common tags
+    { name = "hostname",             type = "binary(30)" },
+    { name = "region",           type = "binary(30)" },
+    { name = "datacenter",             type = "binary(30)" },
+    { name = "rack",           type = "binary(30)" },
+    { name = "os",             type = "binary(30)" },
+    { name = "arch",           type = "binary(30)" },
+    { name = "team",             type = "binary(30)" },
+    { name = "service",           type = "binary(30)" }, 
+    { name = "service_version",           type = "binary(30)" },
+    { name = "service_environment",           type = "binary(30)" },
+    # specific tags
+]
+fields = [
+#    { name = "ts",                  type = "timestamp" },
+    { name = "port",           type = "int" },    
+    { name = "server",           type = "binary(30)" },
+    { name = "accepts",             type = "bigint" },
+    { name = "active",             type = "bigint" },
+    { name = "handled",             type = "bigint" },
+    { name = "reading",             type = "bigint" },
+    { name = "requests",             type = "bigint" },
+    { name = "waiting",             type = "bigint" },
+    { name = "writing",             type = "bigint" },
+]
+
+[[postgresl]]
+stname = "postgresl"
+suffix = "hostname"
+# sample 40% of the tag set, default is to sample 50%
+
+tags = [
+    # common tags
+    { name = "hostname",             type = "binary(30)" },
+    { name = "region",           type = "binary(30)" },
+    { name = "datacenter",             type = "binary(30)" },
+    { name = "rack",           type = "binary(30)" },
+    { name = "os",             type = "binary(30)" },
+    { name = "arch",           type = "binary(30)" },
+    { name = "team",             type = "binary(30)" },
+    { name = "service",           type = "binary(30)" }, 
+    { name = "service_version",           type = "binary(30)" },
+    { name = "service_environment",           type = "binary(30)" },
+    # specific tags
+]
+fields = [
+#    { name = "ts",                  type = "timestamp" },
+    { name = "numbackends",             type = "bigint" },
+    { name = "xact_commit",             type = "bigint" },
+    { name = "xact_rollback",             type = "bigint" },
+    { name = "blks_read",             type = "bigint" },
+    { name = "blks_hit",             type = "bigint" },
+    { name = "tup_returned",             type = "bigint" },
+    { name = "tup_fetched",             type = "bigint" },
+    { name = "tup_inserted",             type = "bigint" },
+    { name = "tup_updated",             type = "bigint" },
+    { name = "tup_deleted",             type = "bigint" },
+    { name = "conflicts",             type = "bigint" },
+    { name = "temp_files",             type = "bigint" },
+    { name = "temp_bytes",             type = "bigint" },
+    { name = "deadlocks",             type = "bigint" },
+    { name = "blk_read_time",             type = "bigint" },
+    { name = "blk_write_time",             type = "bigint" },
+]
+
+[[redis]]
+stname = "redis"
+suffix = "hostname"
+# sample 40% of the tag set, default is to sample 50%
+
+tags = [
+    # common tags
+    { name = "hostname",             type = "binary(30)" },
+    { name = "region",           type = "binary(30)" },
+    { name = "datacenter",             type = "binary(30)" },
+    { name = "rack",           type = "binary(30)" },
+    { name = "os",             type = "binary(30)" },
+    { name = "arch",           type = "binary(30)" },
+    { name = "team",             type = "binary(30)" },
+    { name = "service",           type = "binary(30)" }, 
+    { name = "service_version",           type = "binary(30)" },
+    { name = "service_environment",           type = "binary(30)" },
+    { name = "port",           type = "int" },
+    { name = "server",           type = "binary(30)" },   
+    # specific tags
+]
+fields = [
+#    { name = "ts",                  type = "timestamp" },
+    { name = "uptime_in_seconds",             type = "bigint" },
+    { name = "total_connections_received",             type = "bigint" },
+    { name = "expired_keys",             type = "bigint" },
+    { name = "evicted_keys",             type = "bigint" },
+    { name = "keyspace_hits",             type = "bigint" },
+    { name = "keyspace_misses",             type = "bigint" },
+    { name = "instantaneous_ops_per_sec",             type = "bigint" },
+    { name = "instantaneous_input_kbps",             type = "bigint" },
+    { name = "instantaneous_output_kbps",             type = "bigint" },
+    { name = "connected_clients",             type = "bigint" },
+    { name = "used_memory",             type = "bigint" },
+    { name = "used_memory_rss",             type = "bigint" },
+    { name = "used_memory_peak",             type = "bigint" },
+    { name = "used_memory_lua",             type = "bigint" },
+    { name = "rdb_changes_since_last_save",             type = "bigint" },
+    { name = "sync_full",             type = "bigint" },
+    { name = "sync_partial_ok",             type = "bigint" },
+    { name = "sync_partial_err",             type = "bigint" },
+    { name = "pubsub_channels",             type = "bigint" },
+    { name = "pubsub_patterns",             type = "bigint" },
+    { name = "latest_fork_usec",             type = "bigint" },
+    { name = "connected_slaves",             type = "bigint" },
+    { name = "master_repl_offset",             type = "bigint" },
+    { name = "repl_backlog_active",             type = "bigint" },
+    { name = "repl_backlog_size",             type = "bigint" },
+    { name = "repl_backlog_histlen",             type = "bigint" },    
+    { name = "mem_fragmentation_ratio",             type = "bigint" },
+    { name = "used_cpu_sys",             type = "bigint" },
+    { name = "used_cpu_user",             type = "bigint" },
+    { name = "used_cpu_sys_children",             type = "bigint" },
+    { name = "used_cpu_user_children",             type = "bigint" },   
+]
