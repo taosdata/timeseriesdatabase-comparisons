@@ -7,7 +7,7 @@ GREEN='\033[1;32m'
 GREEN_DARK='\033[0;32m'
 GREEN_UNDERLINE='\033[4;32m'
 NC='\033[0m'
-
+docker rm -f `docker ps -a -q`
 #set -x
 echo
 echo "Prepare data for InfluxDB...."
