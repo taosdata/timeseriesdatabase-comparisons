@@ -70,7 +70,7 @@ func init() {
 	flag.StringVar(&reportHost, "report-host", "", "Host to send result metrics")
 	flag.StringVar(&reportUser, "report-user", "", "User for host to send result metrics")
 	flag.StringVar(&reportPassword, "report-password", "", "User password for Host to send result metrics")
-	flag.StringVar(&reportTagsCSV, "report-tags", "", "Comma separated k:v tags to send  alongside result metrics")
+	flag.StringVar(&reportTagsCSV, "report-tags", "node1", "Comma separated k:v tags to send  alongside result metrics")
 	flag.BoolVar(&slaveSource, "slavesource", false, "if slave source, will not create database")
 	flag.StringVar(&loadfile, "file", "", "Input file")
 	flag.BoolVar(&fileoutput, "fileout", true, "if file out, will out put sql into file")
@@ -81,11 +81,12 @@ func init() {
 		fmt.Printf("results report destination: %v\n", reportHost)
 		fmt.Printf("results report database: %v\n", reportDatabase)
 
-		var err error
-		reportHostname, err = os.Hostname()
-		if err != nil {
-			log.Fatalf("os.Hostname() error: %s", err.Error())
-		}
+//		var err error
+//		reportHostname, err = os.Hostname()
+//		if err != nil {
+//			log.Fatalf("os.Hostname() error: %s", err.Error())
+//		}
+		reportHostname ="TDengine"
 		fmt.Printf("hostname for results report: %v\n", reportHostname)
 
 		if reportTagsCSV != "" {
