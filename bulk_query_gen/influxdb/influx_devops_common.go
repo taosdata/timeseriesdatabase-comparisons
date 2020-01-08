@@ -56,7 +56,9 @@ func (d *InfluxDevops) MaxCPUUsageAllByHourEightHosts(q bulkQuerygen.Query) {
 func (d *InfluxDevops) MaxCPUUsageHourByMinuteSixteenHosts(q bulkQuerygen.Query) {
 	d.maxCPUUsageHourByMinuteNHosts(q.(*bulkQuerygen.HTTPQuery), 16, time.Hour)
 }
-
+func (d *InfluxDevops) MaxCPUUsageAllEightHosts(q bulkQuerygen.Query) {
+	d.maxCPUUsageAllHosts(q.(*bulkQuerygen.HTTPQuery), 8, time.Hour)
+}
 func (d *InfluxDevops) MaxCPUUsageHourByMinuteThirtyTwoHosts(q bulkQuerygen.Query) {
 	d.maxCPUUsageHourByMinuteNHosts(q.(*bulkQuerygen.HTTPQuery), 32, time.Hour)
 }
@@ -189,6 +191,44 @@ func (d *InfluxDevops) maxCPUUsageAllBy1HourHosts(qi bulkQuerygen.Query, nhosts 
 	}
 
 	humanLabel := fmt.Sprintf("InfluxDB (%s) max cpu, rand %4d hosts, by 1h", d.language.String(), nhosts)
+
+	q := qi.(*bulkQuerygen.HTTPQuery)
+	d.getHttpQuery(humanLabel, " ", query, q)
+}
+func (d *InfluxDevops) maxCPUUsageAllHosts(qi bulkQuerygen.Query, nhosts int, timeRange time.Duration) {
+	nn := rand.Perm(d.ScaleVar)[:nhosts]
+
+	hostnames := []string{}
+	for _, n := range nn {
+		hostnames = append(hostnames, fmt.Sprintf("host_%d", n))
+	}
+
+	hostnameClauses := []string{}
+	for _, s := range hostnames {
+		if d.language == InfluxQL {
+			hostnameClauses = append(hostnameClauses, fmt.Sprintf("hostname = '%s'", s))
+		} else {
+			hostnameClauses = append(hostnameClauses, fmt.Sprintf(`r.hostname == "%s"`, s))
+		}
+	}
+
+	combinedHostnameClause := strings.Join(hostnameClauses, " or ")
+
+	var query string
+	if d.language == InfluxQL {
+		query = fmt.Sprintf("SELECT max(usage_user) from cpu where (%s) ", combinedHostnameClause)
+
+	} else { // Flux
+		query = fmt.Sprintf(`from(db:"%s") `+
+			`|> filter(fn:(r) => r._measurement == "cpu" and r._field == "usage_user" and (%s)) `+
+			`|> keep(columns:["_start", "_stop", "_time", "_value"]) `+
+			`|> max() `+
+			`|> yield()`,
+			d.DatabaseName,
+			combinedHostnameClause)
+	}
+
+	humanLabel := fmt.Sprintf("InfluxDB (%s) max cpu, rand %4d hosts ", d.language.String(), nhosts)
 
 	q := qi.(*bulkQuerygen.HTTPQuery)
 	d.getHttpQuery(humanLabel, " ", query, q)

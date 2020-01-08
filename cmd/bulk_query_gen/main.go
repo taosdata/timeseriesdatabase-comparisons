@@ -31,6 +31,7 @@ const (
 	DevOpsEightHostsOneHour         = "8-host-1-hr"
 	DevOpsEightHostsTwelveHours     = "8-host-12-hr"
 	DevOpsEightHostsAllbyHours      = "8-host-allbyhr"
+	DevOpsEightHostsAll             = "8-host-all"
 	DevOpsGroupBy                   = "groupby"
 	IotOneHomeTwelveHours           = "1-home-12-hours"
 	DashboardAll                    = "dashboard-all"
@@ -101,7 +102,11 @@ var useCaseMatrix = map[string]map[string]map[string]bulkQueryGen.QueryGenerator
 		DevOpsEightHostsAllbyHours:{
 			"influx-http":      influxdb.NewInfluxQLDevops8HostsAllBy1Hr,
 			"tdengine":		    tdengine.NewtdengineDevops8HostsAllBy1Hr,
-		},		
+		},
+		DevOpsEightHostsAll:{
+			"influx-http":      influxdb.NewInfluxQLDevops8HostsAll,
+			"tdengine":		    tdengine.NewtdengineDevops8HostsAll,
+		},						
 		DevOpsGroupBy: {
 			"cassandra":        cassandra.NewCassandraDevopsGroupBy,
 			"es-http":          elasticsearch.NewElasticSearchDevopsGroupBy,

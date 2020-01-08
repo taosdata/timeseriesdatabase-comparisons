@@ -65,25 +65,46 @@ echo
 #测试用例1，查询一天的数据中的最大值，用8个hostname标签进行过滤，以1小时为颗粒查询
 #select max(usage_user) from cpu where(hostname='host_a' and hostname='host_b'and hostname='host_c'and hostname='host_d'and hostname='host_e'and hostname='host_f' and hostname='host_g'and hostname='host_h') interval(1h);
 # a,b,c,d,e,f,g,h are random 8 numbers.
-TDQUERY=`bin/bulk_query_gen  -seed 123 -format tdengine -query-type 8-host-allbyhr -scale-var 10 -queries 1000 | bin/query_benchmarker_tdengine  -urls="http://172.15.1.6:6020" -workers 50 -print-interval 0|grep wall`
+TDQS1=`bin/bulk_query_gen  -seed 123 -format tdengine -query-type 8-host-all -scale-var 10 -queries 1000 | bin/query_benchmarker_tdengine  -urls="http://172.15.1.6:6020" -workers 50 -print-interval 0|grep wall`
+echo
+echo -e "${GREEN}TDengine query test case 1 result:${NC}"
+echo -e "${GREEN}$TDQS1${NC}"
+TMP=`echo $TDQS1|awk '{print($4)}'`
+TDQ1=`echo ${TMP%s*}`
 
 #Test case 2
 #测试用例2，查询12小时的数据中的最大值，用8个hostname标签进行过滤，以10分钟为颗粒查询
 #select max(usage_user) from cpu where(hostname='host_a' and hostname='host_b'and hostname='host_c'and hostname='host_d'and hostname='host_e'and hostname='host_f' and hostname='host_g'and hostname='host_h') where time >x and time <y interval(10m);
 # a,b,c,d,e,f,g,h are random 8 numbers, y-x =12 hours
-#TDQUERY=`bin/bulk_query_gen  -seed 123 -format tdengine -query-type 8-host-12-hr -scale-var 10 -queries 1000 | bin/query_benchmarker_tdengine  -urls="http://172.15.1.6:6020" -workers 50 -print-interval 0|grep wall`
+TDQS2=`bin/bulk_query_gen  -seed 123 -format tdengine -query-type 8-host-allbyhr -scale-var 10 -queries 1000 | bin/query_benchmarker_tdengine  -urls="http://172.15.1.6:6020" -workers 50 -print-interval 0|grep wall`
+
+echo
+echo -e "${GREEN}TDengine query test case 2 result:${NC}"
+echo -e "${GREEN}$TDQS2${NC}"
+TMP=`echo $TDQS2|awk '{print($4)}'`
+TDQ2=`echo ${TMP%s*}`
 
 #Test case 3
 #测试用例3，查询1个小时的数据，用1个hostname进行过滤，以1分钟为颗粒查询
 #select max(usage_user) from cpu where(hostname='host_a') where time >x and time <y interval(10m);
 # a are random number, y-x =1 hours
-#TDQUERY=`bin/bulk_query_gen  -seed 123 -format tdengine -query-type 1-host-1-hr -scale-var 10 -queries 1000 | bin/query_benchmarker_tdengine  -urls="http://172.15.1.6:6020" -workers 50 -print-interval 0|grep wall`
-
+TDQS3=`bin/bulk_query_gen  -seed 123 -format tdengine -query-type 8-host-12-hr -scale-var 10 -queries 1000 | bin/query_benchmarker_tdengine  -urls="http://172.15.1.6:6020" -workers 50 -print-interval 0|grep wall`
 echo
-echo -e "${GREEN}TDengine query result:${NC}"
-echo -e "${GREEN}$TDQUERY${NC}"
-TMP=`echo $TDQUERY|awk '{print($4)}'`
-TDQTM=`echo ${TMP%s*}`
+echo -e "${GREEN}TDengine query test case 3 result:${NC}"
+echo -e "${GREEN}$TDQS3${NC}"
+TMP=`echo $TDQS3|awk '{print($4)}'`
+TDQ3=`echo ${TMP%s*}`
+
+#Test case 4
+#测试用例3，查询1个小时的数据，用1个hostname进行过滤，以1分钟为颗粒查询
+#select max(usage_user) from cpu where(hostname='host_a') where time >x and time <y interval(10m);
+# a are random number, y-x =1 hours
+TDQS4=`bin/bulk_query_gen  -seed 123 -format tdengine -query-type 8-host-1-hr -scale-var 10 -queries 1000 | bin/query_benchmarker_tdengine  -urls="http://172.15.1.6:6020" -workers 50 -print-interval 0|grep wall`
+echo
+echo -e "${GREEN}TDengine query test case 4 result:${NC}"
+echo -e "${GREEN}$TDQS4${NC}"
+TMP=`echo $TDQS1|awk '{print($4)}'`
+TDQ4=`echo ${TMP%s*}`
 
 sleep 10
 
@@ -94,41 +115,77 @@ echo
 #测试用例1，查询一天的数据中的最大值，用8个hostname标签进行过滤，以1小时为颗粒查询
 #select max(usage_user) from cpu where(hostname='host_a' and hostname='host_b'and hostname='host_c'and hostname='host_d'and hostname='host_e'and hostname='host_f' and hostname='host_g'and hostname='host_h') interval(1h);
 # a,b,c,d,e,f,g,h are random 8 numbers.
-INFLUXQUERY=`bin/bulk_query_gen  -seed 123 -format influx-http -query-type 8-host-allbyhr -scale-var 10 -queries 1000 | bin/query_benchmarker_influxdb  -urls="http://172.15.1.5:8086"  -workers 50 -print-interval 0|grep wall`
-
+IFQS1=`bin/bulk_query_gen  -seed 123 -format influx-http -query-type 8-host-all -scale-var 10 -queries 1000 | bin/query_benchmarker_influxdb  -urls="http://172.15.1.5:8086"  -workers 50 -print-interval 0|grep wall`
+echo -e "${GREEN}InfluxDB query test case 1 result:${NC}"
+echo -e "${GREEN}$IFQS1${NC}"
+TMP=`echo $IFQS1|awk '{print($4)}'`
+IFQ1=`echo ${TMP%s*}`
 #Test case 2
 #测试用例2，查询12小时的数据中的最大值，用8个hostname标签进行过滤，以10分钟为颗粒查询
 #select max(usage_user) from cpu where(hostname='host_a' and hostname='host_b'and hostname='host_c'and hostname='host_d'and hostname='host_e'and hostname='host_f' and hostname='host_g'and hostname='host_h') where time >x and time <y interval(10m);
 # a,b,c,d,e,f,g,h are random 8 numbers, y-x =12 hours
-#INFLUXQUERY=`bin/bulk_query_gen  -seed 123 -format influx-http -query-type 8-host-12-hr -scale-var 10 -queries 1000 | bin/query_benchmarker_influxdb  -urls="http://172.15.1.5:8086"  -workers 50 -print-interval 0|grep wall`
-
+IFQS2=`bin/bulk_query_gen  -seed 123 -format influx-http -query-type 8-host-allbyhr -scale-var 10 -queries 1000 | bin/query_benchmarker_influxdb  -urls="http://172.15.1.5:8086"  -workers 50 -print-interval 0|grep wall`
+echo -e "${GREEN}InfluxDB query test case 2 result:${NC}"
+echo -e "${GREEN}$IFQS2${NC}"
+TMP=`echo $IFQS2|awk '{print($4)}'`
+IFQ2=`echo ${TMP%s*}`
 #Test case 3
 #测试用例3，查询1个小时的数据，用1个hostname进行过滤，以1分钟为颗粒查询
 #select max(usage_user) from cpu where(hostname='host_a') where time >x and time <y interval(10m);
 # a are random number, y-x =1 hours
 #INFLUXQUERY=`bin/bulk_query_gen  -seed 123 -format influx-http -query-type 1-host-1-hr -scale-var 10 -queries 1000 | bin/query_benchmarker_influxdb  -urls="http://172.15.1.5:8086"  -workers 50 -print-interval 0|grep wall`
+IFQS3=`bin/bulk_query_gen  -seed 123 -format influx-http -query-type 8-host-12-hr -scale-var 10 -queries 1000 | bin/query_benchmarker_influxdb  -urls="http://172.15.1.5:8086"  -workers 50 -print-interval 0|grep wall`
+echo -e "${GREEN}InfluxDB query test case 3 result:${NC}"
+echo -e "${GREEN}$IFQS3${NC}"
+TMP=`echo $IFQS3|awk '{print($4)}'`
+IFQ3=`echo ${TMP%s*}`
+#Test case 4
+#测试用例4，查询1个小时的数据，用1个hostname进行过滤，以1分钟为颗粒查询
+#select max(usage_user) from cpu where(hostname='host_a') where time >x and time <y interval(10m);
+# a are random number, y-x =1 hours
+#INFLUXQUERY=`bin/bulk_query_gen  -seed 123 -format influx-http -query-type 1-host-1-hr -scale-var 10 -queries 1000 | bin/query_benchmarker_influxdb  -urls="http://172.15.1.5:8086"  -workers 50 -print-interval 0|grep wall`
+IFQS4=`bin/bulk_query_gen  -seed 123 -format influx-http -query-type 8-host-1-hr -scale-var 10 -queries 1000 | bin/query_benchmarker_influxdb  -urls="http://172.15.1.5:8086"  -workers 50 -print-interval 0|grep wall`
+echo -e "${GREEN}InfluxDB query test case 4 result:${NC}"
+echo -e "${GREEN}$IFQS4${NC}"
+TMP=`echo $IFQS4|awk '{print($4)}'`
+IFQ4=`echo ${TMP%s*}`
+
 
 echo
-echo -e "${GREEN}InfluxDB query result:${NC}"
-echo -e "${GREEN}$INFLUXQUERY${NC}"
-
-TMP=`echo $INFLUXQUERY|awk '{print($4)}'`
-IFQTM=`echo ${TMP%s*}`
-
 echo
-echo
-echo    "-----------------------------------------------"
-echo    "         tsdb performance comparision          "
-echo    "-----------------------------------------------"
-echo -e "         writing $DATA records takes:          "
-printf  "       InfluxDB       |    %-4.2f Seconds    \n" $IFWTM 
-printf  "       TDengine       |    %-4.2f Seconds    \n" $TDWTM
-echo    "-----------------------------------------------"
-echo    "1000 queries: select max(usage_user) groupby 1h"
-echo    "takes:                                         "
-printf  "       InfluxDB       |    %-4.2f Seconds    \n" $IFQTM 
-printf  "       TDengine       |    %-4.2f Seconds    \n" $TDQTM
-echo    "-----------------------------------------------"
+echo    "======================================================"
+echo    "             tsdb performance comparision             "
+echo    "======================================================"
+echo -e "       Writing $DATA records test takes:          "
+printf  "       InfluxDB           |       %-4.2f Seconds    \n" $IFWTM 
+printf  "       TDengine           |       %-4.2f Seconds    \n" $TDWTM
+echo    "------------------------------------------------------"
+echo    "                   Query test cases:                "
+echo    " case 1: select the max(value) from all data    "
+echo    " filtered out 8 hosts                                 "
+echo    "       Query test case 1 takes:                      "
+printf  "       InfluxDB           |       %-4.2f Seconds    \n" $IFQ1 
+printf  "       TDengine           |       %-4.2f Seconds    \n" $TDQ1
+echo    "------------------------------------------------------"
+echo    " case 2: select the max(value) from all data          "
+echo    " filtered out 8 hosts with an interval of 1 hour     "
+echo    " case 2 takes:                                       "
+printf  "       InfluxDB           |       %-4.2f Seconds    \n" $IFQ2 
+printf  "       TDengine           |       %-4.2f Seconds    \n" $TDQ2
+echo    "------------------------------------------------------"
+echo    " case 3: select the max(value) from random 12 hours"
+echo    " data filtered out 8 hosts with an interval of 10 min         "
+echo    " filtered out 8 hosts interval(1h)                   "
+echo    " case 3 takes:                                       "
+printf  "       InfluxDB           |       %-4.2f Seconds    \n" $IFQ3 
+printf  "       TDengine           |       %-4.2f Seconds    \n" $TDQ3
+echo    "------------------------------------------------------"
+echo    " case 4: select the max(value) from random 1 hour data  "
+echo    " data filtered out 8 hosts with an interval of 1 min         "
+echo    " case 4 takes:                                        "
+printf  "       InfluxDB           |       %-4.2f Seconds    \n" $IFQ4 
+printf  "       TDengine           |       %-4.2f Seconds    \n" $TDQ4
+echo    "------------------------------------------------------"
 echo
 docker stop $INFLUX >>/dev/null 2>&1
 docker container rm -f $INFLUX >>/dev/null 2>&1
