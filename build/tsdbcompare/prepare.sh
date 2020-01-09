@@ -14,4 +14,4 @@ cd ..
 
 #拉取influxdb和tdengine的镜像
 docker pull influxdb 
-docker pull tdengine/tdengine 
+docker pull tdengine/tdengine:v1.6.4.5.c 
