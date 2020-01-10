@@ -1,4 +1,9 @@
 # InflxuDB和TDengine的性能对比测试工具
+
+### 前言
+[TDengine开源项目](https://github.com/taosdata/TDengine)里已经包含了性能对比测试的工具源代码。[https://github.com/taosdata/TDengine/tests/comparisonTest](https://github.com/taosdata/TDengine/tree/develop/tests/comparisonTest)，为了更客观的对比TDengine和其他时序数据库的性能差异，本项目采用InfluxDB开发的性能对比测试工具来进行对比测试，相同的数据产生器，相同的测试用例，相同的测试方法，以保证测试的客观公平。
+
+### 简介
 本项目是基于InfluxDB发布的一个[性能对比测试项目](https://github.com/influxdata/influxdb-comparisons)的基础上开发的。数据产生模块可以模拟Devops场景下多台服务器产生大量监控数据。数据写入程序可以根据不同的数据库格式，将产生的模拟数据以不同的格式写入到不同数据库里，以测试写入性能。查询模块以相同的查询类型产生相同的查询任务，以各数据库自己的格式进行查询，并统计查询消耗的时间，来测试查询性能。
 
 为了让测试过程更简单，本测试采用Docker容器方式来测试，所有被测的数据库都以容器的方式，从Dockerhub拉取下来，并设定固定的IP地址运行，便于脚本执行。容器镜像都是公开发布的，能保证测试的公平公正。
@@ -7,6 +12,7 @@
 + InfluxDB
 + TDengine
 
+本项目的Github链接：https://github.com/liu0x54/timeseriesdatabase-comparisons
 ## 前提条件
 为了开展测试，需要准备以下条件
 - 一台linux服务器，包含10GB的空闲硬盘空间，用于存储产生的测试数据。因为测试模拟数据先生成并写入硬盘文件，由数据加载程序从文件中读取一条条的数据写入语句，写入时序数据库。这种方式能够将数据产生过程中的性能差异排除。
@@ -14,7 +20,7 @@
 
 ## 准备测试
 
-先从[下载地址](http://39.99.229.192/download/tsdbcompare.tar.gz)下载我们已经制作好的测试工具包，解压到本地。
+先从[下载地址](http://www.taosdata.com/download/tsdbcompare.tar.gz)下载我们已经制作好的测试工具包，解压到本地。
 ```sh
 tar -zxf tsdbcompare.tar.gz
 ```
