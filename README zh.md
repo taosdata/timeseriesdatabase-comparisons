@@ -1,7 +1,7 @@
 # InflxuDB和TDengine的性能对比测试工具
 
 ### 前言
-[TDengine开源项目](https://github.com/taosdata/TDengine)里已经包含了性能对比测试的工具源代码。[https://github.com/taosdata/TDengine/tests/comparisonTest](https://github.com/taosdata/TDengine/tree/develop/tests/comparisonTest)，为了更客观的对比TDengine和其他时序数据库的性能差异，本项目采用InfluxDB开发的性能对比测试工具来进行对比测试，相同的数据产生器，相同的测试用例，相同的测试方法，以保证测试的客观公平。
+[TDengine开源项目](https://github.com/taosdata/TDengine)里已经包含了性能对比测试的工具源代码。[https://github.com/taosdata/TDengine/tests/comparisonTest](https://github.com/taosdata/TDengine/tree/develop/tests/comparisonTest)，并基于这个开源的测试工具开展了[TDengine和InfluxDB对比测试](https://www.taosdata.com/blog/2019/07/19/tdengine与influxdb对比测试/)，[TDengine和OpenTSDB对比测试](https://www.taosdata.com/blog/2019/08/21/tdengine与opentsdb对比测试/),[TDengine和Cassandra对比测试](https://www.taosdata.com/blog/2019/08/14/tdengine与cassandra对比测试/)等一系列性能对比测试。为了更客观的对比TDengine和其他时序数据库的性能差异，本项目采用由InfluxDB团队开源的性能对比测试工具来进行对比测试，相同的数据产生器，相同的测试用例，相同的测试方法，以保证测试的客观公平。
 
 ### 简介
 本项目是基于InfluxDB发布的一个[性能对比测试项目](https://github.com/influxdata/influxdb-comparisons)的基础上开发的。数据产生模块可以模拟Devops场景下多台服务器产生大量监控数据。数据写入程序可以根据不同的数据库格式，将产生的模拟数据以不同的格式写入到不同数据库里，以测试写入性能。查询模块以相同的查询类型产生相同的查询任务，以各数据库自己的格式进行查询，并统计查询消耗的时间，来测试查询性能。
