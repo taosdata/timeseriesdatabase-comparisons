@@ -87,7 +87,7 @@ top
 bin/bulk_data_gen -seed 123 -format influx-bulk -sampling-interval 1s -scale-var 10 -use-case devops -timestamp-start "2018-01-01T00:00:00Z" -timestamp-end "2018-01-02T00:00:00Z" >data/influx.dat
 bin/bulk_data_gen -seed 123 -format tdengine -sampling-interval 1s -tdschema-file config/TDengineSchema.toml -scale-var 10 -use-case devops -timestamp-start "2018-01-01T00:00:00Z" -timestamp-end "2018-01-02T00:00:00Z"  > data/tdengine.dat
 ```
-解释一下以上的命令：按influxDB的格式，以1秒一条数据的产生频率，模拟10台设备，以devops场景产生24小时的数据，并写入influx.dat文件。
+解释一下以上的命令：按influxDB/TDengine的格式，以1秒一条数据的产生频率，模拟10台设备，以devops场景产生24小时的数据，并写入influx.dat文件。
 Devops模型下，一台服务器会产生9类数据，分别是cpu，disk，mem，等，因此总共会产生7776000条数据记录。
 数据文件完成后，就开始数据写入测试：
 ```sh
@@ -96,7 +96,7 @@ cat data/influx.dat  |bin/bulk_load_influx --batch-size=5000 --workers=20 --urls
 
 cat data/tdengine.dat |bin/bulk_load_tdengine --url 172.15.1.6:0 --batch-size 300   -do-load -report-tags n1 -workers 20 -fileout=false 
 ```
-上面命令的含义是以每批次写入5000条记录，分20个线程，将数据文件读取出来后写入influxDB中
+上面命令的含义是以每批次写入5000/300条记录，分20个线程，将数据文件读取出来后写入influxDB/TDengine中
 ### 查询测试
 在完成写入后，就开始查询测试。
 查询测试设定了四个查询用例的语句，每个查询语句都执行1000遍，然后统计总的查询用时:
@@ -179,4 +179,3 @@ bin/bulk_query_gen  -seed 123 -format influx-http -query-type 8-host-1-hr -scale
 - 随机选取1小时的数据聚合计算查询以1分钟为颗粒聚合结果：InfluxDB用时约为TDengine的2.5倍
 
 通过top命令的观察，我们可以看到，测试用例执行时，InfluxDB的CPU占用率基本达到满负荷，以4核CPU的服务器为例，经常达到390%以上；而TDengine的CPU占用率则低很多。
-为什么不同的查询的结果性能会有差异：因为TDengine有预计算功能，数据存储时就按一定的存储单元将数据做了预计算，因此，查询的时间段约长，聚合的颗粒度越大，预计算的优势越明显；而当聚合的颗粒越小，预计算发挥的优势越少。比如上面测试用例中的1分钟颗粒，TDengine的预计算基本没有发挥优势。
