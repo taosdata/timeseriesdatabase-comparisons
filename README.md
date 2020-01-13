@@ -17,7 +17,7 @@ Current databases supported:
 
 ## Prepare for test
 
-Download the test package from [download site](http://39.99.229.192/download/tsdbcompare.tar.gz) and unpack it.
+Download the test package from [download site](http://www.taosdata.com/download/tsdbcompare.tar.gz) and unpack it.
 ```sh
 tar -zxf tsdbcompare.tar.gz
 ```
