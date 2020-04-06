@@ -182,7 +182,7 @@ bin/bulk_query_gen  -seed 123 -format influx-http -query-type 8-host-1-hr -scale
 
 ## 从源文件编译
 本项目中的二进制程序是基于1.6.4.5版本的TDengine编译的，因为要用到TDengine的客户端，而TDengine客户端版本必须和TDengine的服务端的版本必须匹配，因此直接使用本项目的二进制的程序连接其他版本的TDengine或镜像时，会遇到连接不上的问题。
-如果遇到这种情况，就需要从本项目的源代码编译出二进制代码后再运行本测试程序。下面介绍编译的步骤
+如果遇到这种情况，或者对于从源代码编译二进制文件感兴趣的使用者，就需要从本项目的源代码编译出二进制代码后再运行本测试程序。下面介绍编译的步骤
 
 #### 前提条件
 - 获取目标版本的TDengine，在编译所在的机器上安装和服务端一样的TDengine服务端版本。TDengine服务端版本可以是从源代码编译出来的，也可以是从Taosdata官网获取的编译好的安装包
@@ -228,4 +228,324 @@ go get github.com/taosdata/TDengine/src/connector/go/src/taosSql
 ```
 在以上语句执行成功后就可以继续编译了。
 
-编译出二进制代码后，就可以参考run.sh脚本中的命令顺序，手动执行测试了。
+编译出二进制代码后，就可以参考run.sh脚本中的命令顺序，手动执行测试了。
+
+## 命令参数详解
+测试程序需要输入对应的参数，必须在正确理解了参数的含义的基础上，正确的设置参数，再执行测试程序。对于每个参数的含义如下
+#### bulk_data_gen程序用到的参数
+```
+Usage of ./bulk_data_gen:
+  -config-file string
+        Simulator config file in TOML format (experimental) 
+        说明：这个参数暂时用不上，可以不用管
+  -cpu-profile file
+        Write CPU profile to file
+        说明：这个参数暂时用不上，可以不用管
+  -debug int
+        Debug printing (choices: 0, 1, 2) (default 0).
+        说明：这个参数暂时用不上，可以不用管
+  -format string
+        Format to emit. (choices: influx-bulk, es-bulk, es-bulk6x, cassandra, mongo, opentsdb, timescaledb-sql, timescaledb-copyFrom, graphite-line, splunk-json, tdengine) (default "influx-bulk")
+        说明：这个参数设置测试数据输出的格式，可以输入choices后面的选项，如果要生成TDengine的测试数据，就带tdengine
+  -interleaved-generation-group-id uint
+        Group (0-indexed) to perform round-robin serialization within. Use this to scale up data generation to multiple processes.
+        说明：这个参数暂时用不上，可以不用管
+  -interleaved-generation-groups uint
+        The number of round-robin serialization groups. Use this to scale up data generation to multiple processes. (default 1)
+        说明：这个参数暂时用不上，可以不用管
+  -sampling-interval duration
+        Simulated sampling interval. (default 10s)
+        说明：这个参数设置模拟数据产生的时间戳的间隔，缺省10秒钟。
+  -scale-var int
+        Scaling variable specific to the use case. (default 1)
+        说明：这个参数设置数据源的数量，如果为N，则模拟N个数据源产生数据。这个数量越大，相同条件下产生的数据量越大
+  -scale-var-offset int
+        Scaling variable offset specific to the use case.
+        说明：这个参数设置的数据源的ID的偏移量，在多个程序同时产生模拟数据时，通过这个偏移量来区别每个测试程序产生的数据中的ID信息，避免重叠
+  -seed int
+        PRNG seed (default, or 0, uses the current timestamp).
+        说明：这个是模拟数据的伪随机数种子，测试不同数据库时，这个种子建议设置成一样的，那么在相同的配置下，产生的数据值也是一致的
+  -tdschema-file string
+        TDengine schema config file in TOML format (experimental)
+        说明：这个参数设置TDengine需要的配置文件的路径，TDengine需要配置文件来生成对应的表结构。本项目中用到了两个配置文件，分别是TDengineSchema.toml和TDDashboardSchema.toml,
+        对于use-case是devops，iot时，请指定TDengineSchema.toml作为配置文件；对于use-case是dashboard时，请指定TDDashboardSchema.toml作为配置文件
+  -timestamp-end string
+        Ending timestamp (RFC3339). (default "2018-01-02T00:00:00Z")
+        说明：模拟的测试数据时间戳结束的时间
+  -timestamp-start string
+        Beginning timestamp (RFC3339). (default "2018-01-01T00:00:00Z")
+        说明：模拟的测试数据时间戳开始的时间
+  -use-case string
+        Use case to model. (choices: devops, iot, dashboard) (default "devops")
+        说明：选择测试数据模型，不同的use-case模拟了不同的数据类型。
+```
+#### bulk_load_tdengine程序用到的参数
+```
+Usage of ./bulk_load_tdengine:
+-batch-size int
+        Batch size (input items). (default 100)
+        说明：每次写入请求中向TDengine写入的记录数量，缺省为100条记录
+  -do-load
+        Whether to read data from file or from stand input. Set this flag to true to get input from file.
+        说明：选择测试数据来源，是从文件中读取，还是从stdin中获取。如果设为true，则从文件中读取数据
+  -file string
+        Input file
+        说明：如果-do-load设为true，则通过这个参数设定数据文件的路径
+  -fileout
+        if file out, will out put sql into file (default true)
+        说明：如果设为true则不直接写数据库，而是将指令写到指定文件中，便于分析
+  -report-database string
+        Database name where to store result metrics (default "vehicle")
+        说明：设定写入目标数据库中的database名称
+  -report-host string
+        Host to send result metrics
+        说明：报告测试结果的服务器，暂时用不上
+  -report-password string
+        User password for Host to send result metrics
+        说明：报告测试结果的服务器，暂时用不上
+  -report-tags string
+        Comma separated k:v tags to send  alongside result metrics (default "node1")
+         说明：不用填，用缺省值即可
+  -report-user string
+        User for host to send result metrics
+         说明：不用填，用缺省值即可
+  -slavesource
+        if slave source, will not create database
+         说明：不用填，用缺省值即可
+  -url string
+        TDengine URL. (default "127.0.0.1:0")
+        说明：TDengine数据库的地址信息，以ip地址加:0作为格式，比如TDengine运行22.23.123.32这个服务器上，则这里填写 22.23.123.32:0
+  -use-case string
+        Use case to set specific load behavior. Options: devops,iot,dashboard (default "devops")
+        说明：不用填，用缺省值即可
+  -workers int
+        Number of parallel requests to make. (default 2)
+        说明：设定多个写入线程的数量，用缺省值，或者在写入速度较慢时可以适当调大
+```
+
+#### bulk_query_gen用到的参数
+```
+Usage of ./bulk_query_gen:
+  -document-format string
+        Document format specification. (for mongo format 'simpleArrays'; leave empty for previous behaviour)
+        说明：不用填，用缺省值即可
+  -format string
+        Format to emit. (Choices are in the use case matrix.) (default "influx-http")
+        说明：查询语句的格式，填对应的数据库，如果测TDengine，则填tdengine
+  -interleaved-generation-group-id uint
+        Group (0-indexed) to perform round-robin serialization within. Use this to scale up data generation to multiple processes.
+        说明：不用填，用缺省值即可
+  -interleaved-generation-groups uint
+        The number of round-robin serialization groups. Use this to scale up data generation to multiple processes. (default 1)
+        说明：不用填，用缺省值即可
+  -queries int
+        Number of queries to generate. (default 1000)
+        说明：测试查询的次数，可以填1000次，因为每次查询的时间非常短，可以填多次，测总的时间
+  -query-interval duration
+        Time interval query should ask for. (default 1h0m0s)
+        说明：不用填，用缺省值即可
+  -query-interval-type string
+        Interval type query { window - either random or shifted, last - interval is defined relative to now() } (default "window")
+        说明：不用填，用缺省值即可
+  -query-type string
+        Query type. (Choices are in the use case matrix.)
+        说明：查询TDengine的话，从下面的选项中选择format: tdengine的填入
+  -scale-var int
+        Scaling variable (must be the equal to the scale-var used for data generation). (default 1)
+        说明：这个参数和bulk_data_gen命令的参数保持一致，表示测试数据模型是模拟的多少个数据源产生的。这个数据会对查询语句中的设备ID产生影响
+  -seed int
+        PRNG seed (default, or 0, uses the current timestamp).
+        说明：查询语句中用到的伪随机数种子，如果测试不同的数据库，确保这个种子是一致的，这样的话查询语句中的随机值可以保证一致
+  -time-window-shift duration
+        Sliding time window shift. (When set to > 0s, queries option is ignored - number of queries is calculated. (default -1ns)
+        说明：不用填，用缺省值即可
+  -timestamp-end string
+        Ending timestamp (RFC3339). (default "2018-01-02T00:00:00Z")
+        说明：不用填，用缺省值即可
+  -timestamp-start string
+        Beginning timestamp (RFC3339). (default "2018-01-01T00:00:00Z")
+        说明：不用填，用缺省值即可
+  -use-case string
+        Use case to model. (Choices are in the use case matrix.) (default "devops")
+        说明：查询TDengine的话，不用填，缺省devops
+ The use case matrix of choices is:
+  use case: devops, query type: groupby, format: influx-http
+  use case: devops, query type: groupby, format: timescaledb
+  use case: devops, query type: groupby, format: graphite
+  use case: devops, query type: groupby, format: splunk
+  use case: devops, query type: groupby, format: cassandra
+  use case: devops, query type: groupby, format: es-http
+  use case: devops, query type: groupby, format: influx-flux-http
+  use case: devops, query type: 1-host-1-hr, format: cassandra
+  use case: devops, query type: 1-host-1-hr, format: es-http
+  use case: devops, query type: 1-host-1-hr, format: influx-http
+  use case: devops, query type: 1-host-1-hr, format: mongo
+  use case: devops, query type: 1-host-1-hr, format: graphite
+  use case: devops, query type: 1-host-1-hr, format: influx-flux-http
+  use case: devops, query type: 1-host-1-hr, format: opentsdb
+  use case: devops, query type: 1-host-1-hr, format: timescaledb
+  use case: devops, query type: 1-host-1-hr, format: splunk
+  use case: devops, query type: 1-host-1-hr, format: tdengine
+  use case: devops, query type: 1-host-12-hr, format: opentsdb
+  use case: devops, query type: 1-host-12-hr, format: graphite
+  use case: devops, query type: 1-host-12-hr, format: splunk
+  use case: devops, query type: 1-host-12-hr, format: cassandra
+  use case: devops, query type: 1-host-12-hr, format: influx-http
+  use case: devops, query type: 1-host-12-hr, format: mongo
+  use case: devops, query type: 1-host-12-hr, format: timescaledb
+  use case: devops, query type: 1-host-12-hr, format: tdengine
+  use case: devops, query type: 1-host-12-hr, format: es-http
+  use case: devops, query type: 1-host-12-hr, format: influx-flux-http
+  use case: devops, query type: 8-host-1-hr, format: opentsdb
+  use case: devops, query type: 8-host-1-hr, format: timescaledb
+  use case: devops, query type: 8-host-1-hr, format: es-http
+  use case: devops, query type: 8-host-1-hr, format: influx-flux-http
+  use case: devops, query type: 8-host-1-hr, format: influx-http
+  use case: devops, query type: 8-host-1-hr, format: mongo
+  use case: devops, query type: 8-host-1-hr, format: graphite
+  use case: devops, query type: 8-host-1-hr, format: splunk
+  use case: devops, query type: 8-host-1-hr, format: tdengine
+  use case: devops, query type: 8-host-1-hr, format: cassandra
+  use case: devops, query type: 8-host-12-hr, format: influx-http
+  use case: devops, query type: 8-host-12-hr, format: tdengine
+  use case: devops, query type: 8-host-allbyhr, format: influx-http
+  use case: devops, query type: 8-host-allbyhr, format: tdengine
+  use case: devops, query type: 8-host-all, format: influx-http
+  use case: devops, query type: 8-host-all, format: tdengine
+  use case: iot, query type: 1-home-12-hours, format: influx-flux-http
+  use case: iot, query type: 1-home-12-hours, format: influx-http
+  use case: iot, query type: 1-home-12-hours, format: timescaledb
+  use case: iot, query type: 1-home-12-hours, format: cassandra
+  use case: iot, query type: 1-home-12-hours, format: mongo
+  use case: dashboard, query type: disk-allocated, format: influx-http
+  use case: dashboard, query type: memory-utilization, format: influx-http
+  use case: dashboard, query type: queue-bytes, format: influx-http
+  use case: dashboard, query type: dashboard-all, format: influx-http
+  use case: dashboard, query type: cpu-num, format: influx-http
+  use case: dashboard, query type: disk-utilization, format: influx-http
+  use case: dashboard, query type: nginx-requests, format: influx-http
+  use case: dashboard, query type: throughput, format: influx-http
+  use case: dashboard, query type: http-request-duration, format: influx-http
+  use case: dashboard, query type: http-requests, format: influx-http
+  use case: dashboard, query type: kapa-cpu, format: influx-http
+  use case: dashboard, query type: redis-memory-utilization, format: influx-http
+  use case: dashboard, query type: kapa-ram, format: influx-http
+  use case: dashboard, query type: memory-total, format: influx-http
+  use case: dashboard, query type: system-load, format: influx-http
+  use case: dashboard, query type: availability, format: influx-http
+  use case: dashboard, query type: cpu-utilization, format: influx-http
+  use case: dashboard, query type: disk-usage, format: influx-http
+  use case: dashboard, query type: kapa-load, format: influx-http       
+
+```
+#### query_benchmarker_tdengine用到的参数
+```
+Usage of ./query_benchmarker_tdengine:
+  -batch-size int
+        Number of queries in batch per worker for Dashboard use-case (default 18)
+        说明：不用填，用缺省值即可
+  -benchmark-duration duration
+        Run querying continually for defined time interval, instead of stopping after all queries have been used
+        说明：不用填，用缺省值即可
+  -burn-in uint
+        Number of queries to ignore before collecting statistics.
+        说明：不用填，用缺省值即可
+  -client-index int
+        Index of a client host running this tool. Used to distribute load
+        说明：不用填，用缺省值即可
+  -debug int
+        Whether to print debug messages.
+        说明：不用填，用缺省值即可
+  -dial-timeout duration
+        TCP dial timeout. (default 15s)
+        说明：不用填，用缺省值即可
+  -file string
+        Input file
+        说明：不用填，用缺省值即可
+  -grad-workers-inc
+        Whether to gradually increase number of workers. The 'workers' params defines initial number of workers in this case.
+        说明：不用填，用缺省值即可
+  -grad-workers-max int
+        Maximum number of workers when are added gradually. (default -1)
+        说明：不用填，用缺省值即可
+  -http-client-type string
+        HTTP client type {fast, default} (default "fast")
+        说明：不用填，用缺省值即可
+  -increase-interval duration
+        Interval when number of workers will increase (default 30s)
+        说明：不用填，用缺省值即可
+  -limit int
+        Limit the number of queries to send. (default -1)
+        说明：不用填，用缺省值即可
+  -memprofile string
+        Write a memory profile to this file.
+        说明：不用填，用缺省值即可
+  -moving-average-interval duration
+        Interval of measuring mean response time on which moving average  is calculated. (default 30s)
+        说明：不用填，用缺省值即可
+  -notification-group string
+        Terminate message notification siblings (comma-separated host:port list of other query benchmarkers)
+        说明：不用填，用缺省值即可
+  -notification-port int
+        Listen port for remote notification messages. Used to remotely terminate benchmark (use -1 to disable it) (default -1)
+        说明：不用填，用缺省值即可
+  -notification-target string
+        host:port of finish message notification receiver
+        说明：不用填，用缺省值即可
+  -print-interval uint
+        Print timing stats to stderr after this many queries (0 to disable) (default 100)
+        说明：每隔多少条查询后打印一下中间结果，建议填0或者一个比较大的数，避免打印较多的信息
+  -print-responses
+        Pretty print JSON response bodies (for correctness checking) (default false).
+        说明：不用填，用缺省值即可
+  -read-timeout duration
+        TCP read timeout. (default 5m0s)
+        说明：不用填，用缺省值即可
+  -report-database string
+        Database name where to store result metrics. (default "database_benchmarks")
+        说明：不用填，用缺省值即可
+  -report-host string
+        Host to send result metrics.
+        说明：不用填，用缺省值即可
+  -report-password string
+        User password for Host to send result metrics.
+        说明：不用填，用缺省值即可
+  -report-tags string
+        Comma separated k:v tags to send  alongside result metrics.
+        说明：不用填，用缺省值即可
+  -report-telemetry
+        Whether to report also progress info about mean, moving mean and #workers.
+        说明：不用填，用缺省值即可
+  -report-user string
+        User for Host to send result metrics.
+        说明：不用填，用缺省值即可
+  -response-time-limit duration
+        Query response time limit, after which will client stop.
+        说明：不用填，用缺省值即可
+  -rt-trend-samples int
+        Number of avg response time samples used for linear regression (-1: number of samples equals increase-interval in seconds) (default -1)
+        说明：不用填，用缺省值即可
+  -telemetry-batch-size uint
+        Telemetry batch size (lines). (default 1)
+        说明：不用填，用缺省值即可
+  -telemetry-stderr
+        Whether to write telemetry also to stderr.
+        说明：不用填，用缺省值即可
+  -urls string
+        Daemon URLs, comma-separated. Will be used in a round-robin fashion. (default "http://localhost:6020")
+        说明：TDengine数据库的地址信息，以ip地址加tdengine的restful接口端口作为格式，比如TDengine运行22.23.123.32这个服务器上，则这里填写 http://22.23.123.32:6020
+  -use-case string
+        Enables use-case specific behavior. Empty for default behavior. Additional use-cases: dashboard
+        说明：不用填，用缺省值即可
+  -wait-interval duration
+        Delay between sending batches of queries in the dashboard use-case
+        说明：不用填，用缺省值即可
+  -workers int
+        Number of concurrent requests to make. (default 1)
+        说明：查询线程的数量，这个参数决定了查询执行函数会用多少个线程并行的去查询
+  -write-timeout duration
+        TCP write timeout. (default 5m0s)
+        说明：不用填，用缺省值即可
+```
+### 测试执行
+基于以上对每个测试程序参数的解释，可以对照run.sh里的测试语句进行理解和尝试
