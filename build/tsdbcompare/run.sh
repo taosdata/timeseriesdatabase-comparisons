@@ -26,7 +26,7 @@ bin/bulk_data_gen -seed 123 -format tdengine -sampling-interval 1s -tdschema-fil
 docker network create --ip-range 172.15.1.255/24 --subnet 172.15.1.1/16 tsdbcomp >>/dev/null 2>&1
 
 
-TDENGINE=`docker run -d --net tsdbcomp --ip 172.15.1.6 -p 6030:6030 -p 6020:6020 -p 6031:6031 -p 6032:6032 -p 6033:6033 -p 6034:6034 -p 6035:6035 -p 6036:6036 -p 6037:6037 -p 6038:6038 -p 6039:6039 tdengine/tdengine` 
+TDENGINE=`docker run -d --net tsdbcomp --ip 172.15.1.6 -p 6030:6030 -p 6020:6020 -p 6031:6031 -p 6032:6032 -p 6033:6033 -p 6034:6034 -p 6035:6035 -p 6036:6036 -p 6037:6037 -p 6038:6038 -p 6039:6039 tdengine/tdengine:1.6.4.5` 
 echo
 echo "------------------Writing Data-----------------"
 echo

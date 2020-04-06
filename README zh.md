@@ -179,3 +179,53 @@ bin/bulk_query_gen  -seed 123 -format influx-http -query-type 8-host-1-hr -scale
 - 随机选取1小时的数据聚合计算查询以1分钟为颗粒聚合结果：InfluxDB用时约为TDengine的2.5倍
 
 通过top命令的观察，我们可以看到，测试用例执行时，InfluxDB的CPU占用率基本达到满负荷，以4核CPU的服务器为例，经常达到390%以上；而TDengine的CPU占用率则低很多。
+
+## 从源文件编译
+本项目中的二进制程序是基于1.6.4.5版本的TDengine编译的，因为要用到TDengine的客户端，而TDengine客户端版本必须和TDengine的服务端的版本必须匹配，因此直接使用本项目的二进制的程序连接其他版本的TDengine或镜像时，会遇到连接不上的问题。
+如果遇到这种情况，就需要从本项目的源代码编译出二进制代码后再运行本测试程序。下面介绍编译的步骤
+
+#### 前提条件
+- 获取目标版本的TDengine，在编译所在的机器上安装和服务端一样的TDengine服务端版本。TDengine服务端版本可以是从源代码编译出来的，也可以是从Taosdata官网获取的编译好的安装包
+- 如果是从源代码编译的TDengine，注意编译出来的lib文件，以及源代码中的taos.h文件必须放到系统的目录里，这样才能正确被引用。可以参考以下代码，将lib文件和taos.h文件放到系统目录里去。如果是从安装包安装的话，可以跳过这一步：
+```
+cp  (TDengine项目的build和源代码目录所在的路径)/build/build/lib/libtaos.so /usr/lib/libtaos.so.1
+ln -s /usr/lib/libtaos.so.1 /usr/lib/libtaos.so
+cp (TDengine项目的build和源代码目录所在的路径)/TDengine/src/inc/taos.h /usr/include/
+```
+
+- 安装最新版本的golang语言程序,参考golang网站相关指导页面[下载安装golang](https://golang.org/dl/)
+
+#### 开始编译
+进入本项目的cmd目录，这个目录下就是各个可执行程序的源文件目录。
+其中：
+bulk_data_gen 目录中的main.go是生成测试所需的数据的程序
+bulk_load_* 是针对不同数据库写入数据的程序
+bulk_query_gen 目录中的main.go是生成测试所需的查询语句程序
+query_benchmarker_* 是针对不同数据库的查询测试执行程序
+
+因此，如果要测试TDengine，就编译以下目录中的main.go文件：
+bulk_data_gen
+bulk_load_tdengine
+bulk_query_gen
+query_benchmarker_tdengine
+
+编译方法如下：
+进入对应的文件路径下，执行：
+```
+go build
+```
+顺利的话就回生成一个可执行的二进制文件，名称为该文件夹的名称
+```
+TomdeMacBook-Pro:bulk_data_gen tom$ go build
+TomdeMacBook-Pro:bulk_data_gen tom$ ls
+bulk_data_gen   main.go
+TomdeMacBook-Pro:bulk_data_gen tom$ 
+```
+如果遇到某些引用的包没有找到的话，可以使用go get对应的包，获取到本地后再编译。
+比如如果找不到github.com/taosdata/TDengine/src/connector/go/src/taosSql，那么执行
+```
+go get github.com/taosdata/TDengine/src/connector/go/src/taosSql
+```
+在以上语句执行成功后就可以继续编译了。
+
+编译出二进制代码后，就可以参考run.sh脚本中的命令顺序，手动执行测试了。
