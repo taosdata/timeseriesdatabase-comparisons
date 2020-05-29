@@ -6,21 +6,22 @@
 package main
 
 import (
-	"encoding/gob"
-	"encoding/base64"
 	"database/sql"
+	"encoding/base64"
+	"encoding/gob"
 	"flag"
 	"fmt"
-	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_query"
-	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_query/http"
-	"github.com/liu0x54/timeseriesdatabase-comparisons/util/report"
-	_ "github.com/taosdata/TDengine/src/connector/go/src/taosSql"	
 	"io"
 	"log"
 	"math/rand"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_query"
+	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_query/http"
+	"github.com/liu0x54/timeseriesdatabase-comparisons/util/report"
+	_ "github.com/taosdata/driver-go/taosSql"
 )
 
 // Program option vars:
@@ -28,18 +29,20 @@ type TDengineQueryBenchmarker struct {
 	csvDaemonUrls string
 	daemonUrls    []string
 
-	dialTimeout        time.Duration
-	readTimeout        time.Duration
-	writeTimeout       time.Duration
-	httpClientType     string
-	clientIndex        int
-	scanFinished       bool
-	queryPool sync.Pool
-	queryChan chan []*http.Query
+	dialTimeout    time.Duration
+	readTimeout    time.Duration
+	writeTimeout   time.Duration
+	httpClientType string
+	clientIndex    int
+	scanFinished   bool
+	queryPool      sync.Pool
+	queryChan      chan []*http.Query
 }
+
 var cgo int = 0
 var querier = &TDengineQueryBenchmarker{}
 var taosDriverName string = "taosSql"
+
 // Parse args:
 func init() {
 
@@ -73,8 +76,8 @@ func (b *TDengineQueryBenchmarker) Validate() {
 		fmt.Printf("Using HTTP client: %v\n", b.httpClientType)
 		http.UseFastHttp = b.httpClientType == "fast"
 	} else if b.httpClientType == "cgo" {
-		fmt.Printf("Using TDengine C connector: %v\n", b.httpClientType)	
-		cgo = 1	
+		fmt.Printf("Using TDengine C connector: %v\n", b.httpClientType)
+		cgo = 1
 	} else {
 		log.Fatalf("Unsupported HTPP client type: %v", b.httpClientType)
 	}
@@ -245,9 +248,9 @@ func (b *TDengineQueryBenchmarker) processSingleQuery(w http.HTTPClient, q *http
 	}()
 	var lagMillis float64
 	var err error
-	if cgo ==1 {
+	if cgo == 1 {
 		lagMillis, err = b.execSql(q)
-	}else {
+	} else {
 		lagMillis, err = w.Do(q, opts)
 	}
 	stat := statPool.Get().(*bulk_query.Stat)
@@ -267,18 +270,18 @@ func (b *TDengineQueryBenchmarker) processSingleQuery(w http.HTTPClient, q *http
 	return nil
 }
 
-func (b *TDengineQueryBenchmarker)execSql(q *http.Query) (lag float64, err error) {
+func (b *TDengineQueryBenchmarker) execSql(q *http.Query) (lag float64, err error) {
 	db, err := sql.Open(taosDriverName, "root:taosdata@/tcp("+b.csvDaemonUrls+")/")
 	if err != nil {
 		log.Fatalf("Open database error: %s\n", err)
 	}
 	defer db.Close()
-	sqlcmd:=string(q.Body)
+	sqlcmd := string(q.Body)
 	start := time.Now()
 	_, err = db.Exec(sqlcmd)
 	lag = float64(time.Since(start).Nanoseconds()) / 1e6 // milliseconds
 	if err != nil {
 		log.Fatalf("Query error: %s\n", err)
 	}
-	return lag, err 
+	return lag, err
 }

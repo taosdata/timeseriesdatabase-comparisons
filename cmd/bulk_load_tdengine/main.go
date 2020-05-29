@@ -15,7 +15,7 @@ import (
 	"time"
 
 	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_data_gen/common"
-	_ "github.com/taosdata/TDengine/src/connector/go/src/taosSql"
+	_ "github.com/taosdata/driver-go/taosSql"
 
 	//	"github.com/caict-benchmark/BDC-TS/util/report"
 	"strconv"
@@ -36,7 +36,7 @@ var (
 	reportPassword string
 	reportTagsCSV  string
 	useCase        string
-	loadfile       string 
+	loadfile       string
 	fileoutput     bool
 )
 
@@ -50,10 +50,8 @@ var (
 	reportTags     [][2]string
 	reportHostname string
 	taosDriverName string = "taosSql"
-	tablesqlname string = "data/table.sql"
-	tablesqlfile *os.File
-
-
+	tablesqlname   string = "data/table.sql"
+	tablesqlfile   *os.File
 )
 
 // Parse args:
@@ -78,26 +76,26 @@ func init() {
 	flag.Parse()
 
 	//if reportHost != "" {
-		fmt.Printf("results report destination: %v\n", reportHost)
-		fmt.Printf("results report database: %v\n", reportDatabase)
+	fmt.Printf("results report destination: %v\n", reportHost)
+	fmt.Printf("results report database: %v\n", reportDatabase)
 
-//		var err error
-//		reportHostname, err = os.Hostname()
-//		if err != nil {
-//			log.Fatalf("os.Hostname() error: %s", err.Error())
-//		}
-		reportHostname ="TDengine"
-		fmt.Printf("hostname for results report: %v\n", reportHostname)
+	//		var err error
+	//		reportHostname, err = os.Hostname()
+	//		if err != nil {
+	//			log.Fatalf("os.Hostname() error: %s", err.Error())
+	//		}
+	reportHostname = "TDengine"
+	fmt.Printf("hostname for results report: %v\n", reportHostname)
 
-		if reportTagsCSV != "" {
-			/*pairs := strings.Split(reportTagsCSV, ",")
-			for _, pair := range pairs {
-				fields := strings.SplitN(pair, ":", 2)
-				tagpair := [2]string{fields[0], fields[1]}
-				reportTags = append(reportTags, tagpair)
-			}*/
-		}
-		fmt.Printf("results report tags: %v\n", reportTagsCSV)
+	if reportTagsCSV != "" {
+		/*pairs := strings.Split(reportTagsCSV, ",")
+		for _, pair := range pairs {
+			fields := strings.SplitN(pair, ":", 2)
+			tagpair := [2]string{fields[0], fields[1]}
+			reportTags = append(reportTags, tagpair)
+		}*/
+	}
+	fmt.Printf("results report tags: %v\n", reportTagsCSV)
 	//}
 	createtablesql, err := os.OpenFile(tablesqlname, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
@@ -114,7 +112,6 @@ func main() {
 		},
 	}
 
-	
 	log.Println("Creating database ----")
 	db, err := sql.Open(taosDriverName, "root:taosdata@/tcp("+daemonUrl+")/")
 	if err != nil {
@@ -122,7 +119,7 @@ func main() {
 	}
 	defer db.Close()
 
-	if !slaveSource{
+	if !slaveSource {
 		createDatabase(db)
 	}
 
@@ -140,9 +137,9 @@ func main() {
 
 	start := time.Now()
 	itemsRead, bytesRead, valuesRead := scan(db, batchSize)
-	
+
 	<-inputDone
-	
+
 	for i := 0; i < workers; i++ {
 		close(batchChans[i])
 	}
@@ -150,7 +147,7 @@ func main() {
 	workersGroup.Wait()
 	end := time.Now()
 	took := end.Sub(start)
-	
+
 	itemsRate := float64(itemsRead) / float64(took.Seconds())
 	bytesRate := float64(bytesRead) / float64(took.Seconds())
 	valuesRate := float64(valuesRead) / float64(took.Seconds())
@@ -161,7 +158,7 @@ func main() {
 	_, err = db.Exec("use benchmarkreport")
 	sqlcmd = fmt.Sprintf("create table if not exists bmreport (ts timestamp, starttime binary(50), endtime binary(50),itemsread double, bytesread double,valuesread double,timetook double,recordsrate double, bytesrate double,valuesrate double, workers double, batchsize double, usecase binary(50)) tags(host binary(50), proc_id binary(40))")
 	_, err = db.Exec(sqlcmd)
-	sqlcmd = fmt.Sprintf("insert into %s_%s using bmreport tags(\"%s\",\"%s\") values(0, \"%s\",\"%s\",%d,%d,%d,%f,%f,%f,%f,%d,%d,\"%s\")", reportHostname,reportTagsCSV,reportHostname,reportTagsCSV,start.Format(time.RFC3339),end.Format(time.RFC3339),itemsRead,bytesRead,valuesRead,took.Seconds(),itemsRate,bytesRate/(1<<20),valuesRate,workers,batchSize,useCase)
+	sqlcmd = fmt.Sprintf("insert into %s_%s using bmreport tags(\"%s\",\"%s\") values(0, \"%s\",\"%s\",%d,%d,%d,%f,%f,%f,%f,%d,%d,\"%s\")", reportHostname, reportTagsCSV, reportHostname, reportTagsCSV, start.Format(time.RFC3339), end.Format(time.RFC3339), itemsRead, bytesRead, valuesRead, took.Seconds(), itemsRate, bytesRate/(1<<20), valuesRate, workers, batchSize, useCase)
 	_, err = db.Exec(sqlcmd)
 	checkErr(err)
 	tablesqlfile.Close()
@@ -179,7 +176,7 @@ func createDatabase(db *sql.DB) {
 	}
 	sqlcmd := fmt.Sprintf("Drop database if exists %s", useCase)
 	_, err := db.Exec(sqlcmd)
-	sqlcmd = fmt.Sprintf("create database %s tables 2000 cache 102400 ablocks 4 tblocks 50 ", useCase)
+	sqlcmd = fmt.Sprintf("create database %s ", useCase)
 	_, err = db.Exec(sqlcmd)
 	sqlcmd = fmt.Sprintf("use %s", useCase)
 	_, err = db.Exec(sqlcmd)
@@ -196,7 +193,6 @@ func scan(db *sql.DB, itemsPerBatch int) (int64, int64, int64) {
 	var totalPoints, totalValues int64
 	var sourceReader *os.File
 
-
 	//buff := bufPool.Get().([]string)
 
 	if loadfile != "" && doLoad {
@@ -205,7 +201,7 @@ func scan(db *sql.DB, itemsPerBatch int) (int64, int64, int64) {
 		} else {
 			log.Fatalf("Error opening %s: %v\n", loadfile, err)
 		}
-	}else {
+	} else {
 		sourceReader = os.Stdin
 	}
 
@@ -214,12 +210,12 @@ func scan(db *sql.DB, itemsPerBatch int) (int64, int64, int64) {
 		line := scanner.Text()
 		if strings.HasPrefix(line, "create") {
 			if fileoutput == true {
-				tablesqlfile.WriteString(line+"\n")
-			}else {
+				tablesqlfile.WriteString(line + "\n")
+			} else {
 				_, err = db.Exec(line)
 			}
-			
-		} else if strings.HasPrefix(line, "data"){
+
+		} else if strings.HasPrefix(line, "data") {
 			totalPoints, totalValues, err = common.CheckTotalValues(line)
 			if totalPoints > 0 || totalValues > 0 {
 				continue
@@ -227,21 +223,21 @@ func scan(db *sql.DB, itemsPerBatch int) (int64, int64, int64) {
 			if err != nil {
 				log.Fatal(err)
 			}
-		}else {
+		} else {
 			itemsRead++
 			bytesRead += int64(len(scanner.Bytes())) - 3
 			if !doLoad {
 				continue
 			}
 
-			hun,_:= strconv.Atoi(string(line[0]))
-			ten,_:= strconv.Atoi(string(line[1]))
+			hun, _ := strconv.Atoi(string(line[0]))
+			ten, _ := strconv.Atoi(string(line[1]))
 			vgid, _ = strconv.Atoi(string(line[2]))
-			vgid = hun*100+ten*10+vgid
+			vgid = hun*100 + ten*10 + vgid
 			vgid = vgid % workers
-			
+
 			batchChans[vgid] <- line[3:]
-			
+
 		}
 
 	}
@@ -268,9 +264,9 @@ func processBatches(iworker int) {
 		db, err = sql.Open(taosDriverName, "root:taosdata@/tcp("+daemonUrl+")/"+useCase)
 		checkErr(err)
 		defer db.Close()
-	}else {
-		dfn := fmt.Sprintf("data/%d.sql",iworker)
-		datafile,_= os.OpenFile(dfn, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	} else {
+		dfn := fmt.Sprintf("data/%d.sql", iworker)
+		datafile, _ = os.OpenFile(dfn, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	}
 	sqlcmd := make([]string, batchSize+1)
 	i = 0
@@ -293,27 +289,27 @@ func processBatches(iworker int) {
 		i++
 		if i > batchSize {
 			i = 1
-			if fileoutput != true{
+			if fileoutput != true {
 				_, err = db.Exec(strings.Join(sqlcmd, ""))
-			}else {
-				datafile.WriteString(strings.Join(sqlcmd, "")+"\n")
+			} else {
+				datafile.WriteString(strings.Join(sqlcmd, "") + "\n")
 			}
-			
+
 			if err != nil {
-				log.Fatalf("Error writing: %s\n", strings.Join(sqlcmd, ""))//err.Error())
+				log.Fatalf("Error writing: %s\n", strings.Join(sqlcmd, "")) //err.Error())
 			}
 		}
 	}
 	if i > 1 {
 		i = 1
 		_, err := db.Exec(strings.Join(sqlcmd, ""))
-		if fileoutput != true{
+		if fileoutput != true {
 			_, err = db.Exec(strings.Join(sqlcmd, ""))
-		}else {
-			datafile.WriteString(strings.Join(sqlcmd, "")+"\n")
-		}		
+		} else {
+			datafile.WriteString(strings.Join(sqlcmd, "") + "\n")
+		}
 		if err != nil {
-			log.Fatalf("Error writing: %s\n", strings.Join(sqlcmd, ""))//err.Error())
+			log.Fatalf("Error writing: %s\n", strings.Join(sqlcmd, "")) //err.Error())
 		}
 	}
 	datafile.Close()
