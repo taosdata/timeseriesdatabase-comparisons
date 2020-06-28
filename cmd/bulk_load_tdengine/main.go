@@ -44,6 +44,7 @@ var (
 var (
 	bufPool    sync.Pool
 	batchChans []chan string
+	sqlCmdChans []chan string
 	//batchChan      chan []string
 	inputDone      chan struct{}
 	workersGroup   sync.WaitGroup
@@ -125,12 +126,15 @@ func main() {
 
 	for i := 0; i < workers; i++ {
 		batchChans = append(batchChans, make(chan string, batchSize))
+		sqlCmdChans = append(sqlCmdChans, make(chan string, 0))
 	}
 	//batchChan = make(chan []string, workers)
 	inputDone = make(chan struct{})
 	log.Println("Starting workers ----")
 
 	for i := 0; i < workers; i++ {
+		workersGroup.Add(1)
+		go processSqlCmd(i)
 		workersGroup.Add(1)
 		go processBatches(i)
 	}
@@ -208,11 +212,17 @@ func scan(db *sql.DB, itemsPerBatch int) (int64, int64, int64) {
 	scanner := bufio.NewScanner(sourceReader)
 	for scanner.Scan() {
 		line := scanner.Text()
-		if strings.HasPrefix(line, "create") {
+		if strings.HasPrefix(line[3:], "create") {
 			if fileoutput == true {
-				tablesqlfile.WriteString(line + "\n")
+				tablesqlfile.WriteString(line[3:] + "\n")
 			} else {
-				_, err = db.Exec(line)
+				hun, _ := strconv.Atoi(string(line[0]))
+				ten, _ := strconv.Atoi(string(line[1]))
+				vgid, _ = strconv.Atoi(string(line[2]))
+				vgid = hun*100 + ten*10 + vgid
+				vgid = vgid % workers
+				sqlCmdChans[vgid] <- line[3:]
+				//_, err = db.Exec(line)
 			}
 
 		} else if strings.HasPrefix(line, "data") {
@@ -322,3 +332,28 @@ func checkErr(err error) {
 		panic(err)
 	}
 }
+func processSqlCmd(iworker int) {
+	var i int
+	var err error
+	var db *sql.DB
+	var datafile *os.File
+
+	if fileoutput != true {
+		db, err = sql.Open(taosDriverName, "root:taosdata@/tcp("+daemonUrl+")/"+useCase)
+		checkErr(err)
+		defer db.Close()
+	} 
+
+	for onepoint := range sqlCmdChans[iworker] {
+		_, err = db.Exec(onepoint)
+
+		if err != nil {
+			log.Fatalf("Error writing: %s\n", onepoint) //err.Error())
+		}
+
+	}
+
+	workersGroup.Done()
+}
+
+

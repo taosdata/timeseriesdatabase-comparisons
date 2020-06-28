@@ -145,7 +145,11 @@ func (s *serializerTDengine) SerializePoint(w io.Writer, p *Point) error {
 }
 
 func createTable(tbn string,stbn string,schema Schemaconfig,w io.Writer, p *Point) error {
+	s2 := p.TagValues[schema.Suffixpos]
+	tbindex := TAOShashSuffix(s2) 
 	buf := scratchBufPool.Get().([]byte)
+	head := fmt.Sprintf("%3d ", tbindex%scalevar)
+	buf = append(buf, head)
 	buf = append(buf, "create table "...)
 	buf = append(buf, tbn...)
 	buf = append(buf, " using "...)
