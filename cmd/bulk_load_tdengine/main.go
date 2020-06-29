@@ -51,7 +51,7 @@ var (
 	reportTags     [][2]string
 	reportHostname string
 	taosDriverName string = "taosSql"
-	tablesqlname   string = "data/table.sql"
+	tablesqlname   string = "data/tables.sql"
 	tablesqlfile   *os.File
 )
 
@@ -134,8 +134,6 @@ func main() {
 
 	for i := 0; i < workers; i++ {
 		workersGroup.Add(1)
-		go processSqlCmd(i)
-		workersGroup.Add(1)
 		go processBatches(i)
 	}
 
@@ -171,11 +169,11 @@ func main() {
 
 func createDatabase(db *sql.DB) {
 	if fileoutput == true {
-		sqlcmd := fmt.Sprintf("Drop database if exists %s\n", useCase)
+		sqlcmd := fmt.Sprintf("Drop database if exists %s;\n", useCase)
 		tablesqlfile.WriteString(sqlcmd)
-		sqlcmd = fmt.Sprintf("create database %s tables 2000 cache 102400 ablocks 4 tblocks 50 \n", useCase)
+		sqlcmd = fmt.Sprintf("create database %s; \n", useCase)
 		tablesqlfile.WriteString(sqlcmd)
-		sqlcmd = fmt.Sprintf("use %s\n", useCase)
+		sqlcmd = fmt.Sprintf("use %s;\n", useCase)
 		tablesqlfile.WriteString(sqlcmd)
 		return
 	}
@@ -214,18 +212,13 @@ func scan(db *sql.DB, itemsPerBatch int) (int64, int64, int64) {
 	for scanner.Scan() {
 		line := scanner.Text()
 		if strings.HasPrefix(line[4:], "create") {
-			if fileoutput == true {
-				tablesqlfile.WriteString(line[4:] + "\n")
-			} else {
-				hun, _ := strconv.Atoi(string(line[0]))
-				ten, _ := strconv.Atoi(string(line[1]))
-				vgid, _ = strconv.Atoi(string(line[2]))
-				vgid = hun*100 + ten*10 + vgid
-				vgid = vgid % workers
-				sqlCmdChans[vgid] <- line[4:]
 
-				//_, err = db.Exec(line)
-			}
+			hun, _ := strconv.Atoi(string(line[0]))
+			ten, _ := strconv.Atoi(string(line[1]))
+			vgid, _ = strconv.Atoi(string(line[2]))
+			vgid = hun*100 + ten*10 + vgid
+			vgid = vgid % workers
+			batchChans[vgid] <- line[4:]
 
 		}else if strings.HasPrefix(line, "create") {
 			if fileoutput == true {
@@ -286,6 +279,9 @@ func processBatches(iworker int) {
 	} else {
 		dfn := fmt.Sprintf("data/%d.sql", iworker)
 		datafile, _ = os.OpenFile(dfn, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		usedb := fmt.Sprintf("use %s;\n",useCase)
+		datafile.WriteString(usedb)
+		
 	}
 	sqlcmd := make([]string, batchSize+1)
 	i = 0
@@ -304,32 +300,46 @@ func processBatches(iworker int) {
 		}
 	*/
 	for onepoint := range batchChans[iworker] {
-		sqlcmd[i] = onepoint
-		i++
-		if i > batchSize {
-			i = 1
+		if  strings.HasPrefix(onepoint, "create"){
 			if fileoutput != true {
-				_, err = db.Exec(strings.Join(sqlcmd, ""))
+				_, err := db.Exec(onepoint)
+				if err != nil {
+					log.Fatalf("Error create table: %s\n", onepoint) //err.Error())
+				}
 			} else {
-				datafile.WriteString(strings.Join(sqlcmd, "") + "\n")
+				datafile.WriteString(onepoint + ";\n")
+			}
+		}else {
+			sqlcmd[i] = onepoint
+			i++
+			if i > batchSize {
+				i = 1
+				if fileoutput != true {
+					_, err = db.Exec(strings.Join(sqlcmd, ""))
+				} else {
+					datafile.WriteString(strings.Join(sqlcmd, "") + ";\n")
+				}
+	
+				if err != nil {
+					log.Fatalf("Error writing: %s\n", strings.Join(sqlcmd, "")) //err.Error())
+				}
 			}
 
-			if err != nil {
-				log.Fatalf("Error writing: %s\n", strings.Join(sqlcmd, "")) //err.Error())
-			}
 		}
+
 	}
 	if i > 1 {
 		i = 1
-		_, err := db.Exec(strings.Join(sqlcmd, ""))
+		
 		if fileoutput != true {
 			_, err = db.Exec(strings.Join(sqlcmd, ""))
+			if err != nil {
+				log.Fatalf("Error writing: %s\n", strings.Join(sqlcmd, "")) //err.Error())
+			}
 		} else {
-			datafile.WriteString(strings.Join(sqlcmd, "") + "\n")
+			datafile.WriteString(strings.Join(sqlcmd, "") + ";\n")
 		}
-		if err != nil {
-			log.Fatalf("Error writing: %s\n", strings.Join(sqlcmd, "")) //err.Error())
-		}
+
 	}
 	datafile.Close()
 
@@ -341,28 +351,6 @@ func checkErr(err error) {
 		panic(err)
 	}
 }
-func processSqlCmd(iworker int) {
 
-	var err error
-	var db *sql.DB
-
-
-	if fileoutput != true {
-		db, err = sql.Open(taosDriverName, "root:taosdata@/tcp("+daemonUrl+")/"+useCase)
-		checkErr(err)
-		defer db.Close()
-	} 
-
-	for onepoint := range sqlCmdChans[iworker] {
-		_, err = db.Exec(onepoint)
-
-		if err != nil {
-			log.Fatalf("Error writing: %s\n", onepoint) //err.Error())
-		}
-
-	}
-
-	workersGroup.Done()
-}
 
 
