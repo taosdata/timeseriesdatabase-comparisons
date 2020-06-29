@@ -149,7 +149,7 @@ func createTable(tbn string,stbn string,schema Schemaconfig,w io.Writer, p *Poin
 	tbindex := TAOShashSuffix(s2) 
 	buf := scratchBufPool.Get().([]byte)
 	head := fmt.Sprintf("%3d ", tbindex%scalevar)
-	buf = append(buf, head)
+	buf = append(buf, head...)
 	buf = append(buf, "create table "...)
 	buf = append(buf, tbn...)
 	buf = append(buf, " using "...)

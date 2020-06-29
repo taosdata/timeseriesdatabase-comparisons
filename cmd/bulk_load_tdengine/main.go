@@ -333,10 +333,10 @@ func checkErr(err error) {
 	}
 }
 func processSqlCmd(iworker int) {
-	var i int
+
 	var err error
 	var db *sql.DB
-	var datafile *os.File
+
 
 	if fileoutput != true {
 		db, err = sql.Open(taosDriverName, "root:taosdata@/tcp("+daemonUrl+")/"+useCase)
