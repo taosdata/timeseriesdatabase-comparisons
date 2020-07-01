@@ -126,7 +126,6 @@ func main() {
 
 	for i := 0; i < workers; i++ {
 		batchChans = append(batchChans, make(chan string, batchSize))
-		sqlCmdChans = append(sqlCmdChans, make(chan string, 0))
 	}
 	//batchChan = make(chan []string, workers)
 	inputDone = make(chan struct{})
@@ -144,7 +143,6 @@ func main() {
 
 	for i := 0; i < workers; i++ {
 		close(batchChans[i])
-		close(sqlCmdChans[i])
 	}
 	//close(batchChan)
 	workersGroup.Wait()
@@ -302,9 +300,9 @@ func processBatches(iworker int) {
 	for onepoint := range batchChans[iworker] {
 		if  strings.HasPrefix(onepoint, "create"){
 			if fileoutput != true {
-				_, err := db.Exec(onepoint)
+				_, err := db.Exec(onepoint+";")
 				if err != nil {
-					log.Fatalf("Error create table: %s\n", onepoint) //err.Error())
+					log.Fatalf("Error create table: %s; error:%s\n", onepoint, err) //err.Error())
 				}
 			} else {
 				datafile.WriteString(onepoint + ";\n")
