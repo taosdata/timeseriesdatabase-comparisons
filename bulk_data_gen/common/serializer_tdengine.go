@@ -4,8 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+
 	//"strconv"
+	"hash/crc32"
 	"sync"
+
 	"github.com/pelletier/go-toml"
 )
 
@@ -83,24 +86,23 @@ func (s *serializerTDengine) SerializePoint(w io.Writer, p *Point) error {
 
 	var tbname string
 	s2 := p.TagValues[schema.Suffixpos]
-	tbindex := TAOShashSuffix(s2) 
+	tbindex := TAOShashSuffix(s2)
 	//if tbindex < 0 {
 	//	tbindex = -tbindex
 	//}
 	//fmt.Println(tbindex)
 	//tbindex, _ := strconv.ParseInt(string(s2[:]), 10, 64)
 	tbname = str + "_" + string(s2[:])
-	hastb,_:= IsTableCreated.Load(tbname)
+	hastb, _ := IsTableCreated.Load(tbname)
 	if hastb == nil {
-		createTable(tbname,str,schema,w,p)
-		IsTableCreated.Store(tbname,true)
+		createTable(tbname, str, schema, w, p)
+		IsTableCreated.Store(tbname, true)
 
-	}	
-
+	}
 
 	buf := scratchBufPool.Get().([]byte)
 	//buf = append(buf, "Insert into "...)
-	head := fmt.Sprintf("%3d ", tbindex%scalevar)
+	head := fmt.Sprintf("%6d ", tbindex%scalevar)
 	buf = append(buf, head...)
 	buf = append(buf, dbname+"."+tbname...)
 	buf = append(buf, " values("...)
@@ -144,11 +146,11 @@ func (s *serializerTDengine) SerializePoint(w io.Writer, p *Point) error {
 	return err
 }
 
-func createTable(tbn string,stbn string,schema Schemaconfig,w io.Writer, p *Point) error {
+func createTable(tbn string, stbn string, schema Schemaconfig, w io.Writer, p *Point) error {
 	s2 := p.TagValues[schema.Suffixpos]
-	tbindex := TAOShashSuffix(s2) 
+	tbindex := TAOShashSuffix(s2)
 	buf := scratchBufPool.Get().([]byte)
-	head := fmt.Sprintf("%3d ", tbindex%scalevar)
+	head := fmt.Sprintf("%6d ", tbindex%scalevar)
 	buf = append(buf, head...)
 	buf = append(buf, "create table "...)
 	buf = append(buf, tbn...)
@@ -302,7 +304,7 @@ func TAOSCreateStable(w io.Writer, p *Point) error {
 			}
 		}
 		if found == 0 {
-			info := fmt.Sprintf("Config error, cannot find fieldname %s in the point. stable name %s", tn,stablename)
+			info := fmt.Sprintf("Config error, cannot find fieldname %s in the point. stable name %s", tn, stablename)
 			panic(info)
 		}
 	}
@@ -351,9 +353,13 @@ func TAOSCreateStable(w io.Writer, p *Point) error {
 }
 
 func TAOShashSuffix(ba []byte) int64 {
-	var sum int = 0
-	for i :=0; i< len(ba); i++{
-		sum += int(ba[i] - '0')
+	var v int64
+	v = int64(crc32.ChecksumIEEE(ba))
+	if v >= 0 {
+		return v
+	} else if -v >= 0 {
+		return -v
 	}
-	return int64(sum)
+	return 0
+
 }

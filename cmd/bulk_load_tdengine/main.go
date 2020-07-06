@@ -42,8 +42,8 @@ var (
 
 // Global vars
 var (
-	bufPool    sync.Pool
-	batchChans []chan string
+	bufPool     sync.Pool
+	batchChans  []chan string
 	sqlCmdChans []chan string
 	//batchChan      chan []string
 	inputDone      chan struct{}
@@ -156,14 +156,14 @@ func main() {
 	valuesRate := float64(valuesRead) / float64(took.Seconds())
 
 	fmt.Printf("loaded %d items in %fsec with %d workers (mean point rate %.2f/s, mean value rate %.2f/s, %.2fMB/sec from stdin)\n", itemsRead, took.Seconds(), workers, itemsRate, valuesRate, bytesRate/(1<<20))
-//	sqlcmd := fmt.Sprintf("create database if not exists benchmarkreport")
-//	_, err = db.Exec(sqlcmd)
-//	_, err = db.Exec("use benchmarkreport")
-//	sqlcmd = fmt.Sprintf("create table if not exists bmreport (ts timestamp, starttime binary(50), endtime binary(50),itemsread double, bytesread double,valuesread double,timetook double,recordsrate double, bytesrate double,valuesrate double, workers double, batchsize double, usecase binary(50)) tags(host binary(50), proc_id binary(40))")
-//	_, err = db.Exec(sqlcmd)
-//	sqlcmd = fmt.Sprintf("insert into %s_%s using bmreport tags(\"%s\",\"%s\") values(0, \"%s\",\"%s\",%d,%d,%d,%f,%f,%f,%f,%d,%d,\"%s\")", reportHostname, reportTagsCSV, reportHostname, reportTagsCSV, start.Format(time.RFC3339), end.Format(time.RFC3339), itemsRead, bytesRead, valuesRead, took.Seconds(), itemsRate, bytesRate/(1<<20), valuesRate, workers, batchSize, useCase)
-//	_, err = db.Exec(sqlcmd)
-//	checkErr(err)
+	//	sqlcmd := fmt.Sprintf("create database if not exists benchmarkreport")
+	//	_, err = db.Exec(sqlcmd)
+	//	_, err = db.Exec("use benchmarkreport")
+	//	sqlcmd = fmt.Sprintf("create table if not exists bmreport (ts timestamp, starttime binary(50), endtime binary(50),itemsread double, bytesread double,valuesread double,timetook double,recordsrate double, bytesrate double,valuesrate double, workers double, batchsize double, usecase binary(50)) tags(host binary(50), proc_id binary(40))")
+	//	_, err = db.Exec(sqlcmd)
+	//	sqlcmd = fmt.Sprintf("insert into %s_%s using bmreport tags(\"%s\",\"%s\") values(0, \"%s\",\"%s\",%d,%d,%d,%f,%f,%f,%f,%d,%d,\"%s\")", reportHostname, reportTagsCSV, reportHostname, reportTagsCSV, start.Format(time.RFC3339), end.Format(time.RFC3339), itemsRead, bytesRead, valuesRead, took.Seconds(), itemsRate, bytesRate/(1<<20), valuesRate, workers, batchSize, useCase)
+	//	_, err = db.Exec(sqlcmd)
+	//	checkErr(err)
 	tablesqlfile.Close()
 }
 
@@ -211,16 +211,14 @@ func scan(db *sql.DB, itemsPerBatch int) (int64, int64, int64) {
 	scanner := bufio.NewScanner(sourceReader)
 	for scanner.Scan() {
 		line := scanner.Text()
-		if strings.HasPrefix(line[4:], "create") {
+		if strings.HasPrefix(line[7:], "create") {
 
-			hun, _ := strconv.Atoi(string(line[0]))
-			ten, _ := strconv.Atoi(string(line[1]))
-			vgid, _ = strconv.Atoi(string(line[2]))
-			vgid = hun*100 + ten*10 + vgid
+			vgid, _ = strconv.ParseInt(line[0:6], 10, 64)
+
 			vgid = vgid % workers
-			batchChans[vgid] <- line[4:]
+			batchChans[vgid] <- line[7:]
 
-		}else if strings.HasPrefix(line, "create") {
+		} else if strings.HasPrefix(line, "create") {
 			if fileoutput == true {
 				tablesqlfile.WriteString(line + "\n")
 			} else {
@@ -242,13 +240,11 @@ func scan(db *sql.DB, itemsPerBatch int) (int64, int64, int64) {
 				continue
 			}
 
-			hun, _ := strconv.Atoi(string(line[0]))
-			ten, _ := strconv.Atoi(string(line[1]))
-			vgid, _ = strconv.Atoi(string(line[2]))
-			vgid = hun*100 + ten*10 + vgid
+			vgid, _ = strconv.ParseInt(line[0:6], 10, 64)
+
 			vgid = vgid % workers
 
-			batchChans[vgid] <- line[3:]
+			batchChans[vgid] <- line[6:]
 
 		}
 
@@ -279,9 +275,9 @@ func processBatches(iworker int) {
 	} else {
 		dfn := fmt.Sprintf("data/%d.sql", iworker)
 		datafile, _ = os.OpenFile(dfn, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-		usedb := fmt.Sprintf("use %s;\n",useCase)
+		usedb := fmt.Sprintf("use %s;\n", useCase)
 		datafile.WriteString(usedb)
-		
+
 	}
 	sqlcmd := make([]string, batchSize+1)
 	i = 0
@@ -300,7 +296,7 @@ func processBatches(iworker int) {
 		}
 	*/
 	for onepoint := range batchChans[iworker] {
-		if  strings.HasPrefix(onepoint, "create"){
+		if strings.HasPrefix(onepoint, "create") {
 			if fileoutput != true {
 				_, err := db.Exec(onepoint)
 				if err != nil {
@@ -309,7 +305,7 @@ func processBatches(iworker int) {
 			} else {
 				datafile.WriteString(onepoint + ";\n")
 			}
-		}else {
+		} else {
 			sqlcmd[i] = onepoint
 			i++
 			if i > batchSize {
@@ -319,7 +315,7 @@ func processBatches(iworker int) {
 				} else {
 					datafile.WriteString(strings.Join(sqlcmd, "") + ";\n")
 				}
-	
+
 				if err != nil {
 					log.Fatalf("Error writing: %s\n", strings.Join(sqlcmd, "")) //err.Error())
 				}
@@ -330,7 +326,7 @@ func processBatches(iworker int) {
 	}
 	if i > 1 {
 		i = 1
-		
+
 		if fileoutput != true {
 			_, err = db.Exec(strings.Join(sqlcmd, ""))
 			if err != nil {
@@ -351,6 +347,3 @@ func checkErr(err error) {
 		panic(err)
 	}
 }
-
-
-
