@@ -102,7 +102,7 @@ func (s *serializerTDengine) SerializePoint(w io.Writer, p *Point) error {
 
 	buf := scratchBufPool.Get().([]byte)
 	//buf = append(buf, "Insert into "...)
-	head := fmt.Sprintf("%6d ", tbindex%scalevar)
+	head := fmt.Sprintf("%6d ", tbindex)
 	buf = append(buf, head...)
 	buf = append(buf, dbname+"."+tbname...)
 	buf = append(buf, " values("...)
