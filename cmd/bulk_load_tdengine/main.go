@@ -45,6 +45,9 @@ var (
 	bufPool     sync.Pool
 	batchChans  []chan string
 	sqlCmdChans []chan string
+	//statistics        []int
+	IsWorkerAllocated sync.Map
+	workerRoundRobin  int = 0
 	//batchChan      chan []string
 	inputDone      chan struct{}
 	workersGroup   sync.WaitGroup
@@ -130,7 +133,7 @@ func main() {
 	//batchChan = make(chan []string, workers)
 	inputDone = make(chan struct{})
 	log.Println("Starting workers ----")
-
+	//statistics = make([]int, workers)
 	for i := 0; i < workers; i++ {
 		workersGroup.Add(1)
 		go processBatches(i)
@@ -143,6 +146,7 @@ func main() {
 
 	for i := 0; i < workers; i++ {
 		close(batchChans[i])
+		//fmt.Printf("worker %d, processed %d data \n", i, statistics[i])
 	}
 	//close(batchChan)
 	workersGroup.Wait()
@@ -211,10 +215,16 @@ func scan(db *sql.DB, itemsPerBatch int) (int64, int64, int64) {
 		line := scanner.Text()
 		if strings.HasPrefix(line[7:], "create") {
 
-			hscode, _ := strconv.ParseInt(line[0:6], 10, 64)
+			hscode, err := strconv.ParseInt(strings.TrimSpace(line[0:6]), 10, 64)
+			if err != nil {
+				fmt.Println(err)
+			}
 
-			vgid = int(hscode) % workers
+			vgid = getWorkerId(hscode)
+
+			//fmt.Printf("string %s, hascode : %d, vgid %d\n", line[0:6], hscode, vgid)
 			batchChans[vgid] <- line[7:]
+			//statistics[vgid]++
 
 		} else if strings.HasPrefix(line, "create") {
 			if fileoutput == true {
@@ -233,16 +243,17 @@ func scan(db *sql.DB, itemsPerBatch int) (int64, int64, int64) {
 			}
 		} else {
 			itemsRead++
-			bytesRead += int64(len(scanner.Bytes())) - 3
+			bytesRead += int64(len(scanner.Bytes())) - 6
 			if !doLoad {
 				continue
 			}
 
-			hscode, _ := strconv.ParseInt(line[0:6], 10, 64)
+			hscode, _ := strconv.ParseInt(strings.TrimSpace(line[0:6]), 10, 64)
 
-			vgid = int(hscode) % workers
+			vgid = getWorkerId(hscode)
 
 			batchChans[vgid] <- line[6:]
+			//statistics[vgid]++
 
 		}
 
@@ -296,7 +307,7 @@ func processBatches(iworker int) {
 	for onepoint := range batchChans[iworker] {
 		if strings.HasPrefix(onepoint, "create") {
 			if fileoutput != true {
-				_, err := db.Exec(onepoint+";")
+				_, err := db.Exec(onepoint + ";")
 				if err != nil {
 					log.Fatalf("Error create table: %s; error:%s\n", onepoint, err) //err.Error())
 				}
@@ -344,4 +355,21 @@ func checkErr(err error) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func getWorkerId(hashcode int64) int {
+	wkid, ok := IsWorkerAllocated.Load(hashcode)
+	if !ok {
+		wkid = workerRoundRobin
+		IsWorkerAllocated.Store(hashcode, wkid)
+		workerRoundRobin++
+		if workerRoundRobin == workers {
+			workerRoundRobin = 0
+		}
+	}
+	value, y := wkid.(int)
+	if y {
+		return value
+	}
+	return 0
 }
