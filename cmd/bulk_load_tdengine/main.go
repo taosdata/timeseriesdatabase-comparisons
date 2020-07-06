@@ -211,9 +211,9 @@ func scan(db *sql.DB, itemsPerBatch int) (int64, int64, int64) {
 		line := scanner.Text()
 		if strings.HasPrefix(line[7:], "create") {
 
-			vgid, _ = strconv.ParseInt(line[0:6], 10, 64)
+			hscode, _ := strconv.ParseInt(line[0:6], 10, 64)
 
-			vgid = vgid % workers
+			vgid = int(hscode) % workers
 			batchChans[vgid] <- line[7:]
 
 		} else if strings.HasPrefix(line, "create") {
@@ -238,9 +238,9 @@ func scan(db *sql.DB, itemsPerBatch int) (int64, int64, int64) {
 				continue
 			}
 
-			vgid, _ = strconv.ParseInt(line[0:6], 10, 64)
+			hscode, _ := strconv.ParseInt(line[0:6], 10, 64)
 
-			vgid = vgid % workers
+			vgid = int(hscode) % workers
 
 			batchChans[vgid] <- line[6:]
 
