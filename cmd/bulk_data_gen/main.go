@@ -19,19 +19,20 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
-	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_data_gen/common"
-	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_data_gen/dashboard"
-	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_data_gen/devops"
-	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_data_gen/iot"
 	"log"
 	"os"
 	"runtime/pprof"
 	"strings"
 	"time"
+
+	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_data_gen/common"
+	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_data_gen/dashboard"
+	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_data_gen/devops"
+	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_data_gen/iot"
 )
 
 // Output data format choices:
-var formatChoices = []string{"influx-bulk", "es-bulk", "es-bulk6x", "cassandra", "mongo", "opentsdb", "timescaledb-sql", "timescaledb-copyFrom", "graphite-line", "splunk-json","tdengine"}
+var formatChoices = []string{"influx-bulk", "es-bulk", "es-bulk6x", "cassandra", "mongo", "opentsdb", "timescaledb-sql", "timescaledb-copyFrom", "graphite-line", "splunk-json", "tdengine"}
 
 // Program option vars:
 var (
