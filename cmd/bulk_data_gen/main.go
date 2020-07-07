@@ -44,6 +44,7 @@ var (
 	configFile       string
 	scaleVar         int64
 	scaleVarOffset   int64
+	workers          int
 	samplingInterval time.Duration
 
 	timestampStartStr string
@@ -78,6 +79,7 @@ func init() {
 
 	flag.Int64Var(&seed, "seed", 0, "PRNG seed (default, or 0, uses the current timestamp).")
 	flag.IntVar(&debug, "debug", 0, "Debug printing (choices: 0, 1, 2) (default 0).")
+	flag.IntVar(&workers, "workers", 10, "write workers, should be the same as load program, default 10.")
 
 	flag.UintVar(&interleavedGenerationGroupID, "interleaved-generation-group-id", 0, "Group (0-indexed) to perform round-robin serialization within. Use this to scale up data generation to multiple processes.")
 	flag.UintVar(&interleavedGenerationGroups, "interleaved-generation-groups", 1, "The number of round-robin serialization groups. Use this to scale up data generation to multiple processes.")
