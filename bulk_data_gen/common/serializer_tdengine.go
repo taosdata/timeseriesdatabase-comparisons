@@ -6,7 +6,7 @@ import (
 	"io"
 
 	//"strconv"
-	"hash/crc32"
+
 	"sync"
 
 	"github.com/pelletier/go-toml"
@@ -38,6 +38,9 @@ var scalevar int64
 var Schematree *toml.Tree
 var IsSTableCreated sync.Map //a map to fast find whether the super table is created
 var IsTableCreated sync.Map  //a map to fast find whether the table is created
+var IsWorkerAllocated sync.Map
+var workerRoundRobin int = 0
+
 //var Stabletoschema sync.Map      //a map to fast ge the schema
 
 func NewSerializerTDengine(path string, dbn string, scaleVar int64) *serializerTDengine {
@@ -353,12 +356,19 @@ func TAOSCreateStable(w io.Writer, p *Point) error {
 }
 
 func TAOShashSuffix(ba []byte) int64 {
-	var v int64
-	v = int64(crc32.ChecksumIEEE(ba))
-	if v >= 0 {
-		return v
-	} else if -v >= 0 {
-		return -v
+	code := string(ba)
+	wkid, ok := IsWorkerAllocated.Load(code)
+	if !ok {
+		wkid = workerRoundRobin
+		IsWorkerAllocated.Store(hashcode, wkid)
+		workerRoundRobin++
+		if workerRoundRobin == workers {
+			workerRoundRobin = 0
+		}
+	}
+	value, y := wkid.(int64)
+	if y {
+		return value
 	}
 	return 0
 
