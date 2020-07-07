@@ -35,6 +35,7 @@ type TAOSConfig struct {
 
 var dbname string
 var scalevar int64
+var workers int
 var Schematree *toml.Tree
 var IsSTableCreated sync.Map //a map to fast find whether the super table is created
 var IsTableCreated sync.Map  //a map to fast find whether the table is created
@@ -43,9 +44,10 @@ var workerRoundRobin int = 0
 
 //var Stabletoschema sync.Map      //a map to fast ge the schema
 
-func NewSerializerTDengine(path string, dbn string, scaleVar int64) *serializerTDengine {
+func NewSerializerTDengine(path string, dbn string, scaleVar int64, workers int) *serializerTDengine {
 	var err error
 	scalevar = scaleVar
+	workers = workers
 	Schematree, err = TAOSNewConfig(path)
 	if err != nil {
 		fmt.Println("load taos config failed: %v", err)
@@ -360,7 +362,7 @@ func TAOShashSuffix(ba []byte) int64 {
 	wkid, ok := IsWorkerAllocated.Load(code)
 	if !ok {
 		wkid = workerRoundRobin
-		IsWorkerAllocated.Store(hashcode, wkid)
+		IsWorkerAllocated.Store(code, wkid)
 		workerRoundRobin++
 		if workerRoundRobin == workers {
 			workerRoundRobin = 0

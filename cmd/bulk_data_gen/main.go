@@ -212,7 +212,7 @@ func main() {
 	case "splunk-json":
 		serializer = common.NewSerializerSplunkJson()
 	case "tdengine":
-		serializer = common.NewSerializerTDengine(taosschema, useCase, scaleVar)
+		serializer = common.NewSerializerTDengine(taosschema, useCase, scaleVar, workers)
 	default:
 		panic("unreachable")
 	}

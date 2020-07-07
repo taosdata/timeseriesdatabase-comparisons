@@ -218,7 +218,7 @@ func scan(db *sql.DB, itemsPerBatch int) (int64, int64, int64) {
 				fmt.Println(err)
 			}
 
-			vgid = hscode % workers
+			vgid = int(hscode) % workers
 
 			//fmt.Printf("string %s, hascode : %d, vgid %d\n", line[0:6], hscode, vgid)
 			batchChans[vgid] <- line[7:]
@@ -248,7 +248,7 @@ func scan(db *sql.DB, itemsPerBatch int) (int64, int64, int64) {
 
 			hscode, _ := strconv.ParseInt(strings.TrimSpace(line[0:6]), 10, 64)
 
-			vgid = hscode % workers
+			vgid = int(hscode) % workers
 
 			batchChans[vgid] <- line[6:]
 			statistics[vgid]++
