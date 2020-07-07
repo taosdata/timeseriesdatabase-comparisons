@@ -357,7 +357,7 @@ func TAOSCreateStable(w io.Writer, p *Point) error {
 	return nil
 }
 
-func TAOShashSuffix(ba []byte) int64 {
+func TAOShashSuffix(ba []byte) int {
 	code := string(ba)
 	wkid, ok := IsWorkerAllocated.Load(code)
 	if !ok {
@@ -368,7 +368,7 @@ func TAOShashSuffix(ba []byte) int64 {
 			workerRoundRobin = 0
 		}
 	}
-	value, y := wkid.(int64)
+	value, y := wkid.(int)
 	if y {
 		return value
 	}
