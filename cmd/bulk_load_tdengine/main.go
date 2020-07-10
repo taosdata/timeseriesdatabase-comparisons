@@ -4,18 +4,32 @@
 // bulk load.
 package main
 
+/*
+#cgo CFLAGS : -I/usr/include
+#cgo LDFLAGS: -L/usr/lib -ltaos
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <taos.h>
+*/
+import "C"
+
 import (
 	"bufio"
-	"database/sql"
+	"errors"
 	"flag"
 	"fmt"
 	"log"
+	"net/http"
+	_ "net/http/pprof"
 	"os"
+	"os/exec"
 	"sync"
 	"time"
+	"unsafe"
 
 	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_data_gen/common"
-	_ "github.com/taosdata/driver-go/taosSql"
+	//_ "github.com/taosdata/driver-go/taosSql"
 
 	//	"github.com/caict-benchmark/BDC-TS/util/report"
 	"strconv"
@@ -38,6 +52,7 @@ var (
 	useCase        string
 	loadfile       string
 	fileoutput     bool
+	httpAPI        bool
 )
 
 // Global vars
@@ -58,7 +73,7 @@ var (
 
 // Parse args:
 func init() {
-	flag.StringVar(&daemonUrl, "url", "127.0.0.1:0", "TDengine URL.")
+	flag.StringVar(&daemonUrl, "url", "localhost", "TDengine URL.")
 
 	flag.IntVar(&batchSize, "batch-size", 100, "Batch size (input items).")
 	flag.IntVar(&workers, "workers", 2, "Number of parallel requests to make.")
@@ -73,7 +88,8 @@ func init() {
 	flag.StringVar(&reportTagsCSV, "report-tags", "node1", "Comma separated k:v tags to send  alongside result metrics")
 	flag.BoolVar(&slaveSource, "slavesource", false, "if slave source, will not create database")
 	flag.StringVar(&loadfile, "file", "", "Input file")
-	flag.BoolVar(&fileoutput, "fileout", true, "if file out, will out put sql into file")
+	flag.BoolVar(&fileoutput, "fileout", false, "if file out, will out put sql into file")
+	flag.BoolVar(&httpAPI, "http-api", false, "if true, will out put sql through TDengine RestAPI")
 
 	flag.Parse()
 
@@ -98,8 +114,10 @@ func init() {
 		}*/
 	}
 	fmt.Printf("results report tags: %v\n", reportTagsCSV)
+	cmd := exec.Command("rm", "data/*")
+	cmd.Run()
 	//}
-	createtablesql, err := os.OpenFile(tablesqlname, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	createtablesql, err := os.OpenFile(tablesqlname, os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -108,21 +126,24 @@ func init() {
 }
 
 func main() {
+	var start time.Time
 	bufPool = sync.Pool{
 		New: func() interface{} {
 			return make([]string, 0, batchSize)
 		},
 	}
-
+	go func() {
+		http.ListenAndServe("0.0.0.0:8080", nil)
+	}()
 	log.Println("Creating database ----")
-	db, err := sql.Open(taosDriverName, "root:taosdata@/tcp("+daemonUrl+")/")
-	if err != nil {
-		log.Fatalf("Open database error: %s\n", err)
-	}
-	defer db.Close()
+	//db, err := sql.Open(taosDriverName, "root:taosdata@/tcp("+daemonUrl+":0)/")
+	//if err != nil {
+	//	log.Fatalf("Open database error: %s\n", err)
+	//}
+	//defer db.Close()
 
 	if !slaveSource {
-		createDatabase(db)
+		createDatabase()
 	}
 
 	for i := 0; i < workers; i++ {
@@ -137,10 +158,14 @@ func main() {
 		go processBatches(i)
 	}
 
-	start := time.Now()
-	itemsRead, bytesRead, valuesRead := scan(db, batchSize)
+	if fileoutput != true {
+		start = time.Now()
+	}
+	//start := time.Now()
+	itemsRead, bytesRead, valuesRead := scan(batchSize)
 
 	<-inputDone
+	//end := time.Now()
 
 	for i := 0; i < workers; i++ {
 		close(batchChans[i])
@@ -148,6 +173,13 @@ func main() {
 	}
 	//close(batchChan)
 	workersGroup.Wait()
+	if fileoutput == true {
+		start = time.Now()
+		wt := fmt.Sprintf("-T %d", workers)
+		cmd := exec.Command("taos", "-D", "data", wt)
+		cmd.Run()
+	}
+
 	end := time.Now()
 	took := end.Sub(start)
 
@@ -167,7 +199,7 @@ func main() {
 	tablesqlfile.Close()
 }
 
-func createDatabase(db *sql.DB) {
+func createDatabase() {
 	if fileoutput == true {
 		sqlcmd := fmt.Sprintf("Drop database if exists %s;\n", useCase)
 		tablesqlfile.WriteString(sqlcmd)
@@ -176,25 +208,42 @@ func createDatabase(db *sql.DB) {
 		sqlcmd = fmt.Sprintf("use %s;\n", useCase)
 		tablesqlfile.WriteString(sqlcmd)
 		return
+	} else if httpAPI == true {
+		client := new(http.Client)
+		sqlcmd := fmt.Sprintf("Drop database if exists %s", useCase)
+		httpExecSQL(sqlcmd, client)
+		sqlcmd = fmt.Sprintf("create database %s ", useCase)
+		httpExecSQL(sqlcmd, client)
+		sqlcmd = fmt.Sprintf("use %s", useCase)
+		httpExecSQL(sqlcmd, client)
+		return
 	}
+	taosConn, err := taosConnect(daemonUrl, "")
+	checkErr(err)
 	sqlcmd := fmt.Sprintf("Drop database if exists %s", useCase)
-	_, err := db.Exec(sqlcmd)
+	_, err = taosQuery(sqlcmd, taosConn)
+	checkErr(err)
 	sqlcmd = fmt.Sprintf("create database %s ", useCase)
-	_, err = db.Exec(sqlcmd)
-	sqlcmd = fmt.Sprintf("use %s", useCase)
-	_, err = db.Exec(sqlcmd)
+	_, err = taosQuery(sqlcmd, taosConn)
 	checkErr(err)
 
 	return
 }
 
-func scan(db *sql.DB, itemsPerBatch int) (int64, int64, int64) {
+func scan(itemsPerBatch int) (int64, int64, int64) {
 
 	var vgid int
 	var err error
 	var itemsRead, bytesRead int64
 	var totalPoints, totalValues int64
 	var sourceReader *os.File
+	var taosConn unsafe.Pointer
+
+	if fileoutput == false && httpAPI != true {
+		taosConn, err = taosConnect(daemonUrl, useCase)
+		checkErr(err)
+		defer taosClose(taosConn)
+	}
 
 	//buff := bufPool.Get().([]string)
 
@@ -224,11 +273,22 @@ func scan(db *sql.DB, itemsPerBatch int) (int64, int64, int64) {
 			batchChans[vgid] <- line[7:]
 			statistics[vgid]++
 
+			/*go func() {
+				_, err = db.Exec(line[7:])
+				if err != nil {
+					fmt.Println(err)
+				}
+			}()*/
+
 		} else if strings.HasPrefix(line, "create") {
-			if fileoutput == true {
+			if fileoutput == true && httpAPI != true {
 				tablesqlfile.WriteString(line + "\n")
+			} else if httpAPI != true {
+				_, err = taosQuery(line, taosConn)
+				checkErr(err)
 			} else {
-				_, err = db.Exec(line)
+				client := new(http.Client)
+				httpExecSQL(line, client)
 			}
 
 		} else if strings.HasPrefix(line, "data") {
@@ -272,19 +332,22 @@ func scan(db *sql.DB, itemsPerBatch int) (int64, int64, int64) {
 func processBatches(iworker int) {
 	var i int
 	var err error
-	var db *sql.DB
 	var datafile *os.File
+	var client *http.Client
+	var taosConn unsafe.Pointer
 
-	if fileoutput != true {
-		db, err = sql.Open(taosDriverName, "root:taosdata@/tcp("+daemonUrl+")/"+useCase)
+	if fileoutput != true && httpAPI != true {
+		taosConn, err = taosConnect(daemonUrl, useCase)
 		checkErr(err)
-		defer db.Close()
-	} else {
+		defer taosClose(taosConn)
+	} else if fileoutput == true {
 		dfn := fmt.Sprintf("data/%d.sql", iworker)
-		datafile, _ = os.OpenFile(dfn, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		datafile, _ = os.OpenFile(dfn, os.O_CREATE|os.O_WRONLY, 0644)
 		usedb := fmt.Sprintf("use %s;\n", useCase)
 		datafile.WriteString(usedb)
 
+	} else {
+		client = new(http.Client)
 	}
 	sqlcmd := make([]string, batchSize+1)
 	i = 0
@@ -304,27 +367,32 @@ func processBatches(iworker int) {
 	*/
 	for onepoint := range batchChans[iworker] {
 		if strings.HasPrefix(onepoint, "create") {
-			if fileoutput != true {
-				_, err := db.Exec(onepoint + ";")
+			if fileoutput != true && httpAPI != true {
+				_, err := taosQuery(onepoint+";", taosConn)
 				if err != nil {
 					log.Fatalf("Error create table: %s; error:%s\n", onepoint, err) //err.Error())
 				}
-			} else {
+			} else if fileoutput == true {
 				datafile.WriteString(onepoint + ";\n")
+			} else {
+				httpExecSQL(onepoint, client)
 			}
 		} else {
 			sqlcmd[i] = onepoint
 			i++
 			if i > batchSize {
 				i = 1
-				if fileoutput != true {
-					_, err = db.Exec(strings.Join(sqlcmd, ""))
-				} else {
+				if fileoutput != true && httpAPI != true {
+					_, err = taosQuery(strings.Join(sqlcmd, ""), taosConn)
+					checkErr(err)
+				} else if fileoutput == true {
 					datafile.WriteString(strings.Join(sqlcmd, "") + ";\n")
+				} else {
+					httpExecSQL(strings.Join(sqlcmd, ""), client)
 				}
 
 				if err != nil {
-					log.Fatalf("Error writing: %s\n", strings.Join(sqlcmd, "")) //err.Error())
+					log.Fatalf("Error writing: %s,  error:%s\n", strings.Join(sqlcmd, ""), err) //err.Error())
 				}
 			}
 
@@ -334,13 +402,13 @@ func processBatches(iworker int) {
 	if i > 1 {
 		i = 1
 
-		if fileoutput != true {
-			_, err = db.Exec(strings.Join(sqlcmd, ""))
-			if err != nil {
-				log.Fatalf("Error writing: %s\n", strings.Join(sqlcmd, "")) //err.Error())
-			}
-		} else {
+		if fileoutput != true && httpAPI != true {
+			_, err = taosQuery(strings.Join(sqlcmd, ""), taosConn)
+			checkErr(err)
+		} else if fileoutput == true {
 			datafile.WriteString(strings.Join(sqlcmd, "") + ";\n")
+		} else {
+			httpExecSQL(strings.Join(sqlcmd, ""), client)
 		}
 
 	}
@@ -353,4 +421,65 @@ func checkErr(err error) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func httpExecSQL(sqlcmd string, client *http.Client) error {
+	body := strings.NewReader(sqlcmd)
+	req, _ := http.NewRequest("GET", "http://"+daemonUrl+":6020/rest/sql", body)
+	req.SetBasicAuth("root", "taosdata")
+	resp, err := client.Do(req)
+
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	defer resp.Body.Close()
+
+	return nil
+}
+
+func taosConnect(ip, db string) (unsafe.Pointer, error) {
+	user := "root"
+	pass := "taosdata"
+	port := 0
+	cuser := C.CString(user)
+	cpass := C.CString(pass)
+	cip := C.CString(ip)
+	cdb := C.CString(db)
+	defer C.free(unsafe.Pointer(cip))
+	defer C.free(unsafe.Pointer(cuser))
+	defer C.free(unsafe.Pointer(cpass))
+	defer C.free(unsafe.Pointer(cdb))
+
+	taosObj := C.taos_connect(cip, cuser, cpass, cdb, (C.ushort)(port))
+	if taosObj == nil {
+		return nil, errors.New("taos_connect() fail!")
+	}
+
+	return (unsafe.Pointer)(taosObj), nil
+}
+
+func taosQuery(sqlstr string, taos unsafe.Pointer) (int, error) {
+	csqlstr := C.CString(sqlstr)
+	defer C.free(unsafe.Pointer(csqlstr))
+
+	result := unsafe.Pointer(C.taos_query(taos, csqlstr))
+	code := C.taos_errno(result)
+	if 0 != code {
+
+		errStr := C.GoString(C.taos_errstr(result))
+		taosClose(taos)
+		return 0, errors.New(errStr)
+
+	}
+
+	// read result and save into mc struct
+	numfields := int(C.taos_field_count(result))
+	C.taos_free_result(result)
+	return numfields, nil
+}
+
+func taosClose(taos unsafe.Pointer) {
+	C.taos_close(taos)
 }
