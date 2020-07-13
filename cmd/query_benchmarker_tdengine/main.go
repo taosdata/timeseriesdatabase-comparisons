@@ -6,9 +6,9 @@
 package main
 
 import (
-	"database/sql"
 	"encoding/base64"
 	"encoding/gob"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -17,12 +17,23 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"unsafe"
 
 	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_query"
 	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_query/http"
 	"github.com/liu0x54/timeseriesdatabase-comparisons/util/report"
 	_ "github.com/taosdata/driver-go/taosSql"
 )
+
+/*
+#cgo CFLAGS : -I/usr/include
+#cgo LDFLAGS: -L/usr/lib -ltaos
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <taos.h>
+*/
+import "C"
 
 // Program option vars:
 type TDengineQueryBenchmarker struct {
@@ -42,6 +53,8 @@ type TDengineQueryBenchmarker struct {
 var cgo int = 0
 var querier = &TDengineQueryBenchmarker{}
 var taosDriverName string = "taosSql"
+var taosConns []unsafe.Pointer
+var workers = 0
 
 // Parse args:
 func init() {
@@ -63,6 +76,7 @@ func (b *TDengineQueryBenchmarker) Init() {
 	flag.DurationVar(&b.writeTimeout, "read-timeout", time.Second*300, "TCP read timeout.")
 	flag.StringVar(&b.httpClientType, "http-client-type", "fast", "HTTP client type {fast, default,cgo}")
 	flag.IntVar(&b.clientIndex, "client-index", 0, "Index of a client host running this tool. Used to distribute load")
+	flag.IntVar(&workers, "threads", 1, "cgo threads")
 }
 
 func (b *TDengineQueryBenchmarker) Validate() {
@@ -81,6 +95,13 @@ func (b *TDengineQueryBenchmarker) Validate() {
 	} else {
 		log.Fatalf("Unsupported HTPP client type: %v", b.httpClientType)
 	}
+	if cgo == 1 {
+		for i := 0; i < workers; i++ {
+			taosConn, _ := taosConnect(b.csvDaemonUrls, "")
+			taosConns = append(taosConns, taosConn)
+		}
+	}
+
 }
 
 func (b *TDengineQueryBenchmarker) Prepare() {
@@ -114,7 +135,7 @@ func (b *TDengineQueryBenchmarker) PrepareProcess(i int) {
 func (b *TDengineQueryBenchmarker) RunProcess(i int, workersGroup *sync.WaitGroup, statPool sync.Pool, statChan chan *bulk_query.Stat) {
 	daemonUrl := b.daemonUrls[(i+b.clientIndex)%len(b.daemonUrls)]
 	w := http.NewHTTPClient(daemonUrl, bulk_query.Benchmarker.Debug(), b.dialTimeout, b.readTimeout, b.writeTimeout)
-	b.processQueries(w, workersGroup, statPool, statChan)
+	b.processQueries(w, workersGroup, statPool, statChan, i)
 }
 
 func (b *TDengineQueryBenchmarker) IsScanFinished() bool {
@@ -123,6 +144,11 @@ func (b *TDengineQueryBenchmarker) IsScanFinished() bool {
 
 func (b *TDengineQueryBenchmarker) CleanUp() {
 	close(b.queryChan)
+	if cgo == 1 {
+		for i := 0; i < workers; i++ {
+			taosClose(taosConns[i])
+		}
+	}
 }
 
 func (b TDengineQueryBenchmarker) UpdateReport(params *report.QueryReportParams, reportTags [][2]string, extraVals []report.ExtraVal) (updatedTags [][2]string, updatedExtraVals []report.ExtraVal) {
@@ -186,7 +212,7 @@ loop:
 
 // processQueries reads byte buffers from queryChan and writes them to the
 // target server, while tracking latency.
-func (b *TDengineQueryBenchmarker) processQueries(w http.HTTPClient, workersGroup *sync.WaitGroup, statPool sync.Pool, statChan chan *bulk_query.Stat) error {
+func (b *TDengineQueryBenchmarker) processQueries(w http.HTTPClient, workersGroup *sync.WaitGroup, statPool sync.Pool, statChan chan *bulk_query.Stat, i int) error {
 	restAuthorization := fmt.Sprintf("Basic %s", base64.StdEncoding.EncodeToString([]byte("root:taosdata")))
 	opts := &http.HTTPClientDoOptions{
 		Authorization:        restAuthorization,
@@ -196,7 +222,7 @@ func (b *TDengineQueryBenchmarker) processQueries(w http.HTTPClient, workersGrou
 	var queriesSeen int64
 	for queries := range b.queryChan {
 		if len(queries) == 1 {
-			if err := b.processSingleQuery(w, queries[0], opts, nil, nil, statPool, statChan); err != nil {
+			if err := b.processSingleQuery(w, queries[0], opts, nil, nil, statPool, statChan, i); err != nil {
 				log.Fatal(err)
 			}
 			queriesSeen++
@@ -207,7 +233,7 @@ func (b *TDengineQueryBenchmarker) processQueries(w http.HTTPClient, workersGrou
 			errCh := make(chan error)
 			doneCh := make(chan int, len(queries))
 			for _, q := range queries {
-				go b.processSingleQuery(w, q, opts, errCh, doneCh, statPool, statChan)
+				go b.processSingleQuery(w, q, opts, errCh, doneCh, statPool, statChan, i)
 				queriesSeen++
 				if bulk_query.Benchmarker.GradualWorkersIncrease() {
 					time.Sleep(time.Duration(rand.Int63n(150)) * time.Millisecond) // random sleep 0-150ms
@@ -240,7 +266,7 @@ func (b *TDengineQueryBenchmarker) processQueries(w http.HTTPClient, workersGrou
 	return nil
 }
 
-func (b *TDengineQueryBenchmarker) processSingleQuery(w http.HTTPClient, q *http.Query, opts *http.HTTPClientDoOptions, errCh chan error, doneCh chan int, statPool sync.Pool, statChan chan *bulk_query.Stat) error {
+func (b *TDengineQueryBenchmarker) processSingleQuery(w http.HTTPClient, q *http.Query, opts *http.HTTPClientDoOptions, errCh chan error, doneCh chan int, statPool sync.Pool, statChan chan *bulk_query.Stat, i int) error {
 	defer func() {
 		if doneCh != nil {
 			doneCh <- 1
@@ -249,7 +275,8 @@ func (b *TDengineQueryBenchmarker) processSingleQuery(w http.HTTPClient, q *http
 	var lagMillis float64
 	var err error
 	if cgo == 1 {
-		lagMillis, err = b.execSql(q)
+		taosConn := taosConns[i]
+		lagMillis, err = b.execSql(q, taosConn)
 	} else {
 		lagMillis, err = w.Do(q, opts)
 	}
@@ -270,18 +297,67 @@ func (b *TDengineQueryBenchmarker) processSingleQuery(w http.HTTPClient, q *http
 	return nil
 }
 
-func (b *TDengineQueryBenchmarker) execSql(q *http.Query) (lag float64, err error) {
-	db, err := sql.Open(taosDriverName, "root:taosdata@/tcp("+b.csvDaemonUrls+")/")
-	if err != nil {
-		log.Fatalf("Open database error: %s\n", err)
-	}
-	defer db.Close()
+func (b *TDengineQueryBenchmarker) execSql(q *http.Query, taosConn unsafe.Pointer) (lag float64, err error) {
+
 	sqlcmd := string(q.Body)
 	start := time.Now()
-	_, err = db.Exec(sqlcmd)
+	_, err = taosQuery(sqlcmd, taosConn)
 	lag = float64(time.Since(start).Nanoseconds()) / 1e6 // milliseconds
 	if err != nil {
 		log.Fatalf("Query error: %s\n", err)
 	}
 	return lag, err
+}
+
+func taosConnect(ip, db string) (unsafe.Pointer, error) {
+	user := "root"
+	pass := "taosdata"
+	port := 0
+	cuser := C.CString(user)
+	cpass := C.CString(pass)
+	cip := C.CString(ip)
+	cdb := C.CString(db)
+	defer C.free(unsafe.Pointer(cip))
+	defer C.free(unsafe.Pointer(cuser))
+	defer C.free(unsafe.Pointer(cpass))
+	defer C.free(unsafe.Pointer(cdb))
+
+	taosObj := C.taos_connect(cip, cuser, cpass, cdb, (C.ushort)(port))
+	if taosObj == nil {
+		return nil, errors.New("taos_connect() fail!")
+	}
+
+	return (unsafe.Pointer)(taosObj), nil
+}
+
+func taosQuery(sqlstr string, taos unsafe.Pointer) (int, error) {
+	csqlstr := C.CString(sqlstr)
+	defer C.free(unsafe.Pointer(csqlstr))
+
+	result := unsafe.Pointer(C.taos_query(taos, csqlstr))
+	code := C.taos_errno(result)
+	if 0 != code {
+
+		errStr := C.GoString(C.taos_errstr(result))
+		taosClose(taos)
+		return 0, errors.New(errStr)
+
+	}
+
+	// read result and save into mc struct
+	//numfields := int(C.taos_field_count(result))
+	for {
+		res := C.taos_fetch_row(result)
+		if res == C.TAOS_ROW(nil) {
+			break
+		}
+
+	}
+
+	C.taos_free_result(result)
+	return 0, nil
+}
+
+func taosClose(taos unsafe.Pointer) {
+	C.taos_close(taos)
 }
