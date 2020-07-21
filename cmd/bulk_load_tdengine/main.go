@@ -147,7 +147,7 @@ func main() {
 	}
 
 	for i := 0; i < workers; i++ {
-		batchChans = append(batchChans, make(chan string, batchSize))
+		batchChans = append(batchChans, make(chan string, 100*batchSize))
 	}
 	//batchChan = make(chan []string, workers)
 	inputDone = make(chan struct{})

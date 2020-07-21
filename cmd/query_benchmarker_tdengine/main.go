@@ -119,7 +119,7 @@ func (b *TDengineQueryBenchmarker) Prepare() {
 	}
 
 	// Make data and control channels:
-	b.queryChan = make(chan []*http.Query)
+	b.queryChan = make(chan []*http.Query,100)
 }
 
 func (b *TDengineQueryBenchmarker) GetProcessor() bulk_query.Processor {
@@ -144,11 +144,7 @@ func (b *TDengineQueryBenchmarker) IsScanFinished() bool {
 
 func (b *TDengineQueryBenchmarker) CleanUp() {
 	close(b.queryChan)
-	if cgo == 1 {
-		for i := 0; i < workers; i++ {
-			taosClose(taosConns[i])
-		}
-	}
+
 }
 
 func (b TDengineQueryBenchmarker) UpdateReport(params *report.QueryReportParams, reportTags [][2]string, extraVals []report.ExtraVal) (updatedTags [][2]string, updatedExtraVals []report.ExtraVal) {
@@ -170,7 +166,7 @@ func (b *TDengineQueryBenchmarker) RunScan(r io.Reader, closeChan chan int) {
 	dec := gob.NewDecoder(r)
 
 	batch := make([]*http.Query, 0, bulk_query.Benchmarker.BatchSize())
-
+	fmt.Printf("batch size %d, limit %d\n", bulk_query.Benchmarker.BatchSize(), bulk_query.Benchmarker.Limit())
 	i := 0
 loop:
 	for {
@@ -181,6 +177,7 @@ loop:
 		q := b.queryPool.Get().(*http.Query)
 		err := dec.Decode(q)
 		if err == io.EOF {
+			fmt.Printf("io.Eof occurs --------------\n")
 			break
 		}
 		if err != nil {
@@ -232,6 +229,7 @@ func (b *TDengineQueryBenchmarker) processQueries(w http.HTTPClient, workersGrou
 			done := 0
 			errCh := make(chan error)
 			doneCh := make(chan int, len(queries))
+			//fmt.Printf("exec query %d\n", len(queries))
 			for _, q := range queries {
 				go b.processSingleQuery(w, q, opts, errCh, doneCh, statPool, statChan, i)
 				queriesSeen++
@@ -263,6 +261,9 @@ func (b *TDengineQueryBenchmarker) processQueries(w http.HTTPClient, workersGrou
 		}
 	}
 	workersGroup.Done()
+	if cgo == 1 {
+		taosClose(taosConns[i])
+	}
 	return nil
 }
 
@@ -340,6 +341,7 @@ func taosQuery(sqlstr string, taos unsafe.Pointer) (int, error) {
 
 		errStr := C.GoString(C.taos_errstr(result))
 		taosClose(taos)
+		fmt.Println(errStr)
 		return 0, errors.New(errStr)
 
 	}
