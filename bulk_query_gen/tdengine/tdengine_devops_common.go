@@ -2,10 +2,11 @@ package tdengine
 
 import (
 	"fmt"
-	bulkQuerygen "github.com/liu0x54/timeseriesdatabase-comparisons/bulk_query_gen"
 	"math/rand"
 	"strings"
 	"time"
+
+	bulkQuerygen "github.com/liu0x54/timeseriesdatabase-comparisons/bulk_query_gen"
 )
 
 // tdengineDevops produces tdengine-specific queries for all the devops query types.
@@ -82,14 +83,15 @@ func (d *tdengineDevops) maxCPUUsageHourByMinuteNHosts(qi bulkQuerygen.Query, nh
 
 	combinedHostnameClause := strings.Join(hostnameClauses, " or ")
 	//_ := strings.Join(hostnameClauses, " or ")
-	query := fmt.Sprintf("select max(f_usage_user) from devops.cpu where (%s) and ts >= '%s' and ts < '%s' interval(1m)", combinedHostnameClause, interval.StartString(), interval.EndString())
-//	query := fmt.Sprintf("select avg(f_usage_user) from devops.cpu where (%s)  interval(1h)",  combinedHostnameClause) 
+	query := fmt.Sprintf("select max(f_usage_user) from devops.cpu where (%s) and ts> \"%s\" and ts < \"%s\" interval(1m) ", combinedHostnameClause, interval.StartString(), interval.EndString())
+	//	query := fmt.Sprintf("select avg(f_usage_user) from devops.cpu where (%s)  interval(1h)",  combinedHostnameClause)
 
-	humanLabel := fmt.Sprintf("TDengine max cpu, rand %4d hosts, rand %s by 1m",  nhosts, timeRange)
+	humanLabel := fmt.Sprintf("TDengine max cpu, rand %4d hosts, rand %s by 1m", nhosts, timeRange)
 
 	q := qi.(*bulkQuerygen.HTTPQuery)
 	d.getHttpQuery(humanLabel, interval.StartString(), query, q)
 }
+
 // MaxCPUUsageHourByMinuteThirtyTwoHosts populates a Query with a query that looks like:
 // SELECT max(usage_user) from cpu where (hostname = '$HOSTNAME_1' or ... or hostname = '$HOSTNAME_N') and time >= '$HOUR_START' and time < '$HOUR_END' group by time(1m)
 func (d *tdengineDevops) maxCPUUsageHourBy10MinuteNHosts(qi bulkQuerygen.Query, nhosts int, timeRange time.Duration) {
@@ -109,9 +111,9 @@ func (d *tdengineDevops) maxCPUUsageHourBy10MinuteNHosts(qi bulkQuerygen.Query, 
 	combinedHostnameClause := strings.Join(hostnameClauses, " or ")
 	//_ := strings.Join(hostnameClauses, " or ")
 	query := fmt.Sprintf("select max(f_usage_user) from devops.cpu where (%s) and ts >= '%s' and ts < '%s' interval(10m)", combinedHostnameClause, interval.StartString(), interval.EndString())
-//	query := fmt.Sprintf("select avg(f_usage_user) from devops.cpu where (%s)  interval(1h)",  combinedHostnameClause) 
+	//	query := fmt.Sprintf("select avg(f_usage_user) from devops.cpu where (%s)  interval(1h)",  combinedHostnameClause)
 
-	humanLabel := fmt.Sprintf("TDengine max cpu, rand %4d hosts, rand %s by 10m",  nhosts, timeRange)
+	humanLabel := fmt.Sprintf("TDengine max cpu, rand %4d hosts, rand %s by 10m", nhosts, timeRange)
 
 	q := qi.(*bulkQuerygen.HTTPQuery)
 	d.getHttpQuery(humanLabel, interval.StartString(), query, q)
@@ -135,7 +137,7 @@ func (d *tdengineDevops) maxCPUUsageAllBy1HourHosts(qi bulkQuerygen.Query, nhost
 
 	query := fmt.Sprintf("select max(f_usage_user) from devops.cpu where (%s) interval(1h)", combinedHostnameClause)
 
-	humanLabel := fmt.Sprintf("TDengine max cpu, rand %4d hosts,  by 1 hour",  nhosts)
+	humanLabel := fmt.Sprintf("TDengine max cpu, rand %4d hosts,  by 1 hour", nhosts)
 
 	q := qi.(*bulkQuerygen.HTTPQuery)
 	d.getHttpQuery(humanLabel, " ", query, q)
@@ -159,19 +161,18 @@ func (d *tdengineDevops) maxCPUUsageAllHosts(qi bulkQuerygen.Query, nhosts int, 
 
 	query := fmt.Sprintf("select max(f_usage_user) from devops.cpu where (%s) ", combinedHostnameClause)
 
-	humanLabel := fmt.Sprintf("TDengine max cpu, rand %4d hosts ",  nhosts)
+	humanLabel := fmt.Sprintf("TDengine max cpu, rand %4d hosts ", nhosts)
 
 	q := qi.(*bulkQuerygen.HTTPQuery)
 	d.getHttpQuery(humanLabel, " ", query, q)
 }
+
 // MeanCPUUsageDayByHourAllHosts populates a Query with a query that looks like:
 // SELECT mean(usage_user) from cpu where time >= '$DAY_START' and time < '$DAY_END' group by time(1h),hostname
 func (d *tdengineDevops) MeanCPUUsageDayByHourAllHostsGroupbyHost(qi bulkQuerygen.Query) {
 	interval := d.AllInterval.RandWindow(24 * time.Hour)
 
-	
 	query := fmt.Sprintf("select avg(f_usage_user) from devops.cpu where ts >= '%s' and time < '%s' group by t_hostname interval(1h)", interval.StartString(), interval.EndString())
-	 
 
 	humanLabel := fmt.Sprintf("TDengine avg cpu, all hosts, rand 1day by 1hour")
 	q := qi.(*bulkQuerygen.HTTPQuery)
@@ -197,7 +198,7 @@ func (d *tdengineDevops) getHttpQuery(humanLabel, intervalStart, query string, q
 	q.HumanLabel = []byte(humanLabel)
 	q.HumanDescription = []byte(fmt.Sprintf("%s: %s", humanLabel, intervalStart))
 
-		q.Method = []byte("POST")
-		q.Path = []byte("/rest/sql")
-		q.Body = []byte(query)
+	q.Method = []byte("POST")
+	q.Path = []byte("/rest/sql")
+	q.Body = []byte(query)
 }

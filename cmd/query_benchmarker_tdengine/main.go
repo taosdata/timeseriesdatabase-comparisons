@@ -22,7 +22,7 @@ import (
 	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_query"
 	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_query/http"
 	"github.com/liu0x54/timeseriesdatabase-comparisons/util/report"
-	_ "github.com/taosdata/driver-go/taosSql"
+	//_ "github.com/taosdata/driver-go/taosSql"
 )
 
 /*
@@ -119,7 +119,7 @@ func (b *TDengineQueryBenchmarker) Prepare() {
 	}
 
 	// Make data and control channels:
-	b.queryChan = make(chan []*http.Query,100)
+	b.queryChan = make(chan []*http.Query, 1000000)
 }
 
 func (b *TDengineQueryBenchmarker) GetProcessor() bulk_query.Processor {
@@ -231,7 +231,7 @@ func (b *TDengineQueryBenchmarker) processQueries(w http.HTTPClient, workersGrou
 			doneCh := make(chan int, len(queries))
 			//fmt.Printf("exec query %d\n", len(queries))
 			for _, q := range queries {
-				go b.processSingleQuery(w, q, opts, errCh, doneCh, statPool, statChan, i)
+				b.processSingleQuery(w, q, opts, errCh, doneCh, statPool, statChan, i)
 				queriesSeen++
 				if bulk_query.Benchmarker.GradualWorkersIncrease() {
 					time.Sleep(time.Duration(rand.Int63n(150)) * time.Millisecond) // random sleep 0-150ms
