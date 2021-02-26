@@ -54,7 +54,7 @@ var cgo int = 0
 var querier = &TDengineQueryBenchmarker{}
 var taosDriverName string = "taosSql"
 var taosConns []unsafe.Pointer
-var workers = 0
+var workers int = 0
 
 // Parse args:
 func init() {
@@ -70,7 +70,7 @@ func init() {
 }
 
 func (b *TDengineQueryBenchmarker) Init() {
-	flag.StringVar(&b.csvDaemonUrls, "urls", "http://localhost:6020", "Daemon URLs, comma-separated. Will be used in a round-robin fashion.")
+	flag.StringVar(&b.csvDaemonUrls, "urls", "http://localhost:6041", "Daemon URLs, comma-separated. Will be used in a round-robin fashion.")
 	flag.DurationVar(&b.dialTimeout, "dial-timeout", time.Second*15, "TCP dial timeout.")
 	flag.DurationVar(&b.readTimeout, "write-timeout", time.Second*300, "TCP write timeout.")
 	flag.DurationVar(&b.writeTimeout, "read-timeout", time.Second*300, "TCP read timeout.")
@@ -322,7 +322,6 @@ func taosConnect(ip, db string) (unsafe.Pointer, error) {
 	defer C.free(unsafe.Pointer(cuser))
 	defer C.free(unsafe.Pointer(cpass))
 	defer C.free(unsafe.Pointer(cdb))
-
 	taosObj := C.taos_connect(cip, cuser, cpass, cdb, (C.ushort)(port))
 	if taosObj == nil {
 		return nil, errors.New("taos_connect() fail!")

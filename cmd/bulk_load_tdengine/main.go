@@ -300,18 +300,16 @@ func scan(itemsPerBatch int) (int64, int64, int64) {
 				log.Fatal(err)
 			}
 		} else {
-			itemsRead++
+			
 			bytesRead += int64(len(scanner.Bytes())) - 6
 			if !doLoad {
 				continue
 			}
 
-			hscode, _ := strconv.ParseInt(strings.TrimSpace(line[0:6]), 10, 64)
-
-			vgid = int(hscode) % workers
-
-			batchChans[vgid] <- line[6:]
+			vgid = int(itemsRead % int64(workers))
+			batchChans[vgid] <- line[4:]
 			statistics[vgid]++
+			itemsRead++
 
 		}
 
@@ -351,7 +349,7 @@ func processBatches(iworker int) {
 	}
 	sqlcmd := make([]string, batchSize+1)
 	i = 0
-	sqlcmd[i] = "Insert into"
+	sqlcmd[i] = "Insert into "
 	i++
 	/*
 		for batch := range batchChan {
@@ -425,7 +423,7 @@ func checkErr(err error) {
 
 func httpExecSQL(sqlcmd string, client *http.Client) error {
 	body := strings.NewReader(sqlcmd)
-	req, _ := http.NewRequest("GET", "http://"+daemonUrl+":6020/rest/sql", body)
+	req, _ := http.NewRequest("GET", "http://"+daemonUrl+":6041/rest/sql", body)
 	req.SetBasicAuth("root", "taosdata")
 	resp, err := client.Do(req)
 
