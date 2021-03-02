@@ -13,8 +13,11 @@ workers=16
 interface='false'
 gene=1
 add='127.0.0.1'
-
-while getopts "b:w:i:g:a:" opt
+interval='10s'
+scale=100
+st='2018-01-01T00:00:00Z'
+et='2018-01-02T00:00:00Z'
+while getopts "b:w:n:g:a:i:s:t:e:" opt
 do
     case $opt in
         b)
@@ -25,7 +28,7 @@ do
         echo "workers:$OPTARG"
         workers=$OPTARG
         ;;
-        i)
+        n)
         echo "TD's interface:$OPTARG"
         interface=$OPTARG
         ;;
@@ -33,9 +36,25 @@ do
         echo "whether generate data:$OPTARG"
         gene=$OPTARG
         ;;
+        i)
+        echo "sampling interval:$OPTARG"
+        interval=$OPTARG
+        ;;
         a)
         echo "address:$OPTARG"
         add=$OPTARG
+        ;;
+        s)
+        echo "scale-var:$OPTARG"
+        scale=$OPTARG
+        ;;
+        t)
+        echo "timestamp-start:$OPTARG"
+        st=$OPTARG
+        ;;
+        e)
+        echo "timestamp-end:$OPTARG"
+        et=$OPTARG
         ;;
         ?)
         echo    "======================================================"
@@ -43,17 +62,26 @@ do
         echo    "------------------------------------------------------"
         echo    "w | workers"
         echo    "------------------------------------------------------"
-        echo    "i | TD's interface(false:cgo,true:rest)"
+        echo    "n | TD's interface(false:cgo,true:rest)"
+        echo    "------------------------------------------------------"
+        echo    "i | sampling interval(default:10s)"
         echo    "------------------------------------------------------"
         echo    "a | address of TD & influx"
+        echo    "------------------------------------------------------"
+        echo    "s | scale-var(default:100)"
+        echo    "------------------------------------------------------"
+        echo    "t | timestamp-start(default:'2018-01-01T00:00:00Z')"
+        echo    "------------------------------------------------------"
+        echo    "e | timestamp-end(default:'2018-01-02T00:00:00Z')"
         echo    "------------------------------------------------------"
         echo    "g | genate data(0:no,1:yes)"
         echo    "======================================================"
         exit 1;;
     esac
 done
-if [ $# != 10 ];then
-    echo "variables not defined,use default value as follow :"
+if [ $# != 18 ];then
+    echo "variables not all defined,use value as follow :"
+    echo "generate data: scale-var: $scale ,interval: $interval ,timestamp-start: $st ,timestamp-stop: $et"
     echo "batchsize:$batchsize ,workers:$workers ,TD's interface: $interface ,generate data: $gene , address: $add"
 fi
 echo "$a"
@@ -66,11 +94,11 @@ if [[ $gene == 1 ]];then
     echo "---------------Generating Data-----------------"
     echo
     echo "Prepare data for InfluxDB...."
-    bin/bulk_data_gen -seed 123 -format influx-bulk -sampling-interval 10s -scale-var 100 -use-case devops -timestamp-start "2018-01-01T00:00:00Z" -timestamp-end "2018-01-02T00:00:00Z" >data/influx.dat
+    bin/bulk_data_gen -seed 123 -format influx-bulk -sampling-interval $interval -scale-var $scale -use-case devops -timestamp-start "$st" -timestamp-end "$et" >data/influx.dat
 
     echo 
     echo "Prepare data for TDengine...."
-    bin/bulk_data_gen -seed 123 -format tdengine -sampling-interval 10s -tdschema-file config/TDengineSchema.toml -scale-var 100 -use-case devops -timestamp-start "2018-01-01T00:00:00Z" -timestamp-end "2018-01-02T00:00:00Z"  > data/tdengine.dat
+    bin/bulk_data_gen -seed 123 -format tdengine -sampling-interval $interval -tdschema-file config/TDengineSchema.toml -scale-var $scale -use-case devops -timestamp-start "$st" -timestamp-end "$et"  > data/tdengine.dat
 fi
 echo
 echo "---------------  Clean  -----------------"
