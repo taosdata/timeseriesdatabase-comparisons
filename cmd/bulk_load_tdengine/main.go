@@ -300,16 +300,18 @@ func scan(itemsPerBatch int) (int64, int64, int64) {
 				log.Fatal(err)
 			}
 		} else {
-			
+			itemsRead++
 			bytesRead += int64(len(scanner.Bytes())) - 6
 			if !doLoad {
 				continue
 			}
 
-			vgid = int(itemsRead % int64(workers))
-			batchChans[vgid] <- line[4:]
+			hscode, _ := strconv.ParseInt(strings.TrimSpace(line[0:6]), 10, 64)
+
+			vgid = int(hscode) % workers
+
+			batchChans[vgid] <- line[6:]
 			statistics[vgid]++
-			itemsRead++
 
 		}
 
