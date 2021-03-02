@@ -25,10 +25,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_data_gen/common"
-	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_data_gen/dashboard"
-	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_data_gen/devops"
-	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_data_gen/iot"
+	"github.com/taosdata/timeseriesdatabase-comparisons/bulk_data_gen/common"
+	"github.com/taosdata/timeseriesdatabase-comparisons/bulk_data_gen/dashboard"
+	"github.com/taosdata/timeseriesdatabase-comparisons/bulk_data_gen/devops"
+	"github.com/taosdata/timeseriesdatabase-comparisons/bulk_data_gen/iot"
 )
 
 // Output data format choices:

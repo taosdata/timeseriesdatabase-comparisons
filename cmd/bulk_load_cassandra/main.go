@@ -8,15 +8,15 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
-	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_load"
+	"github.com/taosdata/timeseriesdatabase-comparisons/bulk_load"
 	"io"
 	"log"
 	"sync"
 	"time"
 
 	"github.com/gocql/gocql"
-	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_data_gen/common"
-	"github.com/liu0x54/timeseriesdatabase-comparisons/util/report"
+	"github.com/taosdata/timeseriesdatabase-comparisons/bulk_data_gen/common"
+	"github.com/taosdata/timeseriesdatabase-comparisons/util/report"
 	"strconv"
 	"strings"
 )

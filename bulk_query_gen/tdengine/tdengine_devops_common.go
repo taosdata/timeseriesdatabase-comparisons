@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	bulkQuerygen "github.com/liu0x54/timeseriesdatabase-comparisons/bulk_query_gen"
+	bulkQuerygen "github.com/taosdata/timeseriesdatabase-comparisons/bulk_query_gen"
 )
 
 // tdengineDevops produces tdengine-specific queries for all the devops query types.

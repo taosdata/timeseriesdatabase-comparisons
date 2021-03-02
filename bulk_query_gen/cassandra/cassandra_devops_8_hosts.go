@@ -1,7 +1,7 @@
 package cassandra
 
 import (
-	bulkQuerygen "github.com/liu0x54/timeseriesdatabase-comparisons/bulk_query_gen"
+	bulkQuerygen "github.com/taosdata/timeseriesdatabase-comparisons/bulk_query_gen"
 	"time"
 )
 

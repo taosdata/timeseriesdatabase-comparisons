@@ -2,7 +2,7 @@ package iot
 
 import (
 	"fmt"
-	. "github.com/liu0x54/timeseriesdatabase-comparisons/bulk_data_gen/common"
+	. "github.com/taosdata/timeseriesdatabase-comparisons/bulk_data_gen/common"
 	"math/rand"
 	"time"
 )

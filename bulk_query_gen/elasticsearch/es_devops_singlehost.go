@@ -1,7 +1,7 @@
 package elasticsearch
 
 import "time"
-import bulkQuerygen "github.com/liu0x54/timeseriesdatabase-comparisons/bulk_query_gen"
+import bulkQuerygen "github.com/taosdata/timeseriesdatabase-comparisons/bulk_query_gen"
 
 // ElasticSearchDevopsSingleHost produces ES-specific queries for the devops single-host case.
 type ElasticSearchDevopsSingleHost struct {

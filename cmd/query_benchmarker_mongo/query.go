@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_query_gen/mongodb"
+	"github.com/taosdata/timeseriesdatabase-comparisons/bulk_query_gen/mongodb"
 )
 
 // Query holds Mongo BSON request data, typically decoded from the program's

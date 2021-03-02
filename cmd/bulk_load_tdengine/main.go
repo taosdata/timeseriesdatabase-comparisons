@@ -28,7 +28,7 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_data_gen/common"
+	"github.com/taosdata/timeseriesdatabase-comparisons/bulk_data_gen/common"
 	//_ "github.com/taosdata/driver-go/taosSql"
 
 	//	"github.com/caict-benchmark/BDC-TS/util/report"

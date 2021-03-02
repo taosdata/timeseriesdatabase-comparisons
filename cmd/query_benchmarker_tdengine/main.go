@@ -19,9 +19,9 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_query"
-	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_query/http"
-	"github.com/liu0x54/timeseriesdatabase-comparisons/util/report"
+	"github.com/taosdata/timeseriesdatabase-comparisons/bulk_query"
+	"github.com/taosdata/timeseriesdatabase-comparisons/bulk_query/http"
+	"github.com/taosdata/timeseriesdatabase-comparisons/util/report"
 	//_ "github.com/taosdata/driver-go/taosSql"
 )
 

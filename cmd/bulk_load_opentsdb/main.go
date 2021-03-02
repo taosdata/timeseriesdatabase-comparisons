@@ -9,14 +9,14 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
-	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_load"
+	"github.com/taosdata/timeseriesdatabase-comparisons/bulk_load"
 	"io"
 	"log"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/liu0x54/timeseriesdatabase-comparisons/util/report"
+	"github.com/taosdata/timeseriesdatabase-comparisons/util/report"
 	"github.com/klauspost/compress/gzip"
 )
 

@@ -1,7 +1,7 @@
 package influxdb
 
 import "time"
-import bulkQuerygen "github.com/liu0x54/timeseriesdatabase-comparisons/bulk_query_gen"
+import bulkQuerygen "github.com/taosdata/timeseriesdatabase-comparisons/bulk_query_gen"
 
 // InfluxDevopsGroupby produces Influx-specific queries for the devops groupby case.
 type InfluxDevopsGroupby struct {

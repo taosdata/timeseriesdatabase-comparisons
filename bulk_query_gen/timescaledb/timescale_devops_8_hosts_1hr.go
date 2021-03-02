@@ -1,7 +1,7 @@
 package timescaledb
 
 import "time"
-import bulkQuerygen "github.com/liu0x54/timeseriesdatabase-comparisons/bulk_query_gen"
+import bulkQuerygen "github.com/taosdata/timeseriesdatabase-comparisons/bulk_query_gen"
 
 // TimescaleDevops8Hosts1Hr produces Timescale-specific queries for the devops single-host case.
 type TimescaleDevops8Hosts1Hr struct {

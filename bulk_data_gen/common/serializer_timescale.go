@@ -3,7 +3,7 @@ package common
 import (
 	"encoding/binary"
 	"fmt"
-	"github.com/liu0x54/timeseriesdatabase-comparisons/timescale_serializaition"
+	"github.com/taosdata/timeseriesdatabase-comparisons/timescale_serializaition"
 	"io"
 	"log"
 	"reflect"

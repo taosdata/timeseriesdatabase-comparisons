@@ -1,4 +1,4 @@
-module github.com/liu0x54/timeseriesdatabase-comparisons
+module github.com/taosdata/timeseriesdatabase-comparisons
 
 go 1.14
 

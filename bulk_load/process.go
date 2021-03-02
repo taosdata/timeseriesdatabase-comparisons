@@ -1,7 +1,7 @@
 package bulk_load
 
 import (
-	"github.com/liu0x54/timeseriesdatabase-comparisons/util/report"
+	"github.com/taosdata/timeseriesdatabase-comparisons/util/report"
 	"sync"
 )
 

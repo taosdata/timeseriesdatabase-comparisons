@@ -10,8 +10,8 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_data_gen/common"
-	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_load"
+	"github.com/taosdata/timeseriesdatabase-comparisons/bulk_data_gen/common"
+	"github.com/taosdata/timeseriesdatabase-comparisons/bulk_load"
 	"io"
 	"io/ioutil"
 	"log"
@@ -22,7 +22,7 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/liu0x54/timeseriesdatabase-comparisons/
+	"github.com/taosdata/timeseriesdatabase-comparisons/
 	"github.com/valyala/fasthttp"
 	"strconv"
 )

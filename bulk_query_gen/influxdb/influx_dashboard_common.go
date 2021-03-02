@@ -2,8 +2,8 @@ package influxdb
 
 import (
 	"fmt"
-	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_data_gen/dashboard"
-	bulkQuerygen "github.com/liu0x54/timeseriesdatabase-comparisons/bulk_query_gen"
+	"github.com/taosdata/timeseriesdatabase-comparisons/bulk_data_gen/dashboard"
+	bulkQuerygen "github.com/taosdata/timeseriesdatabase-comparisons/bulk_query_gen"
 	"math/rand"
 	"time"
 )

@@ -19,7 +19,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/liu0x54/timeseriesdatabase-comparisons/util/report"
+	"github.com/taosdata/timeseriesdatabase-comparisons/util/report"
 )
 
 // TODO: distinguish per use case

@@ -2,8 +2,8 @@ package dashboard
 
 import (
 	"fmt"
-	. "github.com/liu0x54/timeseriesdatabase-comparisons/bulk_data_gen/common"
-	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_data_gen/devops"
+	. "github.com/taosdata/timeseriesdatabase-comparisons/bulk_data_gen/common"
+	"github.com/taosdata/timeseriesdatabase-comparisons/bulk_data_gen/devops"
 	"math/rand"
 	"time"
 )

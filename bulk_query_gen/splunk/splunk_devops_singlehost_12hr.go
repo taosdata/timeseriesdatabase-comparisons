@@ -1,7 +1,7 @@
 package splunk
 
 import "time"
-import bulkQuerygen "github.com/liu0x54/timeseriesdatabase-comparisons/bulk_query_gen"
+import bulkQuerygen "github.com/taosdata/timeseriesdatabase-comparisons/bulk_query_gen"
 
 // SplunkDevopsSingleHost12hr produces Influx-specific queries for the devops single-host case over a 12hr period.
 type SplunkDevopsSingleHost12hr struct {

@@ -1,7 +1,7 @@
 package cassandra
 
 import "time"
-import bulkQuerygen "github.com/liu0x54/timeseriesdatabase-comparisons/bulk_query_gen"
+import bulkQuerygen "github.com/taosdata/timeseriesdatabase-comparisons/bulk_query_gen"
 
 // CassandraDevopsSingleHost12hr produces Cassandra-specific queries for the devops single-host case.
 type CassandraDevopsSingleHost12hr struct {

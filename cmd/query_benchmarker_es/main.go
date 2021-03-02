@@ -11,13 +11,13 @@ import (
 	"encoding/gob"
 	"flag"
 	"fmt"
-	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_query"
+	"github.com/taosdata/timeseriesdatabase-comparisons/bulk_query"
 	"io"
 	"log"
 	"strings"
 	"sync"
 
-	"github.com/liu0x54/timeseriesdatabase-comparisons/util/report"
+	"github.com/taosdata/timeseriesdatabase-comparisons/util/report"
 )
 
 type ElasticQueryBenchmarker struct {

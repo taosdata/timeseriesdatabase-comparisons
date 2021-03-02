@@ -8,21 +8,21 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
-	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_load"
+	"github.com/taosdata/timeseriesdatabase-comparisons/bulk_load"
 	"log"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/liu0x54/timeseriesdatabase-comparisons/util/report"
+	"github.com/taosdata/timeseriesdatabase-comparisons/util/report"
 	"github.com/jackc/pgx"
 
 	"bytes"
 	"context"
 	"encoding/binary"
-	"github.com/liu0x54/timeseriesdatabase-comparisons/bulk_data_gen/common"
-	"github.com/liu0x54/timeseriesdatabase-comparisons/timescale_serializaition"
+	"github.com/taosdata/timeseriesdatabase-comparisons/bulk_data_gen/common"
+	"github.com/taosdata/timeseriesdatabase-comparisons/timescale_serializaition"
 	"io"
 )
 
