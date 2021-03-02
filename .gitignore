@@ -1,2 +1,2 @@
-build/tsdbcompare/bin/*
-build/tsdbcompare/data/*
+/build/tsdbcompare/bin/*
+/build/tsdbcompare/data/*
