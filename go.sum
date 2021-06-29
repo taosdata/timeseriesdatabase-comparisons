@@ -7,7 +7,7 @@ github.com/golang/protobuf v1.4.0-rc.4.0.20200313231945-b860323f09d0/go.mod h1:W
 github.com/golang/protobuf v1.4.0/go.mod h1:jodUvKwWbYaEsadDk5Fwe5c77LiNKVO9IDvqG2KuDX0=
 github.com/golang/protobuf v1.4.2 h1:+Z5KGCizgyZCbGh1KZqA0fcLLkwbsjIzS4aV2v7wJX0=
 github.com/golang/protobuf v1.4.2/go.mod h1:oDoupMAO8OvCJWAcko0GGGIgR6R6ocIYbsSw735rRwI=
-github.com/google/flatbuffers v1.12.0 h1:N8EguYFm2wwdpoNcpchQY0tPs85vOJkboFb2dPxmixo=
+github.com/google/flatbuffers v1.12.0 h1:/PtAHvnBY4Kqnx/xCQ3OIV9uYcSFGScBsWI3Oogeh6w=
 github.com/google/flatbuffers v1.12.0/go.mod h1:1AeVuKshWv4vARoZatz6mlQ0JxURH0Kv5+zNeJKJCa8=
 github.com/google/go-cmp v0.3.0/go.mod h1:8QqcDgzrUqlUb/G2PQTWiueGozuR1884gddMywk6iLU=
 github.com/google/go-cmp v0.3.1/go.mod h1:8QqcDgzrUqlUb/G2PQTWiueGozuR1884gddMywk6iLU=
@@ -18,9 +18,6 @@ github.com/pelletier/go-toml v1.8.0 h1:Keo9qb7iRJs2voHvunFtuuYFsbWeOBh8/P9v/kVMF
 github.com/pelletier/go-toml v1.8.0/go.mod h1:D6yutnOGMveHEPV7VQOuvI/gXY61bv+9bAOTRnLElKs=
 github.com/pkg/profile v1.5.0 h1:042Buzk+NhDI+DeSAA62RwJL8VAuZUMQZUjCsRz1Mug=
 github.com/pkg/profile v1.5.0/go.mod h1:qBsxPvzyUincmltOk6iyRVxHYg4adc0OFOv72ZdLa18=
-github.com/taosdata/driver-go v0.0.0-20200311072652-8c58c512b6ac h1:uZplMwObJj8mfgI4ZvYPNHRn+fNz2leiMPqShsjtEEc=
-github.com/taosdata/driver-go v0.0.0-20200311072652-8c58c512b6ac/go.mod h1:TuMZDpnBrjNO07rneM2C5qMYFqIro4aupL2cUOGGo/I=
-github.com/taosdata/driver-go v0.0.0-20200605030916-a45432a82eef h1:3zZLs6kEGvsfTxZ01iW1jLTyqpkusC3nBe7tCN0yUlo=
 github.com/taosdata/driver-go v0.0.0-20200605030916-a45432a82eef/go.mod h1:TuMZDpnBrjNO07rneM2C5qMYFqIro4aupL2cUOGGo/I=
 github.com/valyala/bytebufferpool v1.0.0 h1:GqA5TC/0021Y/b9FG4Oi9Mr3q7XYx6KllzawFIhcdPw=
 github.com/valyala/bytebufferpool v1.0.0/go.mod h1:6bBcMArwyJ5K/AmCkWv1jt77kVWyCJ6HpOuEn7z0Csc=
