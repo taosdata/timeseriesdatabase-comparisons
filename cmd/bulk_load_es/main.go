@@ -22,7 +22,8 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/taosdata/timeseriesdatabase-comparisons/
+	//"github.com/taosdata/timeseriesdatabase-comparisons"
+	"github.com/taosdata/timeseriesdatabase-comparisons/util/report"
 	"github.com/valyala/fasthttp"
 	"strconv"
 )
