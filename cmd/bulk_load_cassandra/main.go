@@ -8,17 +8,19 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
-	"github.com/taosdata/timeseriesdatabase-comparisons/bulk_load"
 	"io"
 	"log"
 	"sync"
 	"time"
 
+	"github.com/taosdata/timeseriesdatabase-comparisons/bulk_load"
+
+	"strconv"
+	"strings"
+
 	"github.com/gocql/gocql"
 	"github.com/taosdata/timeseriesdatabase-comparisons/bulk_data_gen/common"
 	"github.com/taosdata/timeseriesdatabase-comparisons/util/report"
-	"strconv"
-	"strings"
 )
 
 type CassandraBulkLoad struct {
@@ -47,8 +49,8 @@ func init() {
 
 	flag.Parse()
 
-	bulk_load.Runner.Validate()
-	load.Validate()
+	bulk_load.Runner.Validate() // run the Validate in bulk_load.runner
+	load.Validate()             // currently no use
 
 }
 
@@ -69,10 +71,10 @@ func (l *CassandraBulkLoad) Validate() {
 
 }
 
-func (l *CassandraBulkLoad) CreateDb() {
+func (l *CassandraBulkLoad) CreateDb() { //create the keyspace and the tables
 	var ucTablesMap = map[string][]string{
-		common.UseCaseDevOps: createTablesCQLDevops,
-		common.UseCaseIot:    createTablesCQLIot,
+		common.UseCaseDevOps: createTablesCQLDevops, //defualt table format
+		common.UseCaseIot:    createTablesCQLIot,    //the second table format
 	}
 
 	log.Println("Creating keyspace")
@@ -98,7 +100,7 @@ func (l *CassandraBulkLoad) PrepareWorkers() {
 	}
 
 	l.batchChan = make(chan *gocql.Batch, bulk_load.Runner.Workers)
-	l.inputDone = make(chan struct{})
+	l.inputDone = make(chan struct{}) //really not sure what does this do. Confusing
 }
 
 func (l *CassandraBulkLoad) GetBatchProcessor() bulk_load.BatchProcessor {
@@ -175,7 +177,7 @@ func (l *CassandraBulkLoad) RunScanner(r io.Reader, syncChanDone chan int) {
 	var totalPoints, totalValues int64
 
 	var deadline time.Time
-	if bulk_load.Runner.TimeLimit > 0 {
+	if bulk_load.Runner.TimeLimit > 0 { //set the deadline for the load time
 		deadline = time.Now().Add(bulk_load.Runner.TimeLimit)
 	}
 
@@ -200,11 +202,11 @@ outer:
 		batch.Query(string(scanner.Bytes()))
 
 		n++
-		if n >= bulk_load.Runner.BatchSize {
+		if n >= bulk_load.Runner.BatchSize { //send the batch to batch chain and create a new batch.
 			l.batchChan <- batch
 			batch = l.session.NewBatch(gocql.LoggedBatch)
 			n = 0
-			if bulk_load.Runner.TimeLimit > 0 && time.Now().After(deadline) {
+			if bulk_load.Runner.TimeLimit > 0 && time.Now().After(deadline) { //if the run time exceed the running time, time out the loop
 				bulk_load.Runner.SetPrematureEnd("Timeout elapsed")
 				break outer
 			}
@@ -301,6 +303,7 @@ func (l *CassandraBulkLoad) createKeyspace(daemonUrl string, tableSchema []strin
 	}
 	defer session.Close()
 
+	//the tester need to remove the keyspace measurements from the database
 	if err := session.Query(`create keyspace measurements with replication = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 };`).Exec(); err != nil {
 		log.Print("if you know what you are doing, drop the keyspace with a command line:")
 		log.Print("echo 'drop keyspace measurements;' | cqlsh <host>")

@@ -2,10 +2,11 @@ package cassandra
 
 import (
 	"fmt"
-	bulkQuerygen "github.com/taosdata/timeseriesdatabase-comparisons/bulk_query_gen"
 	"math/rand"
 	"strings"
 	"time"
+
+	bulkQuerygen "github.com/taosdata/timeseriesdatabase-comparisons/bulk_query_gen"
 )
 
 // CassandraDevops produces Cassandra-specific queries for all the devops query types.
@@ -43,7 +44,19 @@ func (d *CassandraDevops) MaxCPUUsageHourByMinuteFourHosts(q bulkQuerygen.Query)
 }
 
 func (d *CassandraDevops) MaxCPUUsageHourByMinuteEightHosts(q bulkQuerygen.Query) {
-	d.maxCPUUsageHourByMinuteNHosts(q.(*CassandraQuery), 8, time.Hour)
+	d.maxCPUUsageHourBy10MinuteNHosts(q.(*CassandraQuery), 8, time.Hour)
+}
+
+func (d *CassandraDevops) MaxCPUUsageHour12HoursByMinuteEightHosts(q bulkQuerygen.Query) {
+	d.maxCPUUsageHourBy10MinuteNHosts(q.(*CassandraQuery), 8, 12*time.Hour)
+}
+
+func (d *CassandraDevops) MaxCPUUsageHourAllByMinuteEightHosts(q bulkQuerygen.Query) {
+	d.maxCPUUsageHourBy10MinuteNHosts(q.(*CassandraQuery), 8, 0)
+}
+
+func (d *CassandraDevops) MaxCPUUsageHourAllByHourEightHosts(q bulkQuerygen.Query) {
+	d.maxCPUUsageHourByHourNHosts(q.(*CassandraQuery), 8, 0)
 }
 
 func (d *CassandraDevops) MaxCPUUsageHourByMinuteSixteenHosts(q bulkQuerygen.Query) {
@@ -71,10 +84,10 @@ func (d *CassandraDevops) maxCPUUsageHourByMinuteNHosts(qi bulkQuerygen.Query, n
 
 	hostnameClauses := []string{}
 	for _, s := range hostnames {
-		hostnameClauses = append(hostnameClauses, fmt.Sprintf("hostname = '%s'", s))
+		hostnameClauses = append(hostnameClauses, fmt.Sprintf(" '%s'", s))
 	}
 
-	combinedHostnameClause := strings.Join(hostnameClauses, " or ")
+	combinedHostnameClause := "hostname in(" + strings.Join(hostnameClauses, " , ") + ")"
 
 	humanLabel := fmt.Sprintf("Cassandra max cpu, rand %4d hosts, rand %s by 1m", nhosts, timeRange)
 	q := qi.(*CassandraQuery)
@@ -88,6 +101,74 @@ func (d *CassandraDevops) maxCPUUsageHourByMinuteNHosts(qi bulkQuerygen.Query, n
 	q.TimeStart = interval.Start
 	q.TimeEnd = interval.End
 	q.GroupByDuration = time.Minute
+
+	q.TagsCondition = []byte(combinedHostnameClause)
+}
+
+// MaxCPUUsageHourByMinuteThirtyTwoHosts populates a Query with a query that looks like:
+// SELECT max(usage_user) from cpu where (hostname = '$HOSTNAME_1' or ... or hostname = '$HOSTNAME_N') and time >= '$HOUR_START' and time < '$HOUR_END' group by time(10m)
+func (d *CassandraDevops) maxCPUUsageHourBy10MinuteNHosts(qi bulkQuerygen.Query, nhosts int, timeRange time.Duration) {
+	interval := d.AllInterval.RandWindow(timeRange)
+	nn := rand.Perm(d.ScaleVar)[:nhosts]
+
+	hostnames := []string{}
+	for _, n := range nn {
+		hostnames = append(hostnames, fmt.Sprintf("host_%d", n))
+	}
+
+	hostnameClauses := []string{}
+	for _, s := range hostnames {
+		hostnameClauses = append(hostnameClauses, fmt.Sprintf(" '%s'", s))
+	}
+
+	combinedHostnameClause := "hostname in(" + strings.Join(hostnameClauses, " , ") + ")"
+
+	humanLabel := fmt.Sprintf("Cassandra max cpu, rand %4d hosts, rand %s by 10m", nhosts, timeRange)
+	q := qi.(*CassandraQuery)
+	q.HumanLabel = []byte(humanLabel)
+	q.HumanDescription = []byte(fmt.Sprintf("%s: %s", humanLabel, interval.StartString()))
+
+	q.AggregationType = []byte("max")
+	q.MeasurementName = []byte("measurements.cpu")
+	q.FieldName = []byte("usage_user")
+
+	q.TimeStart = interval.Start
+	q.TimeEnd = interval.End
+	q.GroupByDuration = time.Minute * 10
+
+	q.TagsCondition = []byte(combinedHostnameClause)
+}
+
+// MaxCPUUsageHourByMinuteThirtyTwoHosts populates a Query with a query that looks like:
+// SELECT max(usage_user) from cpu where (hostname = '$HOSTNAME_1' or ... or hostname = '$HOSTNAME_N') and time >= '$HOUR_START' and time < '$HOUR_END' group by time(1h)
+func (d *CassandraDevops) maxCPUUsageHourByHourNHosts(qi bulkQuerygen.Query, nhosts int, timeRange time.Duration) {
+	interval := d.AllInterval.RandWindow(timeRange)
+	nn := rand.Perm(d.ScaleVar)[:nhosts]
+
+	hostnames := []string{}
+	for _, n := range nn {
+		hostnames = append(hostnames, fmt.Sprintf("host_%d", n))
+	}
+
+	hostnameClauses := []string{}
+	for _, s := range hostnames {
+		hostnameClauses = append(hostnameClauses, fmt.Sprintf(" '%s'", s))
+	}
+
+	combinedHostnameClause := "hostname in(" + strings.Join(hostnameClauses, " , ") + ")"
+
+	humanLabel := fmt.Sprintf("Cassandra max cpu, rand %4d hosts, rand %s by 1h", nhosts, timeRange)
+	q := qi.(*CassandraQuery)
+	q.HumanLabel = []byte(humanLabel)
+	q.HumanDescription = []byte(fmt.Sprintf("%s: %s", humanLabel, interval.StartString()))
+
+	q.AggregationType = []byte("max")
+	q.MeasurementName = []byte("measurements.cpu")
+	q.FieldName = []byte("usage_user")
+
+	q.TimeStart = interval.Start
+	q.TimeEnd = interval.End
+	q.GroupByDuration = time.Hour
 
 	q.TagsCondition = []byte(combinedHostnameClause)
 }
