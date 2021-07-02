@@ -198,6 +198,7 @@ outer:
 		}
 
 		batch.Query(string(scanner.Bytes()))
+		//fmt.Println(string(scanner.Bytes())) // modifications
 
 		n++
 		if n >= bulk_load.Runner.BatchSize {
@@ -229,6 +230,7 @@ outer:
 	close(l.inputDone)
 
 	l.valuesRead = totalValues
+	//fmt.Println(totalValues, totalPoints) // modifications
 	//cassandra's schema stores each value separately, point is represented in series_id
 	if l.itemsRead != totalPoints {
 		if !bulk_load.Runner.HasEndedPrematurely() {
@@ -268,7 +270,7 @@ var createTablesCQLDevops = []string{
 	"CREATE table measurements.disk(time bigint, hostname TEXT, region TEXT, datacenter TEXT, rack TEXT, os TEXT, arch TEXT, team TEXT, service TEXT, service_version TEXT, service_environment TEXT, path TEXT, fstype TEXT, total bigint, free bigint, used bigint, used_percent bigint, inodes_total bigint, inodes_free bigint, inodes_used bigint, primary key(hostname, time)) %s;",
 	"CREATE table measurements.kernel(time bigint, hostname TEXT, region TEXT, datacenter TEXT, rack TEXT, os TEXT, arch TEXT, team TEXT, service TEXT, service_version TEXT, service_environment TEXT, boot_time bigint, interrupts bigint, context_switches bigint, processes_forked bigint, disk_pages_in bigint, disk_pages_out bigint, primary key(hostname, time)) %s;",
 	"CREATE table measurements.mem(time bigint, hostname TEXT, region TEXT, datacenter TEXT, rack TEXT, os TEXT, arch TEXT, team TEXT, service TEXT, service_version TEXT, service_environment TEXT, total bigint, available bigint, used bigint, free bigint, cached bigint, buffered bigint, used_percent double, available_percent double, buffered_percent double, primary key(hostname, time)) %s;",
-	"CREATE table measurements.Net(time bigint, hostname TEXT, region TEXT, datacenter TEXT, rack TEXT, os TEXT, arch TEXT, team TEXT, service TEXT, service_version TEXT, service_environment TEXT, interface TEXT, total_connections_received bigint, expired_keys bigint, evicted_keys bigint, keyspace_hits bigint, keyspace_misses bigint, instantaneous_ops_per_sec bigint, instantaneous_input_kbps bigint, instantaneous_output_kbps bigint , primary key(hostname, time)) %s;",
+	"CREATE table measurements.Net(time bigint,hostname TEXT,region TEXT,datacenter TEXT,rack TEXT,os TEXT,arch TEXT,team TEXT,service TEXT,service_version TEXT,service_environment TEXT,interface TEXT,bytes_sent bigint,bytes_recv bigint,packets_sent bigint,packets_recv bigint,err_in bigint,err_out bigint,drop_in bigint,drop_out bigint, primary key(hostname, time)) %s;",
 	"CREATE table measurements.nginx(time bigint, hostname TEXT, region TEXT, datacenter TEXT, rack TEXT, os TEXT, arch TEXT, team TEXT, service TEXT, service_version TEXT, service_environment TEXT, port TEXT, server TEXT, accepts bigint, active bigint, handled bigint, reading bigint, requests bigint, waiting bigint, writing bigint , primary key(hostname, time)) %s;",
 	"CREATE table measurements.postgresl(time bigint, hostname TEXT, region TEXT, datacenter TEXT, rack TEXT, os TEXT, arch TEXT, team TEXT, service TEXT, service_version TEXT, service_environment TEXT, numbackends bigint, xact_commit bigint, xact_rollback bigint, blks_read bigint, blks_hit bigint, tup_returned bigint, tup_fetched bigint, tup_inserted bigint, tup_updated bigint, tup_deleted bigint, conflicts bigint, temp_files bigint, temp_bytes bigint, deadlocks bigint, blk_read_time bigint, blk_write_time bigint , primary key(hostname, time)) %s;",
 	"CREATE table measurements.redis(time bigint, hostname TEXT, region TEXT, datacenter TEXT, rack TEXT, os TEXT, arch TEXT, team TEXT, service TEXT, service_version TEXT, service_environment TEXT, port TEXT, server TEXT, uptime_in_seconds bigint, total_connections_received bigint, expired_keys bigint, evicted_keys bigint, keyspace_hits bigint, keyspace_misses bigint, instantaneous_ops_per_sec bigint, instantaneous_input_kbps bigint, instantaneous_output_kbps bigint, connected_clients bigint, used_memory bigint, used_memory_rss bigint, used_memory_peak bigint, used_memory_lua bigint, rdb_changes_since_last_save bigint, sync_full bigint, sync_partial_ok bigint, sync_partial_err bigint, pubsub_channels bigint, pubsub_patterns bigint, latest_fork_usec bigint, connected_slaves bigint, master_repl_offset bigint, repl_backlog_active bigint, repl_backlog_size bigint, repl_backlog_histlen bigint, mem_fragmentation_ratio bigint, used_cpu_sys bigint, used_cpu_user bigint, used_cpu_sys_children bigint, used_cpu_user_children bigint , primary key(hostname, time)) %s;",

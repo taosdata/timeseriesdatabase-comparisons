@@ -12,7 +12,7 @@ batchsize=5000
 workers=16
 interface='false'
 gene=1
-add='tdvs'
+add='192.168.1.179'
 interval='10s'
 scale=100
 st='2018-01-01T00:00:00Z'
@@ -94,7 +94,7 @@ if [[ $gene == 1 ]];then
     echo "---------------Generating Data-----------------"
     echo
     echo "Prepare data for InfluxDB...."
-    bin/bulk_data_gen -seed 123 -format influx-bulk -sampling-interval $interval -scale-var $scale -use-case devops -timestamp-start "$st" -timestamp-end "$et" >data/influx.dat
+    bin/bulk_data_gen -seed 123 -format cassandra -sampling-interval $interval -scale-var $scale -use-case devops -timestamp-start "$st" -timestamp-end "$et" >data/cassandra.dat
 
     echo 
     echo "Prepare data for TDengine...."
@@ -102,14 +102,16 @@ if [[ $gene == 1 ]];then
 fi
 echo
 echo "---------------  Clean  -----------------"
-ssh root@$add << eeooff
-rm -rf /mnt/lib/taos/*
-rm -rf /mnt/lib/influxdb/*
+rm -rf /var/lib/taos/*
+service cassandra start
+sleep 30
+echo 'drop keyspace if exists measurements;' | cqlsh
 echo 1 > /proc/sys/vm/drop_caches
-systemctl start taosd 
+service cassandra stop
+systemctl start taosd
+rm -rf /var/lib/cassandra/data/measurements
 sleep 10
-exit
-eeooff
+
 
 echo
 echo "------------------Writing Data-----------------"
@@ -126,29 +128,24 @@ echo -e "${GREEN}$TDENGINERES${NC}"
 DATA=`echo $TDENGINERES|awk '{print($2)}'`
 TMP=`echo $TDENGINERES|awk '{print($5)}'`
 TDWTM=`echo ${TMP%s*}`
-ssh root@$add << eeooff
 systemctl stop taosd 
 echo 1 > /proc/sys/vm/drop_caches
-systemctl start influxdb
-sleep 10
-exit
-eeooff
+service cassandra start
+sleep 20
+echo 'cassandra started'
+#exit
 echo
-echo -e "Start test InfluxDB, result in ${GREEN}Green line${NC}"
+echo -e "Start test cassandra, result in ${GREEN}Green line${NC}"
 #curl "http://$add:8086/query?q=drop%20database%20benchmark_db" -X POST
-INFLUXRES=`cat data/influx.dat  |bin/bulk_load_influx --batch-size=$batchsize --workers=$workers --urls="http://$add:8086" | grep loaded`
+CASSANDRA=`cat data/cassandra.dat  |bin/bulk_load_cassandra --batch-size=$batchsize --workers=$workers| grep loaded`
 echo
-echo -e "${GREEN}InfluxDB writing result:${NC}"
-echo -e "${GREEN}$INFLUXRES${NC}"
+echo -e "${GREEN}cassandra writing result:${NC}"
+echo -e "${GREEN}$CASSANDRA${NC}"
 
-TMP=`echo $INFLUXRES|awk '{print($5)}'`
+TMP=`echo $CASSANDRA|awk '{print($5)}'`
 IFWTM=`echo ${TMP%s*}`
-ssh root@$add << eeooff
-systemctl stop influxd
-exit
-eeooff
-TDDISK=`ssh root@$add "du -sh /mnt/lib/taos/vnode | cut -d '	' -f 1 " `
-IFDISK=`ssh root@$add "du -sh /mnt/lib/influxdb/data | cut -d '	' -f 1" `
+TDDISK=`du -sh /var/lib/taos/vnode | cut -d '	' -f 1 `
+IFDISK=`du -sh /var/lib/cassandra/data/measurements | cut -d '	' -f 1 `
 
 echo
 echo
@@ -157,11 +154,11 @@ echo    "             tsdb performance comparision             "
 printf  "       worker:%-4.2f      |       batch:%-4.2f      \n" $workers $batchsize
 echo    "======================================================"
 echo -e "       Writing $DATA records test takes:          "
-printf  "       InfluxDB           |       %-4.2f Seconds    \n" $IFWTM 
+printf  "       cassandra          |       %-4.2f Seconds    \n" $IFWTM 
 printf  "       TDengine           |       %-4.2f Seconds    \n" $TDWTM
 echo    "======================================================"
 echo -e "       Writing $DATA records test disk:          "
-printf  "       InfluxDB           |       %-10s     \n" $IFDISK
+printf  "       cassandra          |       %-10s     \n" $IFDISK
 printf  "       TDengine           |       %-10s     \n" $TDDISK
 echo    "------------------------------------------------------"
 

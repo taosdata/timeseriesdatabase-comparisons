@@ -159,7 +159,7 @@ echo
 #select max(usage_user) from cpu where(hostname='host_a' and hostname='host_b'and hostname='host_c'and hostname='host_d'and hostname='host_e'and hostname='host_f' and hostname='host_g'and hostname='host_h') ;
 # a,b,c,d,e,f,g,h are random 8 numbers.
 IFQS1=`bin/bulk_query_gen  -seed 123 -format influx-http -query-type 8-host-all -scale-var $scale -queries 1000 | bin/query_benchmarker_influxdb  -urls="http://$add:8086"  -workers $workers -print-interval 0|grep wall`
-echo -e "${GREEN}InfluxDB query test case 1 result:${NC}"
+echo -e "${GREEN}cassandra query test case 1 result:${NC}"
 echo -e "${GREEN}$IFQS1${NC}"
 TMP=`echo $IFQS1|awk '{print($4)}'`
 IFQ1=`echo ${TMP%s*}`
@@ -168,7 +168,7 @@ IFQ1=`echo ${TMP%s*}`
 #select max(usage_user) from cpu where(hostname='host_a' and hostname='host_b'and hostname='host_c'and hostname='host_d'and hostname='host_e'and hostname='host_f' and hostname='host_g'and hostname='host_h') interval(1h);
 # a,b,c,d,e,f,g,h are random 8 numbers
 IFQS2=`bin/bulk_query_gen  -seed 123 -format influx-http -query-type 8-host-allbyhr -scale-var $scale -queries 1000 | bin/query_benchmarker_influxdb  -urls="http://$add:8086"  -workers $workers -print-interval 0|grep wall`
-echo -e "${GREEN}InfluxDB query test case 2 result:${NC}"
+echo -e "${GREEN}cassandra query test case 2 result:${NC}"
 echo -e "${GREEN}$IFQS2${NC}"
 TMP=`echo $IFQS2|awk '{print($4)}'`
 IFQ2=`echo ${TMP%s*}`
@@ -178,7 +178,7 @@ IFQ2=`echo ${TMP%s*}`
 # a,b,c,d,e,f,g,h are random 8 numbers, y-x =12 hour
 #INFLUXQUERY=`bin/bulk_query_gen  -seed 123 -format influx-http -query-type 1-host-1-hr -scale-var 10 -queries 1000 | bin/query_benchmarker_influxdb  -urls="http://127.0.0.1:8086"  -workers $workers -print-interval 0|grep wall`
 IFQS3=`bin/bulk_query_gen  -seed 123 -format influx-http -query-type 8-host-12-hr -scale-var $scale -queries 1000 | bin/query_benchmarker_influxdb  -urls="http://$add:8086"  -workers $workers -print-interval 0|grep wall`
-echo -e "${GREEN}InfluxDB query test case 3 result:${NC}"
+echo -e "${GREEN}cassandra query test case 3 result:${NC}"
 echo -e "${GREEN}$IFQS3${NC}"
 TMP=`echo $IFQS3|awk '{print($4)}'`
 IFQ3=`echo ${TMP%s*}`
@@ -188,7 +188,7 @@ IFQ3=`echo ${TMP%s*}`
 # a,b,c,d,e,f,g,h are random 8 numbers, y-x =1 hours
 #INFLUXQUERY=`bin/bulk_query_gen  -seed 123 -format influx-http -query-type 1-host-1-hr -scale-var 10 -queries 1000 | bin/query_benchmarker_influxdb  -urls="http://127.0.0.1:8086"  -workers $workers -print-interval 0|grep wall`
 IFQS4=`bin/bulk_query_gen  -seed 123 -format influx-http -query-type 8-host-1-hr -scale-var $scale -queries 1000 | bin/query_benchmarker_influxdb  -urls="http://$add:8086"  -workers $workers -print-interval 0|grep wall`
-echo -e "${GREEN}InfluxDB query test case 4 result:${NC}"
+echo -e "${GREEN}cassandra query test case 4 result:${NC}"
 echo -e "${GREEN}$IFQS4${NC}"
 TMP=`echo $IFQS4|awk '{print($4)}'`
 IFQ4=`echo ${TMP%s*}`
@@ -203,26 +203,26 @@ echo    "                   Query test cases:                "
 echo    " case 1: select the max(value) from all data    "
 echo    " filtered out 8 hosts                                 "
 echo    "       Query test case 1 takes:                      "
-printf  "       InfluxDB           |       %-4.2f Seconds    \n" $IFQ1 
+printf  "       cassandra          |       %-4.2f Seconds    \n" $IFQ1 
 printf  "       TDengine           |       %-4.2f Seconds    \n" $TDQ1
 echo    "------------------------------------------------------"
 echo    " case 2: select the max(value) from all data          "
 echo    " filtered out 8 hosts with an interval of 1 hour     "
 echo    " case 2 takes:                                       "
-printf  "       InfluxDB           |       %-4.2f Seconds    \n" $IFQ2 
+printf  "       cassandra          |       %-4.2f Seconds    \n" $IFQ2 
 printf  "       TDengine           |       %-4.2f Seconds    \n" $TDQ2
 echo    "------------------------------------------------------"
 echo    " case 3: select the max(value) from random 12 hours"
 echo    " data filtered out 8 hosts with an interval of 10 min         "
 echo    " filtered out 8 hosts interval(1h)                   "
 echo    " case 3 takes:                                       "
-printf  "       InfluxDB           |       %-4.2f Seconds    \n" $IFQ3 
+printf  "       cassandra          |       %-4.2f Seconds    \n" $IFQ3 
 printf  "       TDengine           |       %-4.2f Seconds    \n" $TDQ3
 echo    "------------------------------------------------------"
 echo    " case 4: select the max(value) from random 1 hour data  "
 echo    " data filtered out 8 hosts with an interval of 1 min         "
 echo    " case 4 takes:                                        "
-printf  "       InfluxDB           |       %-4.2f Seconds    \n" $IFQ4 
+printf  "       cassandra          |       %-4.2f Seconds    \n" $IFQ4 
 printf  "       TDengine           |       %-4.2f Seconds    \n" $TDQ4
 echo    "------------------------------------------------------"
 echo

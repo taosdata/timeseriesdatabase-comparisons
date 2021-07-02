@@ -1,0 +1,615 @@
+batchsize:2000
+workers:100
+whether generate data:1
+scale-var:100
+variables not all defined,use value as follow :
+generate data: scale-var: 100 ,interval: 10s ,timestamp-start: 2018-01-01T00:00:00Z ,timestamp-stop: 2018-01-02T00:00:00Z
+batchsize:2000 ,workers:100 ,TD's interface: false ,generate data: 1 , address: 192.168.1.179
+
+
+---------------Generating Data-----------------
+
+Prepare data for InfluxDB....
+
+Prepare data for TDengine....
+
+---------------  Clean  -----------------
+
+------------------Writing Data-----------------
+
+Start test TDengine, result in [1;32mGreen line[0m
+loaded 7776000 items in 18.523118sec with 100 workers (mean point rate 419799.73/s, mean value rate 4711085.83/s, 54.66MB/sec from stdin)
+
+[1;32mTDengine writing result:[0m
+[1;32mloaded 7776000 items in 18.523118sec with 100 workers (mean point rate 419799.73/s, mean value rate 4711085.83/s, 54.66MB/sec from stdin)[0m
+cassandra started
+
+Start test cassandra, result in [1;32mGreen line[0m
+
+[1;32mcassandra writing result:[0m
+[1;32mloaded 7776000 items in 323.484615sec with 100 workers (mean point rate 24038.237525/sec, mean value rate 269762.443336/s, 11.45MB/sec from stdin)[0m
+
+
+======================================================
+             tsdb performance comparision             
+       worker:100.00      |       batch:2000.00      
+======================================================
+       Writing 7776000 records test takes:          
+       cassandra          |       323.48 Seconds    
+       TDengine           |       18.52 Seconds    
+======================================================
+       Writing 7776000 records test disk:          
+       cassandra          |       377M           
+       TDengine           |       92M            
+------------------------------------------------------
+batchsize:2000
+workers:50
+whether generate data:0
+scale-var:100
+variables not all defined,use value as follow :
+generate data: scale-var: 100 ,interval: 10s ,timestamp-start: 2018-01-01T00:00:00Z ,timestamp-stop: 2018-01-02T00:00:00Z
+batchsize:2000 ,workers:50 ,TD's interface: false ,generate data: 0 , address: 192.168.1.179
+
+
+---------------  Clean  -----------------
+
+------------------Writing Data-----------------
+
+Start test TDengine, result in [1;32mGreen line[0m
+loaded 7776000 items in 20.671303sec with 50 workers (mean point rate 376173.68/s, mean value rate 4221504.60/s, 48.98MB/sec from stdin)
+
+[1;32mTDengine writing result:[0m
+[1;32mloaded 7776000 items in 20.671303sec with 50 workers (mean point rate 376173.68/s, mean value rate 4221504.60/s, 48.98MB/sec from stdin)[0m
+cassandra started
+
+Start test cassandra, result in [1;32mGreen line[0m
+
+[1;32mcassandra writing result:[0m
+[1;32mloaded 7776000 items in 264.122284sec with 50 workers (mean point rate 29440.908522/sec, mean value rate 330392.417860/s, 14.02MB/sec from stdin)[0m
+
+
+======================================================
+             tsdb performance comparision             
+       worker:50.00      |       batch:2000.00      
+======================================================
+       Writing 7776000 records test takes:          
+       cassandra          |       264.12 Seconds    
+       TDengine           |       20.67 Seconds    
+======================================================
+       Writing 7776000 records test disk:          
+       cassandra          |       396M           
+       TDengine           |       93M            
+------------------------------------------------------
+batchsize:2000
+workers:16
+whether generate data:0
+scale-var:100
+variables not all defined,use value as follow :
+generate data: scale-var: 100 ,interval: 10s ,timestamp-start: 2018-01-01T00:00:00Z ,timestamp-stop: 2018-01-02T00:00:00Z
+batchsize:2000 ,workers:16 ,TD's interface: false ,generate data: 0 , address: 192.168.1.179
+
+
+---------------  Clean  -----------------
+
+------------------Writing Data-----------------
+
+Start test TDengine, result in [1;32mGreen line[0m
+loaded 7776000 items in 20.112775sec with 16 workers (mean point rate 386619.95/s, mean value rate 4338734.94/s, 50.34MB/sec from stdin)
+
+[1;32mTDengine writing result:[0m
+[1;32mloaded 7776000 items in 20.112775sec with 16 workers (mean point rate 386619.95/s, mean value rate 4338734.94/s, 50.34MB/sec from stdin)[0m
+cassandra started
+
+Start test cassandra, result in [1;32mGreen line[0m
+
+[1;32mcassandra writing result:[0m
+[1;32mloaded 7776000 items in 205.979494sec with 16 workers (mean point rate 37751.330787/sec, mean value rate 423653.823278/s, 17.98MB/sec from stdin)[0m
+
+
+======================================================
+             tsdb performance comparision             
+       worker:16.00      |       batch:2000.00      
+======================================================
+       Writing 7776000 records test takes:          
+       cassandra          |       205.98 Seconds    
+       TDengine           |       20.11 Seconds    
+======================================================
+       Writing 7776000 records test disk:          
+       cassandra          |       458M           
+       TDengine           |       93M            
+------------------------------------------------------
+batchsize:2000
+workers:1
+whether generate data:0
+scale-var:100
+variables not all defined,use value as follow :
+generate data: scale-var: 100 ,interval: 10s ,timestamp-start: 2018-01-01T00:00:00Z ,timestamp-stop: 2018-01-02T00:00:00Z
+batchsize:2000 ,workers:1 ,TD's interface: false ,generate data: 0 , address: 192.168.1.179
+
+
+---------------  Clean  -----------------
+
+------------------Writing Data-----------------
+
+Start test TDengine, result in [1;32mGreen line[0m
+loaded 7776000 items in 156.424817sec with 1 workers (mean point rate 49710.78/s, mean value rate 557865.45/s, 6.47MB/sec from stdin)
+
+[1;32mTDengine writing result:[0m
+[1;32mloaded 7776000 items in 156.424817sec with 1 workers (mean point rate 49710.78/s, mean value rate 557865.45/s, 6.47MB/sec from stdin)[0m
+cassandra started
+
+Start test cassandra, result in [1;32mGreen line[0m
+
+[1;32mcassandra writing result:[0m
+[1;32mloaded 7776000 items in 562.489837sec with 1 workers (mean point rate 13824.249780/sec, mean value rate 155138.803083/s, 6.58MB/sec from stdin)[0m
+
+
+======================================================
+             tsdb performance comparision             
+       worker:1.00      |       batch:2000.00      
+======================================================
+       Writing 7776000 records test takes:          
+       cassandra          |       562.49 Seconds    
+       TDengine           |       156.42 Seconds    
+======================================================
+       Writing 7776000 records test disk:          
+       cassandra          |       371M           
+       TDengine           |       93M            
+------------------------------------------------------
+batchsize:1000
+workers:100
+whether generate data:1
+scale-var:100
+variables not all defined,use value as follow :
+generate data: scale-var: 100 ,interval: 10s ,timestamp-start: 2018-01-01T00:00:00Z ,timestamp-stop: 2018-01-02T00:00:00Z
+batchsize:1000 ,workers:100 ,TD's interface: false ,generate data: 1 , address: 192.168.1.179
+
+
+---------------Generating Data-----------------
+
+Prepare data for InfluxDB....
+
+Prepare data for TDengine....
+
+---------------  Clean  -----------------
+
+------------------Writing Data-----------------
+
+Start test TDengine, result in [1;32mGreen line[0m
+loaded 7776000 items in 19.595374sec with 100 workers (mean point rate 396828.35/s, mean value rate 4453295.90/s, 51.67MB/sec from stdin)
+
+[1;32mTDengine writing result:[0m
+[1;32mloaded 7776000 items in 19.595374sec with 100 workers (mean point rate 396828.35/s, mean value rate 4453295.90/s, 51.67MB/sec from stdin)[0m
+cassandra started
+
+Start test cassandra, result in [1;32mGreen line[0m
+
+[1;32mcassandra writing result:[0m
+[1;32mloaded 7776000 items in 276.170493sec with 100 workers (mean point rate 28156.519978/sec, mean value rate 315978.724193/s, 13.41MB/sec from stdin)[0m
+
+
+======================================================
+             tsdb performance comparision             
+       worker:100.00      |       batch:1000.00      
+======================================================
+       Writing 7776000 records test takes:          
+       cassandra          |       276.17 Seconds    
+       TDengine           |       19.60 Seconds    
+======================================================
+       Writing 7776000 records test disk:          
+       cassandra          |       433M           
+       TDengine           |       93M            
+------------------------------------------------------
+batchsize:1000
+workers:50
+whether generate data:0
+scale-var:100
+variables not all defined,use value as follow :
+generate data: scale-var: 100 ,interval: 10s ,timestamp-start: 2018-01-01T00:00:00Z ,timestamp-stop: 2018-01-02T00:00:00Z
+batchsize:1000 ,workers:50 ,TD's interface: false ,generate data: 0 , address: 192.168.1.179
+
+
+---------------  Clean  -----------------
+
+------------------Writing Data-----------------
+
+Start test TDengine, result in [1;32mGreen line[0m
+loaded 7776000 items in 21.834941sec with 50 workers (mean point rate 356126.45/s, mean value rate 3996530.13/s, 46.37MB/sec from stdin)
+
+[1;32mTDengine writing result:[0m
+[1;32mloaded 7776000 items in 21.834941sec with 50 workers (mean point rate 356126.45/s, mean value rate 3996530.13/s, 46.37MB/sec from stdin)[0m
+cassandra started
+
+Start test cassandra, result in [1;32mGreen line[0m
+
+[1;32mcassandra writing result:[0m
+[1;32mloaded 7776000 items in 260.783442sec with 50 workers (mean point rate 29817.844052/sec, mean value rate 334622.472141/s, 14.20MB/sec from stdin)[0m
+
+
+======================================================
+             tsdb performance comparision             
+       worker:50.00      |       batch:1000.00      
+======================================================
+       Writing 7776000 records test takes:          
+       cassandra          |       260.78 Seconds    
+       TDengine           |       21.83 Seconds    
+======================================================
+       Writing 7776000 records test disk:          
+       cassandra          |       392M           
+       TDengine           |       93M            
+------------------------------------------------------
+batchsize:1000
+workers:16
+whether generate data:0
+scale-var:100
+variables not all defined,use value as follow :
+generate data: scale-var: 100 ,interval: 10s ,timestamp-start: 2018-01-01T00:00:00Z ,timestamp-stop: 2018-01-02T00:00:00Z
+batchsize:1000 ,workers:16 ,TD's interface: false ,generate data: 0 , address: 192.168.1.179
+
+
+---------------  Clean  -----------------
+
+------------------Writing Data-----------------
+
+Start test TDengine, result in [1;32mGreen line[0m
+loaded 7776000 items in 20.050311sec with 16 workers (mean point rate 387824.40/s, mean value rate 4352251.59/s, 50.49MB/sec from stdin)
+
+[1;32mTDengine writing result:[0m
+[1;32mloaded 7776000 items in 20.050311sec with 16 workers (mean point rate 387824.40/s, mean value rate 4352251.59/s, 50.49MB/sec from stdin)[0m
+cassandra started
+
+Start test cassandra, result in [1;32mGreen line[0m
+
+[1;32mcassandra writing result:[0m
+[1;32mloaded 7776000 items in 191.506986sec with 16 workers (mean point rate 40604.262958/sec, mean value rate 455670.062081/s, 19.34MB/sec from stdin)[0m
+
+
+======================================================
+             tsdb performance comparision             
+       worker:16.00      |       batch:1000.00      
+======================================================
+       Writing 7776000 records test takes:          
+       cassandra          |       191.51 Seconds    
+       TDengine           |       20.05 Seconds    
+======================================================
+       Writing 7776000 records test disk:          
+       cassandra          |       403M           
+       TDengine           |       93M            
+------------------------------------------------------
+batchsize:1000
+workers:1
+whether generate data:0
+scale-var:100
+variables not all defined,use value as follow :
+generate data: scale-var: 100 ,interval: 10s ,timestamp-start: 2018-01-01T00:00:00Z ,timestamp-stop: 2018-01-02T00:00:00Z
+batchsize:1000 ,workers:1 ,TD's interface: false ,generate data: 0 , address: 192.168.1.179
+
+
+---------------  Clean  -----------------
+
+------------------Writing Data-----------------
+
+Start test TDengine, result in [1;32mGreen line[0m
+loaded 7776000 items in 173.939684sec with 1 workers (mean point rate 44705.15/s, mean value rate 501691.15/s, 5.82MB/sec from stdin)
+
+[1;32mTDengine writing result:[0m
+[1;32mloaded 7776000 items in 173.939684sec with 1 workers (mean point rate 44705.15/s, mean value rate 501691.15/s, 5.82MB/sec from stdin)[0m
+cassandra started
+
+Start test cassandra, result in [1;32mGreen line[0m
+
+[1;32mcassandra writing result:[0m
+[1;32mloaded 7776000 items in 620.657595sec with 1 workers (mean point rate 12528.647143/sec, mean value rate 140599.262385/s, 5.97MB/sec from stdin)[0m
+
+
+======================================================
+             tsdb performance comparision             
+       worker:1.00      |       batch:1000.00      
+======================================================
+       Writing 7776000 records test takes:          
+       cassandra          |       620.66 Seconds    
+       TDengine           |       173.94 Seconds    
+======================================================
+       Writing 7776000 records test disk:          
+       cassandra          |       387M           
+       TDengine           |       93M            
+------------------------------------------------------
+batchsize:500
+workers:100
+whether generate data:1
+scale-var:100
+variables not all defined,use value as follow :
+generate data: scale-var: 100 ,interval: 10s ,timestamp-start: 2018-01-01T00:00:00Z ,timestamp-stop: 2018-01-02T00:00:00Z
+batchsize:500 ,workers:100 ,TD's interface: false ,generate data: 1 , address: 192.168.1.179
+
+
+---------------Generating Data-----------------
+
+Prepare data for InfluxDB....
+
+Prepare data for TDengine....
+
+---------------  Clean  -----------------
+
+------------------Writing Data-----------------
+
+Start test TDengine, result in [1;32mGreen line[0m
+loaded 7776000 items in 19.514431sec with 100 workers (mean point rate 398474.34/s, mean value rate 4471767.55/s, 51.88MB/sec from stdin)
+
+[1;32mTDengine writing result:[0m
+[1;32mloaded 7776000 items in 19.514431sec with 100 workers (mean point rate 398474.34/s, mean value rate 4471767.55/s, 51.88MB/sec from stdin)[0m
+cassandra started
+
+Start test cassandra, result in [1;32mGreen line[0m
+
+[1;32mcassandra writing result:[0m
+[1;32mloaded 7776000 items in 261.436492sec with 100 workers (mean point rate 29743.361177/sec, mean value rate 333786.608766/s, 14.17MB/sec from stdin)[0m
+
+
+======================================================
+             tsdb performance comparision             
+       worker:100.00      |       batch:500.00      
+======================================================
+       Writing 7776000 records test takes:          
+       cassandra          |       261.44 Seconds    
+       TDengine           |       19.51 Seconds    
+======================================================
+       Writing 7776000 records test disk:          
+       cassandra          |       379M           
+       TDengine           |       93M            
+------------------------------------------------------
+batchsize:500
+workers:50
+whether generate data:0
+scale-var:100
+variables not all defined,use value as follow :
+generate data: scale-var: 100 ,interval: 10s ,timestamp-start: 2018-01-01T00:00:00Z ,timestamp-stop: 2018-01-02T00:00:00Z
+batchsize:500 ,workers:50 ,TD's interface: false ,generate data: 0 , address: 192.168.1.179
+
+
+---------------  Clean  -----------------
+
+------------------Writing Data-----------------
+
+Start test TDengine, result in [1;32mGreen line[0m
+loaded 7776000 items in 19.957540sec with 50 workers (mean point rate 389627.17/s, mean value rate 4372482.68/s, 50.73MB/sec from stdin)
+
+[1;32mTDengine writing result:[0m
+[1;32mloaded 7776000 items in 19.957540sec with 50 workers (mean point rate 389627.17/s, mean value rate 4372482.68/s, 50.73MB/sec from stdin)[0m
+cassandra started
+
+Start test cassandra, result in [1;32mGreen line[0m
+
+[1;32mcassandra writing result:[0m
+[1;32mloaded 7776000 items in 234.784322sec with 50 workers (mean point rate 33119.758310/sec, mean value rate 371677.287702/s, 15.77MB/sec from stdin)[0m
+
+
+======================================================
+             tsdb performance comparision             
+       worker:50.00      |       batch:500.00      
+======================================================
+       Writing 7776000 records test takes:          
+       cassandra          |       234.78 Seconds    
+       TDengine           |       19.96 Seconds    
+======================================================
+       Writing 7776000 records test disk:          
+       cassandra          |       407M           
+       TDengine           |       93M            
+------------------------------------------------------
+batchsize:500
+workers:16
+whether generate data:0
+scale-var:100
+variables not all defined,use value as follow :
+generate data: scale-var: 100 ,interval: 10s ,timestamp-start: 2018-01-01T00:00:00Z ,timestamp-stop: 2018-01-02T00:00:00Z
+batchsize:500 ,workers:16 ,TD's interface: false ,generate data: 0 , address: 192.168.1.179
+
+
+---------------  Clean  -----------------
+
+------------------Writing Data-----------------
+
+Start test TDengine, result in [1;32mGreen line[0m
+loaded 7776000 items in 20.073730sec with 16 workers (mean point rate 387371.95/s, mean value rate 4347174.14/s, 50.43MB/sec from stdin)
+
+[1;32mTDengine writing result:[0m
+[1;32mloaded 7776000 items in 20.073730sec with 16 workers (mean point rate 387371.95/s, mean value rate 4347174.14/s, 50.43MB/sec from stdin)[0m
+cassandra started
+
+Start test cassandra, result in [1;32mGreen line[0m
+
+[1;32mcassandra writing result:[0m
+[1;32mloaded 7776000 items in 202.484739sec with 16 workers (mean point rate 38402.894245/sec, mean value rate 430965.813198/s, 18.29MB/sec from stdin)[0m
+
+
+======================================================
+             tsdb performance comparision             
+       worker:16.00      |       batch:500.00      
+======================================================
+       Writing 7776000 records test takes:          
+       cassandra          |       202.48 Seconds    
+       TDengine           |       20.07 Seconds    
+======================================================
+       Writing 7776000 records test disk:          
+       cassandra          |       453M           
+       TDengine           |       93M            
+------------------------------------------------------
+batchsize:500
+workers:1
+whether generate data:0
+scale-var:100
+variables not all defined,use value as follow :
+generate data: scale-var: 100 ,interval: 10s ,timestamp-start: 2018-01-01T00:00:00Z ,timestamp-stop: 2018-01-02T00:00:00Z
+batchsize:500 ,workers:1 ,TD's interface: false ,generate data: 0 , address: 192.168.1.179
+
+
+---------------  Clean  -----------------
+
+------------------Writing Data-----------------
+
+Start test TDengine, result in [1;32mGreen line[0m
+loaded 7776000 items in 168.595195sec with 1 workers (mean point rate 46122.31/s, mean value rate 517594.82/s, 6.00MB/sec from stdin)
+
+[1;32mTDengine writing result:[0m
+[1;32mloaded 7776000 items in 168.595195sec with 1 workers (mean point rate 46122.31/s, mean value rate 517594.82/s, 6.00MB/sec from stdin)[0m
+cassandra started
+
+Start test cassandra, result in [1;32mGreen line[0m
+
+[1;32mcassandra writing result:[0m
+[1;32mloaded 7776000 items in 661.612201sec with 1 workers (mean point rate 11753.108518/sec, mean value rate 131895.995591/s, 5.60MB/sec from stdin)[0m
+
+
+======================================================
+             tsdb performance comparision             
+       worker:1.00      |       batch:500.00      
+======================================================
+       Writing 7776000 records test takes:          
+       cassandra          |       661.61 Seconds    
+       TDengine           |       168.60 Seconds    
+======================================================
+       Writing 7776000 records test disk:          
+       cassandra          |       399M           
+       TDengine           |       93M            
+------------------------------------------------------
+batchsize:1
+workers:100
+whether generate data:1
+scale-var:100
+variables not all defined,use value as follow :
+generate data: scale-var: 100 ,interval: 10s ,timestamp-start: 2018-01-01T00:00:00Z ,timestamp-stop: 2018-01-02T00:00:00Z
+batchsize:1 ,workers:100 ,TD's interface: false ,generate data: 1 , address: 192.168.1.179
+
+
+---------------Generating Data-----------------
+
+Prepare data for InfluxDB....
+
+Prepare data for TDengine....
+
+---------------  Clean  -----------------
+
+------------------Writing Data-----------------
+
+Start test TDengine, result in [1;32mGreen line[0m
+loaded 7776000 items in 326.151643sec with 100 workers (mean point rate 23841.67/s, mean value rate 267556.52/s, 3.10MB/sec from stdin)
+
+[1;32mTDengine writing result:[0m
+[1;32mloaded 7776000 items in 326.151643sec with 100 workers (mean point rate 23841.67/s, mean value rate 267556.52/s, 3.10MB/sec from stdin)[0m
+cassandra started
+
+Start test cassandra, result in [1;32mGreen line[0m
+
+[1;32mcassandra writing result:[0m
+[1;32mloaded 7776000 items in 264.925856sec with 100 workers (mean point rate 29351.608514/sec, mean value rate 329390.273320/s, 13.98MB/sec from stdin)[0m
+
+
+======================================================
+             tsdb performance comparision             
+       worker:100.00      |       batch:1.00      
+======================================================
+       Writing 7776000 records test takes:          
+       cassandra          |       264.93 Seconds    
+       TDengine           |       326.15 Seconds    
+======================================================
+       Writing 7776000 records test disk:          
+       cassandra          |       400M           
+       TDengine           |       93M            
+------------------------------------------------------
+batchsize:1
+workers:50
+whether generate data:0
+scale-var:100
+variables not all defined,use value as follow :
+generate data: scale-var: 100 ,interval: 10s ,timestamp-start: 2018-01-01T00:00:00Z ,timestamp-stop: 2018-01-02T00:00:00Z
+batchsize:1 ,workers:50 ,TD's interface: false ,generate data: 0 , address: 192.168.1.179
+
+
+---------------  Clean  -----------------
+
+------------------Writing Data-----------------
+
+Start test TDengine, result in [1;32mGreen line[0m
+loaded 7776000 items in 238.851860sec with 50 workers (mean point rate 32555.74/s, mean value rate 365347.79/s, 4.24MB/sec from stdin)
+
+[1;32mTDengine writing result:[0m
+[1;32mloaded 7776000 items in 238.851860sec with 50 workers (mean point rate 32555.74/s, mean value rate 365347.79/s, 4.24MB/sec from stdin)[0m
+cassandra started
+
+Start test cassandra, result in [1;32mGreen line[0m
+
+[1;32mcassandra writing result:[0m
+[1;32mloaded 7776000 items in 320.356119sec with 50 workers (mean point rate 24272.987265/sec, mean value rate 272396.857090/s, 11.56MB/sec from stdin)[0m
+
+
+======================================================
+             tsdb performance comparision             
+       worker:50.00      |       batch:1.00      
+======================================================
+       Writing 7776000 records test takes:          
+       cassandra          |       320.36 Seconds    
+       TDengine           |       238.85 Seconds    
+======================================================
+       Writing 7776000 records test disk:          
+       cassandra          |       391M           
+       TDengine           |       93M            
+------------------------------------------------------
+batchsize:1
+workers:16
+whether generate data:0
+scale-var:100
+variables not all defined,use value as follow :
+generate data: scale-var: 100 ,interval: 10s ,timestamp-start: 2018-01-01T00:00:00Z ,timestamp-stop: 2018-01-02T00:00:00Z
+batchsize:1 ,workers:16 ,TD's interface: false ,generate data: 0 , address: 192.168.1.179
+
+
+---------------  Clean  -----------------
+
+------------------Writing Data-----------------
+
+Start test TDengine, result in [1;32mGreen line[0m
+loaded 7776000 items in 203.868209sec with 16 workers (mean point rate 38142.29/s, mean value rate 428041.24/s, 4.97MB/sec from stdin)
+
+[1;32mTDengine writing result:[0m
+[1;32mloaded 7776000 items in 203.868209sec with 16 workers (mean point rate 38142.29/s, mean value rate 428041.24/s, 4.97MB/sec from stdin)[0m
+cassandra started
+
+Start test cassandra, result in [1;32mGreen line[0m
+
+[1;32mcassandra writing result:[0m
+[1;32mloaded 7776000 items in 492.737098sec with 16 workers (mean point rate 15781.235141/sec, mean value rate 177100.527691/s, 7.52MB/sec from stdin)[0m
+
+
+======================================================
+             tsdb performance comparision             
+       worker:16.00      |       batch:1.00      
+======================================================
+       Writing 7776000 records test takes:          
+       cassandra          |       492.74 Seconds    
+       TDengine           |       203.87 Seconds    
+======================================================
+       Writing 7776000 records test disk:          
+       cassandra          |       388M           
+       TDengine           |       93M            
+------------------------------------------------------
+batchsize:1
+workers:1
+whether generate data:0
+scale-var:100
+variables not all defined,use value as follow :
+generate data: scale-var: 100 ,interval: 10s ,timestamp-start: 2018-01-01T00:00:00Z ,timestamp-stop: 2018-01-02T00:00:00Z
+batchsize:1 ,workers:1 ,TD's interface: false ,generate data: 0 , address: 192.168.1.179
+
+
+---------------  Clean  -----------------
+
+------------------Writing Data-----------------
+
+Start test TDengine, result in [1;32mGreen line[0m
+loaded 7776000 items in 954.336982sec with 1 workers (mean point rate 8148.07/s, mean value rate 91439.40/s, 1.06MB/sec from stdin)
+
+[1;32mTDengine writing result:[0m
+[1;32mloaded 7776000 items in 954.336982sec with 1 workers (mean point rate 8148.07/s, mean value rate 91439.40/s, 1.06MB/sec from stdin)[0m
+cassandra started
+
+Start test cassandra, result in [1;32mGreen line[0m
