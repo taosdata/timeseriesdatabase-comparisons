@@ -4,7 +4,7 @@ go 1.16
 
 require (
 	github.com/cockroachdb/apd v1.1.0 // indirect
-	github.com/gocql/gocql v0.0.0-20210621133426-d83b80dfb480
+	github.com/gocql/gocql v0.0.0-20210702075011-769848eae462
 	github.com/gofrs/uuid v4.0.0+incompatible // indirect
 	github.com/golang/protobuf v1.5.2
 	github.com/google/flatbuffers v2.0.0+incompatible
@@ -18,7 +18,7 @@ require (
 	github.com/pkg/profile v1.6.0
 	github.com/shopspring/decimal v1.2.0 // indirect
 	github.com/stretchr/testify v1.7.0
-	github.com/valyala/fasthttp v1.27.0
+	github.com/valyala/fasthttp v1.28.0
 	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
