@@ -74,11 +74,11 @@ func (qp *QueryPlanWithServerAggregation) Execute(session *gocql.Session, debug 
 		// 	}
 		// }
 
-		fmt.Println(q.PreparableQueryString)
+		fmt.Println(q.PreparableQueryString) //for debuging the query string
 		iter := session.Query(q.PreparableQueryString, q.Args...).Iter()
 		var usage_user float64
 		iter.Scan(&usage_user)
-		fmt.Println(usage_user)
+		fmt.Println(usage_user) //for debuging the query result
 		for iter.Scan(&usage_user) {
 			//fmt.Println(usage_user)
 			agg.Put(usage_user)

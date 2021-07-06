@@ -45,6 +45,8 @@ func (d *CassandraDevops) MaxCPUUsageHourByMinuteFourHosts(q bulkQuerygen.Query)
 	d.maxCPUUsageHourByMinuteNHosts(q.(*CassandraQuery), 4, time.Hour)
 }
 
+// the following for are for the comparsion test between cassandra and TDengine
+
 func (d *CassandraDevops) MaxCPUUsageHourByMinuteEightHosts(q bulkQuerygen.Query) {
 	d.maxCPUUsageHourByMinuteNHosts(q.(*CassandraQuery), 8, time.Hour)
 }
@@ -60,6 +62,8 @@ func (d *CassandraDevops) MaxCPUUsageAllEightHosts(q bulkQuerygen.Query) {
 func (d *CassandraDevops) MaxCPUUsageAllByHourEightHosts(q bulkQuerygen.Query) {
 	d.maxCPUUsageAllByHourNHosts(q.(*CassandraQuery), 8, 0)
 }
+
+//four test end
 
 func (d *CassandraDevops) MaxCPUUsageHourByMinuteSixteenHosts(q bulkQuerygen.Query) {
 	d.maxCPUUsageHourByMinuteNHosts(q.(*CassandraQuery), 16, time.Hour)

@@ -27,33 +27,34 @@ import (
 )
 
 const (
-	DevOpsOneHostOneHour            = "1-host-1-hr"
-	DevOpsOneHostTwelveHours        = "1-host-12-hr"
-	DevOpsEightHostsOneHour         = "8-host-1-hr"
-	DevOpsEightHostsTwelveHours     = "8-host-12-hr"
-	DevOpsEightHostsAllbyHours      = "8-host-allbyhr"
-	DevOpsEightHostsAll             = "8-host-all"
-	DevOpsGroupBy                   = "groupby"
-	IotOneHomeTwelveHours           = "1-home-12-hours"
-	DashboardAll                    = "dashboard-all"
-	DashboardAvailability           = "availability"
-	DashboardCpuNum                 = "cpu-num"
-	DashboardCpuUtilization         = "cpu-utilization"
-	DashboardDiskAllocated          = "disk-allocated"
-	DashboardDiskUsage              = "disk-usage"
-	DashboardDiskUtilization        = "disk-utilization"
-	DashboardHttpRequestDuration    = "http-request-duration"
-	DashboardHttpRequests           = "http-requests"
-	DashboardKapaCpu                = "kapa-cpu"
-	DashboardKapaLoad               = "kapa-load"
-	DashboardKapaRam                = "kapa-ram"
-	DashboardMemoryTotal            = "memory-total"
-	DashboardMemoryUtilization      = "memory-utilization"
-	DashboardNginxRequests          = "nginx-requests"
-	DashboardQueueBytes             = "queue-bytes"
-	DashboardRedisMemoryUtilization = "redis-memory-utilization"
-	DashboardSystemLoad             = "system-load"
-	DashboardThroughput             = "throughput"
+	DevOpsOneHostOneHour              = "1-host-1-hr"
+	DevOpsOneHostTwelveHours          = "1-host-12-hr"
+	DevOpsEightHostsOneHourNoInterval = "8-host-1-hr-no-interval"
+	DevOpsEightHostsOneHour           = "8-host-1-hr"
+	DevOpsEightHostsTwelveHours       = "8-host-12-hr"
+	DevOpsEightHostsAllbyHours        = "8-host-allbyhr"
+	DevOpsEightHostsAll               = "8-host-all"
+	DevOpsGroupBy                     = "groupby"
+	IotOneHomeTwelveHours             = "1-home-12-hours"
+	DashboardAll                      = "dashboard-all"
+	DashboardAvailability             = "availability"
+	DashboardCpuNum                   = "cpu-num"
+	DashboardCpuUtilization           = "cpu-utilization"
+	DashboardDiskAllocated            = "disk-allocated"
+	DashboardDiskUsage                = "disk-usage"
+	DashboardDiskUtilization          = "disk-utilization"
+	DashboardHttpRequestDuration      = "http-request-duration"
+	DashboardHttpRequests             = "http-requests"
+	DashboardKapaCpu                  = "kapa-cpu"
+	DashboardKapaLoad                 = "kapa-load"
+	DashboardKapaRam                  = "kapa-ram"
+	DashboardMemoryTotal              = "memory-total"
+	DashboardMemoryUtilization        = "memory-utilization"
+	DashboardNginxRequests            = "nginx-requests"
+	DashboardQueueBytes               = "queue-bytes"
+	DashboardRedisMemoryUtilization   = "redis-memory-utilization"
+	DashboardSystemLoad               = "system-load"
+	DashboardThroughput               = "throughput"
 )
 
 // query generator choices {use-case, query-type, format}
@@ -96,17 +97,27 @@ var useCaseMatrix = map[string]map[string]map[string]bulkQueryGen.QueryGenerator
 			"splunk":           splunk.NewSplunkDevops8Hosts,
 			"tdengine":         tdengine.NewtdengineDevops8Hosts,
 		},
+
+		//since cassandra does not support interval by time since group by cannot be applied on system clock,
+		//there is a special test case for tdengine to query in the same way as cassandra's testing method
+		DevOpsEightHostsOneHourNoInterval: {
+			"tdengine": tdengine.NewtdengineDevops8HostsNoInterval,
+		},
+
 		DevOpsEightHostsTwelveHours: {
 			"influx-http": influxdb.NewInfluxQLDevops8Hosts12HR,
 			"tdengine":    tdengine.NewtdengineDevops8Hosts12HR,
+			"cassandra":   cassandra.NewCassandraDevops8Hosts12HR,
 		},
-		DevOpsEightHostsAllbyHours: { //here is another functon need to be added
+		DevOpsEightHostsAllbyHours: {
 			"influx-http": influxdb.NewInfluxQLDevops8HostsAllBy1Hr,
 			"tdengine":    tdengine.NewtdengineDevops8HostsAllBy1Hr,
+			"cassandra":   cassandra.NewCassandraDevops8HostsAllBy1Hr,
 		},
-		DevOpsEightHostsAll: { //there is the function need to be added
+		DevOpsEightHostsAll: {
 			"influx-http": influxdb.NewInfluxQLDevops8HostsAll,
 			"tdengine":    tdengine.NewtdengineDevops8HostsAll,
+			"cassandra":   cassandra.NewCassandraDevops8HostsAll,
 		},
 		DevOpsGroupBy: {
 			"cassandra":        cassandra.NewCassandraDevopsGroupBy,

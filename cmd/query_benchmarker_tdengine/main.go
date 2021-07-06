@@ -219,10 +219,17 @@ func (b *TDengineQueryBenchmarker) processQueries(w http.HTTPClient, workersGrou
 	var queriesSeen int64
 	for queries := range b.queryChan {
 		if len(queries) == 1 {
-			if err := b.processSingleQuery(w, queries[0], opts, nil, nil, statPool, statChan, i); err != nil {
-				log.Fatal(err)
+			if !strings.Contains(string(queries[0].Body), "interval") && strings.Count(string(queries[0].HumanLabel), "rand") > 1 {
+				if err := b.processMultipleQuery(w, queries[0], opts, nil, nil, statPool, statChan, i); err != nil {
+					log.Fatal(err)
+				}
+			} else {
+				if err := b.processSingleQuery(w, queries[0], opts, nil, nil, statPool, statChan, i); err != nil {
+					log.Fatal(err)
+				}
 			}
 			queriesSeen++
+
 		} else {
 			var err error
 			errors := 0
@@ -230,13 +237,23 @@ func (b *TDengineQueryBenchmarker) processQueries(w http.HTTPClient, workersGrou
 			errCh := make(chan error)
 			doneCh := make(chan int, len(queries))
 			//fmt.Printf("exec query %d\n", len(queries))
-			for _, q := range queries {
-				b.processSingleQuery(w, q, opts, errCh, doneCh, statPool, statChan, i)
-				queriesSeen++
-				if bulk_query.Benchmarker.GradualWorkersIncrease() {
-					time.Sleep(time.Duration(rand.Int63n(150)) * time.Millisecond) // random sleep 0-150ms
+
+			if !strings.Contains(string(queries[0].Body), "interval") && strings.Count(string(queries[0].HumanLabel), "rand") > 1 {
+				for _, q := range queries {
+					b.processMultipleQuery(w, q, opts, errCh, doneCh, statPool, statChan, i)
+					if bulk_query.Benchmarker.GradualWorkersIncrease() {
+						time.Sleep(time.Duration(rand.Int63n(150)) * time.Millisecond) // random sleep 0-150ms
+					}
+				}
+			} else {
+				for _, q := range queries {
+					b.processSingleQuery(w, q, opts, errCh, doneCh, statPool, statChan, i)
+					if bulk_query.Benchmarker.GradualWorkersIncrease() {
+						time.Sleep(time.Duration(rand.Int63n(150)) * time.Millisecond) // random sleep 0-150ms
+					}
 				}
 			}
+			queriesSeen++
 
 		loop:
 			for {
@@ -295,6 +312,59 @@ func (b *TDengineQueryBenchmarker) processSingleQuery(w http.HTTPClient, q *http
 		}
 	}
 
+	return nil
+}
+
+func (b *TDengineQueryBenchmarker) processMultipleQuery(w http.HTTPClient, q *http.Query, opts *http.HTTPClientDoOptions, errCh chan error, doneCh chan int, statPool sync.Pool, statChan chan *bulk_query.Stat, i int) error {
+	defer func() {
+		if doneCh != nil {
+			doneCh <- 1
+		}
+	}()
+	SplitHumanDescription := strings.Fields(string(q.HumanDescription))
+	timeBegin, _ := time.Parse(time.RFC3339, SplitHumanDescription[len(SplitHumanDescription)-2])
+	timeEnd, _ := time.Parse(time.RFC3339, SplitHumanDescription[len(SplitHumanDescription)-1])
+	tis := bucketTimeIntervals(timeBegin, timeEnd, time.Minute*10)
+	sqlBucket := make(map[TimeInterval]*http.Query, len(tis))
+	for _, ti := range tis {
+		start := ti.Start
+		end := ti.End
+
+		// the following two special cases ensure equivalency with rounded time boundaries as seen in influxdb:
+		// https://docs.influxdata.com/influxdb/v0.13/query_language/data_exploration/#rounded-group-by-time-boundaries
+		if start.Before(timeBegin) {
+			start = timeBegin
+		}
+		if end.After(timeEnd) {
+			end = timeEnd
+		}
+		sqlBucket[ti] = new(http.Query)
+		sqlBucket[ti].HumanDescription, sqlBucket[ti].HumanLabel, sqlBucket[ti].ID, sqlBucket[ti].Method, sqlBucket[ti].Path = q.HumanDescription, q.HumanLabel, q.ID, q.Method, q.Path
+		sqlBucket[ti].Body = []byte(fmt.Sprintf("%s and ts > %d and ts < %d", string(q.Body), ti.Start.Unix()*100, ti.End.Unix()*100))
+	}
+	var lagMillis float64
+	var err error
+	for _, q := range sqlBucket {
+		if cgo == 1 {
+			taosConn := taosConns[i]
+			lagMillis, err = b.execSql(q, taosConn)
+		} else {
+			lagMillis, err = w.Do(q, opts)
+		}
+		stat := statPool.Get().(*bulk_query.Stat)
+		stat.Init(q.HumanLabel, lagMillis)
+		statChan <- stat
+		b.queryPool.Put(q)
+		if err != nil {
+			qerr := fmt.Errorf("Error during request of query %s: %s\n", q.String(), err.Error())
+			if errCh != nil {
+				errCh <- qerr
+				return nil
+			} else {
+				return qerr
+			}
+		}
+	}
 	return nil
 }
 

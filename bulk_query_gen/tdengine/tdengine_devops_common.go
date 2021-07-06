@@ -41,9 +41,16 @@ func (d *tdengineDevops) MaxCPUUsageHourByMinuteFourHosts(q bulkQuerygen.Query) 
 	d.maxCPUUsageHourByMinuteNHosts(q.(*bulkQuerygen.HTTPQuery), 4, time.Hour)
 }
 
+//the following five are the test for comparsion between TDengine and cassandra
+
 func (d *tdengineDevops) MaxCPUUsageHourByMinuteEightHosts(q bulkQuerygen.Query) {
 	d.maxCPUUsageHourByMinuteNHosts(q.(*bulkQuerygen.HTTPQuery), 8, time.Hour)
 }
+
+func (d *tdengineDevops) MaxCPUUsageHourByMinuteEightHostsNoInterval(q bulkQuerygen.Query) {
+	d.maxCPUUsageHourByMinuteNHostsnoInterval(q.(*bulkQuerygen.HTTPQuery), 8, time.Hour)
+}
+
 func (d *tdengineDevops) MaxCPUUsageHourByMinuteEightHosts12HR(q bulkQuerygen.Query) {
 	d.maxCPUUsageHourBy10MinuteNHosts(q.(*bulkQuerygen.HTTPQuery), 8, 12*time.Hour)
 }
@@ -53,6 +60,9 @@ func (d *tdengineDevops) MaxCPUUsageAllByHourEightHosts(q bulkQuerygen.Query) {
 func (d *tdengineDevops) MaxCPUUsageAllEightHosts(q bulkQuerygen.Query) {
 	d.maxCPUUsageAllHosts(q.(*bulkQuerygen.HTTPQuery), 8, time.Hour)
 }
+
+//five test ends
+
 func (d *tdengineDevops) MaxCPUUsageHourByMinuteSixteenHosts(q bulkQuerygen.Query) {
 	d.maxCPUUsageHourByMinuteNHosts(q.(*bulkQuerygen.HTTPQuery), 16, time.Hour)
 }
@@ -89,7 +99,32 @@ func (d *tdengineDevops) maxCPUUsageHourByMinuteNHosts(qi bulkQuerygen.Query, nh
 	humanLabel := fmt.Sprintf("TDengine max cpu, rand %4d hosts, rand %s by 1m", nhosts, timeRange)
 
 	q := qi.(*bulkQuerygen.HTTPQuery)
-	d.getHttpQuery(humanLabel, interval.StartString(), query, q)
+	d.getHttpQuery(humanLabel, interval.StartString(), interval.EndString(), query, q)
+}
+
+func (d *tdengineDevops) maxCPUUsageHourByMinuteNHostsnoInterval(qi bulkQuerygen.Query, nhosts int, timeRange time.Duration) {
+	interval := d.AllInterval.RandWindow(timeRange)
+	nn := rand.Perm(d.ScaleVar)[:nhosts]
+
+	hostnames := []string{}
+	for _, n := range nn {
+		hostnames = append(hostnames, fmt.Sprintf("host_%d", n))
+	}
+
+	hostnameClauses := []string{}
+	for _, s := range hostnames {
+		hostnameClauses = append(hostnameClauses, fmt.Sprintf("t_hostname = '%s'", s))
+	}
+
+	combinedHostnameClause := strings.Join(hostnameClauses, " or ")
+	//_ := strings.Join(hostnameClauses, " or ")
+	query := fmt.Sprintf("select max(f_usage_user) from devops.cpu where (%s)", combinedHostnameClause)
+	//	query := fmt.Sprintf("select avg(f_usage_user) from devops.cpu where (%s)  interval(1h)",  combinedHostnameClause)
+
+	humanLabel := fmt.Sprintf("TDengine max cpu, rand %4d hosts, rand %s by 1m", nhosts, timeRange)
+
+	q := qi.(*bulkQuerygen.HTTPQuery)
+	d.getHttpQuery(humanLabel, interval.StartString(), interval.EndString(), query, q)
 }
 
 // MaxCPUUsageHourByMinuteThirtyTwoHosts populates a Query with a query that looks like:
@@ -116,7 +151,7 @@ func (d *tdengineDevops) maxCPUUsageHourBy10MinuteNHosts(qi bulkQuerygen.Query, 
 	humanLabel := fmt.Sprintf("TDengine max cpu, rand %4d hosts, rand %s by 10m", nhosts, timeRange)
 
 	q := qi.(*bulkQuerygen.HTTPQuery)
-	d.getHttpQuery(humanLabel, interval.StartString(), query, q)
+	d.getHttpQuery(humanLabel, interval.StartString(), interval.EndString(), query, q)
 }
 
 func (d *tdengineDevops) maxCPUUsageAllBy1HourHosts(qi bulkQuerygen.Query, nhosts int, timeRange time.Duration) {
@@ -140,7 +175,7 @@ func (d *tdengineDevops) maxCPUUsageAllBy1HourHosts(qi bulkQuerygen.Query, nhost
 	humanLabel := fmt.Sprintf("TDengine max cpu, rand %4d hosts,  by 1 hour", nhosts)
 
 	q := qi.(*bulkQuerygen.HTTPQuery)
-	d.getHttpQuery(humanLabel, " ", query, q)
+	d.getHttpQuery(humanLabel, " ", " ", query, q)
 }
 
 func (d *tdengineDevops) maxCPUUsageAllHosts(qi bulkQuerygen.Query, nhosts int, timeRange time.Duration) {
@@ -164,7 +199,7 @@ func (d *tdengineDevops) maxCPUUsageAllHosts(qi bulkQuerygen.Query, nhosts int, 
 	humanLabel := fmt.Sprintf("TDengine max cpu, rand %4d hosts ", nhosts)
 
 	q := qi.(*bulkQuerygen.HTTPQuery)
-	d.getHttpQuery(humanLabel, " ", query, q)
+	d.getHttpQuery(humanLabel, " ", " ", query, q)
 }
 
 // MeanCPUUsageDayByHourAllHosts populates a Query with a query that looks like:
@@ -176,7 +211,7 @@ func (d *tdengineDevops) MeanCPUUsageDayByHourAllHostsGroupbyHost(qi bulkQueryge
 
 	humanLabel := fmt.Sprintf("TDengine avg cpu, all hosts, rand 1day by 1hour")
 	q := qi.(*bulkQuerygen.HTTPQuery)
-	d.getHttpQuery(humanLabel, interval.StartString(), query, q)
+	d.getHttpQuery(humanLabel, interval.StartString(), interval.EndString(), query, q)
 }
 
 //func (d *tdengineDevops) MeanCPUUsageDayByHourAllHostsGroupbyHost(qi Query, _ int) {
@@ -194,9 +229,12 @@ func (d *tdengineDevops) MeanCPUUsageDayByHourAllHostsGroupbyHost(qi bulkQueryge
 //	q.Path = []byte(fmt.Sprintf("/query?%s", v.Encode()))
 //	q.Body = nil
 //}
-func (d *tdengineDevops) getHttpQuery(humanLabel, intervalStart, query string, q *bulkQuerygen.HTTPQuery) {
+
+//for handling the intervalStart and intervalEnd without too much modification on the whole system, HumanDescription is going to
+//pass intervalStart and intervalEnd. Before the change, there is no intervalEnd in this process
+func (d *tdengineDevops) getHttpQuery(humanLabel, intervalStart, intervalEnd, query string, q *bulkQuerygen.HTTPQuery) {
 	q.HumanLabel = []byte(humanLabel)
-	q.HumanDescription = []byte(fmt.Sprintf("%s: %s", humanLabel, intervalStart))
+	q.HumanDescription = []byte(fmt.Sprintf("%s: %s %s", humanLabel, intervalStart, intervalEnd))
 
 	q.Method = []byte("POST")
 	q.Path = []byte("/rest/sql")
