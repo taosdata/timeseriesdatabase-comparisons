@@ -40,7 +40,7 @@ func NewQueryPlanWithServerAggregation(aggrLabel string, bucketedCQLQueries map[
 // TODO(rw): support parallel execution.
 func (qp *QueryPlanWithServerAggregation) Execute(session *gocql.Session, debug int) ([]CQLResult, error) {
 	// sort the time interval buckets we'll use:
-
+	//fmt.Println("start one query")
 	agg, err := GetAggregator(qp.AggregatorLabel)
 	if err != nil {
 		return nil, err
@@ -52,14 +52,41 @@ func (qp *QueryPlanWithServerAggregation) Execute(session *gocql.Session, debug 
 		// For server-side aggregation, this will return only
 		// one row; for exclusive client-side aggregation this
 		// will return a sequence.
+
+		// if strings.Contains(q.PreparableQueryString, "max") {
+
+		// 	fmt.Println(q.PreparableQueryString)
+		// 	var usage_user float64
+		// 	if err := session.Query(q.PreparableQueryString, q.Args...).Scan(&usage_user); err != nil {
+		// 		log.Fatalf("Query failed: %v", err)
+		// 	}
+		// 	fmt.Println(usage_user)
+		// 	agg.Put(usage_user)
+		// } else {
+		// 	//fmt.Println(q.PreparableQueryString)
+		// 	iter := session.Query(q.PreparableQueryString, q.Args...).Iter()
+		// 	var usage_user float64
+		// 	iter.Scan(&usage_user)
+		// 	fmt.Println(usage_user)
+		// 	for iter.Scan(&usage_user) {
+		// 		//fmt.Println(usage_user)
+		// 		agg.Put(usage_user)
+		// 	}
+		// }
+
+		fmt.Println(q.PreparableQueryString)
 		iter := session.Query(q.PreparableQueryString, q.Args...).Iter()
-		var x float64
-		for iter.Scan(&x) {
-			agg.Put(x)
+		var usage_user float64
+		iter.Scan(&usage_user)
+		fmt.Println(usage_user)
+		for iter.Scan(&usage_user) {
+			//fmt.Println(usage_user)
+			agg.Put(usage_user)
 		}
-		if err := iter.Close(); err != nil {
-			return nil, err
-		}
+
+		// if err := iter.Close(); err != nil {
+		// 	return nil, err
+		// }
 		results = append(results, CQLResult{TimeInterval: k, Value: agg.Get()})
 	}
 

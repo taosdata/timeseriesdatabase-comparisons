@@ -47,6 +47,11 @@ func (q *HLQuery) ToQueryPlanWithServerAggregation() (qp *QueryPlanWithServerAgg
 
 	// For each group-by time bucket, convert its series into CQLQueries:
 	cqlBuckets := make(map[TimeInterval]CQLQuery, len(tis))
+
+	if len(tis) == 0 {
+		cqlBuckets[NewTimeInterval(q.TimeStart, q.TimeEnd)] = NewCQLQuery(string(q.AggregationType), string(q.MeasurementName), string(q.FieldName), string(q.TagsCondition), q.TimeStart.UnixNano(), q.TimeEnd.UnixNano())
+	}
+
 	for _, ti := range tis {
 		start := ti.Start
 		end := ti.End
@@ -100,6 +105,10 @@ func NewCQLQuery(aggrLabel, tableName, fieldName string, tagCondition string, ti
 
 	if aggrLabel == "" {
 		preparableQueryString = fmt.Sprintf("SELECT time, %s FROM %s WHERE %s AND time >= ? AND time < ?", fieldName, tableName, tagCondition)
+	} else if timeStartNanos == timeEndNanos {
+		preparableQueryString = fmt.Sprintf("SELECT %s(%s) FROM %s WHERE %s", aggrLabel, fieldName, tableName, tagCondition)
+		args := []interface{}{}
+		return CQLQuery{preparableQueryString, args}
 	} else {
 		preparableQueryString = fmt.Sprintf("SELECT %s(%s) FROM %s WHERE %s AND time >= ? AND time < ?", aggrLabel, fieldName, tableName, tagCondition)
 	}

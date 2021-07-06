@@ -20,6 +20,6 @@ func NewCassandraDevops8HostsAllBy1Hr(dbConfig bulkQuerygen.DatabaseConfig, quer
 
 func (d *CassandraDevops8HostsAllBy1Hr) Dispatch(i int) bulkQuerygen.Query {
 	q := NewCassandraQuery() // from pool
-	d.MaxCPUUsageHourAllByHourEightHosts(q)
+	d.MaxCPUUsageAllByHourEightHosts(q)
 	return q
 }

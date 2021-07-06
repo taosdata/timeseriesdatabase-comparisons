@@ -96,17 +96,21 @@ var useCaseMatrix = map[string]map[string]map[string]bulkQueryGen.QueryGenerator
 			"splunk":           splunk.NewSplunkDevops8Hosts,
 			"tdengine":         tdengine.NewtdengineDevops8Hosts,
 		},
+
 		DevOpsEightHostsTwelveHours: {
 			"influx-http": influxdb.NewInfluxQLDevops8Hosts12HR,
 			"tdengine":    tdengine.NewtdengineDevops8Hosts12HR,
+			"cassandra":   cassandra.NewCassandraDevops8Hosts12HR,
 		},
-		DevOpsEightHostsAllbyHours: { //here is another functon need to be added
+		DevOpsEightHostsAllbyHours: {
 			"influx-http": influxdb.NewInfluxQLDevops8HostsAllBy1Hr,
 			"tdengine":    tdengine.NewtdengineDevops8HostsAllBy1Hr,
+			"cassandra":   cassandra.NewCassandraDevops8HostsAllBy1Hr,
 		},
-		DevOpsEightHostsAll: { //there is the function need to be added
+		DevOpsEightHostsAll: {
 			"influx-http": influxdb.NewInfluxQLDevops8HostsAll,
 			"tdengine":    tdengine.NewtdengineDevops8HostsAll,
+			"cassandra":   cassandra.NewCassandraDevops8HostsAll,
 		},
 		DevOpsGroupBy: {
 			"cassandra":        cassandra.NewCassandraDevopsGroupBy,

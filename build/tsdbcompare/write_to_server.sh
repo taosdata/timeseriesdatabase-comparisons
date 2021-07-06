@@ -137,7 +137,7 @@ echo 'cassandra started'
 echo
 echo -e "Start test cassandra, result in ${GREEN}Green line${NC}"
 #curl "http://$add:8086/query?q=drop%20database%20benchmark_db" -X POST
-CASSANDRA=`cat data/cassandra.dat  |bin/bulk_load_cassandra --batch-size=$batchsize --workers=$workers| grep loaded`
+CASSANDRA=`cat data/cassandra.dat  |bin/bulk_load_cassandra --batch-size=$batchsize --workers=$workers`
 echo
 echo -e "${GREEN}cassandra writing result:${NC}"
 echo -e "${GREEN}$CASSANDRA${NC}"

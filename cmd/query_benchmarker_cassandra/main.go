@@ -13,14 +13,15 @@ import (
 	"encoding/gob"
 	"flag"
 	"fmt"
-	"github.com/gocql/gocql"
-	"github.com/taosdata/timeseriesdatabase-comparisons/bulk_query"
-	"github.com/taosdata/timeseriesdatabase-comparisons/util/report"
 	"io"
 	"log"
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/gocql/gocql"
+	"github.com/taosdata/timeseriesdatabase-comparisons/bulk_query"
+	"github.com/taosdata/timeseriesdatabase-comparisons/util/report"
 )
 
 const (

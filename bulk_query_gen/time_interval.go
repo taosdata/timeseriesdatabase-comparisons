@@ -17,6 +17,12 @@ func NewTimeInterval(start, end time.Time) TimeInterval {
 		End:   end,
 	}
 }
+func (ti *TimeInterval) NewTimeInterval(start, end time.Time) TimeInterval {
+	return TimeInterval{
+		Start: start,
+		End:   end,
+	}
+}
 
 // Duration converts a TimeInterval to a time.Duration.
 func (ti *TimeInterval) Duration() time.Duration {

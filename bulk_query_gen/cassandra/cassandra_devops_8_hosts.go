@@ -1,8 +1,9 @@
 package cassandra
 
 import (
-	bulkQuerygen "github.com/taosdata/timeseriesdatabase-comparisons/bulk_query_gen"
 	"time"
+
+	bulkQuerygen "github.com/taosdata/timeseriesdatabase-comparisons/bulk_query_gen"
 )
 
 // CassandraDevops8Hosts produces Cassandra-specific queries for the devops groupby case.
