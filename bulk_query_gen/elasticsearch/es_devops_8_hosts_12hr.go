@@ -17,6 +17,6 @@ func NewElasticSearchDevops8Hosts12HR(_ bulkQuerygen.DatabaseConfig, queriesFull
 
 func (d *ElasticSearchDevops8Hosts12HR) Dispatch(i int) bulkQuerygen.Query {
 	q := bulkQuerygen.NewHTTPQuery() // from pool
-	d.MaxCPUUsageHourByMinuteEightHosts(q)
+	d.MaxCPUUsage12HoursByMinuteEightHost(q)
 	return q
 }
