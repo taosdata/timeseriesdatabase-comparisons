@@ -12,7 +12,7 @@ batchsize=5000
 workers=16
 interface='false'
 gene=1
-add='192.168.1.179'
+add='serv'
 interval='10s'
 scale=100
 st='2018-01-01T00:00:00Z'
@@ -93,7 +93,7 @@ if [[ $gene == 1 ]];then
     echo
     echo "---------------Generating Data-----------------"
     echo
-    echo "Prepare data for InfluxDB...."
+    echo "Prepare data for cassandra...."
     bin/bulk_data_gen -seed 123 -format cassandra -sampling-interval $interval -scale-var $scale -use-case devops -timestamp-start "$st" -timestamp-end "$et" >data/cassandra.dat
 
     echo 
@@ -102,16 +102,18 @@ if [[ $gene == 1 ]];then
 fi
 echo
 echo "---------------  Clean  -----------------"
-rm -rf /var/lib/taos/*
-service cassandra start
+ssh root@$add << eeooff
+rm -rf /data/lib/taos/*
+sudo service cassandra start
 sleep 30
-echo 'drop keyspace if exists measurements;' | cqlsh
+echo 'drop keyspace if exists measurements;' | cqlsh serv
 echo 1 > /proc/sys/vm/drop_caches
-service cassandra stop
+sudo service cassandra stop
 systemctl start taosd
-rm -rf /var/lib/cassandra/data/measurements
-sleep 10
-
+rm -rf /data/cassandra/data/measurements
+sleep 30
+exit
+eeooff
 
 echo
 echo "------------------Writing Data-----------------"
@@ -128,24 +130,32 @@ echo -e "${GREEN}$TDENGINERES${NC}"
 DATA=`echo $TDENGINERES|awk '{print($2)}'`
 TMP=`echo $TDENGINERES|awk '{print($5)}'`
 TDWTM=`echo ${TMP%s*}`
+ssh root@$add << eeooff
 systemctl stop taosd 
 echo 1 > /proc/sys/vm/drop_caches
 service cassandra start
-sleep 20
-echo 'cassandra started'
-#exit
+sleep 30
+exit
+eeooff
+
 echo
 echo -e "Start test cassandra, result in ${GREEN}Green line${NC}"
 #curl "http://$add:8086/query?q=drop%20database%20benchmark_db" -X POST
-CASSANDRA=`cat data/cassandra.dat  |bin/bulk_load_cassandra --batch-size=$batchsize --workers=$workers`
+CASSANDRA=`cat data/cassandra.dat  |bin/bulk_load_cassandra --batch-size=$batchsize --workers=$workers --url $add | grep loaded`
 echo
 echo -e "${GREEN}cassandra writing result:${NC}"
 echo -e "${GREEN}$CASSANDRA${NC}"
-
+DATA=`echo $CASSANDRA|awk '{print($2)}'`
 TMP=`echo $CASSANDRA|awk '{print($5)}'`
 IFWTM=`echo ${TMP%s*}`
-TDDISK=`du -sh /var/lib/taos/vnode | cut -d '	' -f 1 `
-IFDISK=`du -sh /var/lib/cassandra/data/measurements | cut -d '	' -f 1 `
+
+ssh root@$add << eeooff
+service cassandra stop
+exit
+eeooff
+
+TDDISK=`ssh root@$add du -sh /data/lib/taos/vnode | cut -d '	' -f 1 `
+IFDISK=`ssh root@$add du -sh /data/cassandra/data/measurements | cut -d '	' -f 1 `
 
 echo
 echo

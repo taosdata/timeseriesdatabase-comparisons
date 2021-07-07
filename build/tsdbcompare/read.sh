@@ -11,7 +11,7 @@ NC='\033[0m'
 workers=16
 interface='cgo'
 gene=0
-add='127.0.0.1'
+add='serv'
 interval='10s'
 scale=100
 st='2018-01-01T00:00:00Z'
@@ -84,12 +84,26 @@ if [[ $gene == 1 ]];then
     if [ ! -d "data" ]; then
         mkdir data
     fi
+
+    ssh root@$add << eeooff
+    rm -rf /data/lib/taos/*
+    sudo service cassandra start
+    sleep 30
+    echo 'drop keyspace if exists measurements;' | cqlsh serv
+    echo 1 > /proc/sys/vm/drop_caches
+    systemctl start taosd
+    rm -rf /data/cassandra/data/measurements
+    sleep 10
+    exit
+eeooff
+
+
     echo
     echo "---------------Generating && Inserting Data-----------------"
     echo
-    echo "Prepare data for InfluxDB...."
-    bin/bulk_data_gen -seed 123 -format influx-bulk -sampling-interval $interval -scale-var $scale -use-case devops -timestamp-start "$st" -timestamp-end "$et" >data/influx.dat
-    cat data/influx.dat  |bin/bulk_load_influx --batch-size=5000 --workers=$workers --urls="http://$add:8086" | grep loaded
+    echo "Prepare data for Cassandra...."
+    bin/bulk_data_gen -seed 123 -format cassandra -sampling-interval $interval -scale-var $scale -use-case devops -timestamp-start "$st" -timestamp-end "$et" >data/cassandra.dat
+    cat data/cassandra.dat  |bin/bulk_load_cassandra --batch-size=2000 --workers=$workers --url $add | grep loaded
 
     echo 
     echo "Prepare data for TDengine...."
@@ -101,6 +115,10 @@ echo
 echo "------------------Querying Data-----------------"
 echo
 
+ssh root@$add << eeooff
+service cassandra stop
+exit
+eeooff
 
 echo 
 echo  "start query test, query max from 8 hosts group by 1 hour, TDengine"
@@ -165,6 +183,14 @@ TDQ5=`echo ${TMP%s*}`
 
 sleep 10
 
+ssh root@$add << eeooff
+systemctl stop taosd 
+echo 1 > /proc/sys/vm/drop_caches
+sudo service cassandra start
+sleep 20
+exit
+eeooff
+
 echo 
 echo  "start query test, query max from 8 hosts group by 1hour, cassandra"
 echo
@@ -174,7 +200,7 @@ echo
 #SELECT max(usage_user) FROM measurements.cpu WHERE hostname in( 'host_a' ,  'host_b' ,  'host_c' ,  'host_d' ,  'host_e' ,  'host_f' ,  'host_g' ,  'host_h') ;
 # a,b,c,d,e,f,g,h are random 8 numbers.
 sum=$((query + workers))
-IFQS1=`bin/bulk_query_gen  -seed 123 -format cassandra -query-type 8-host-all -scale-var $scale -queries $((query + workers)) | bin/query_benchmarker_cassandra  -url="127.0.0.1:9042"  -workers $workers -print-interval 0 -aggregation-plan server| grep wall`
+IFQS1=`bin/bulk_query_gen  -seed 123 -format cassandra -query-type 8-host-all -scale-var $scale -queries $((query + workers)) | bin/query_benchmarker_cassandra  -url=$add  -workers $workers -print-interval 0 -aggregation-plan server| grep wall`
 #`bin/bulk_query_gen  -seed 123 -format influx-http -query-type 8-host-all -scale-var $scale -queries 5 | bin/query_benchmarker_influxdb  -urls="http://$add:8086"  -workers $workers -print-interval 0|grep wall`
 echo -e "${GREEN}cassandra query test case 1 result:${NC}"
 echo -e "${GREEN}$IFQS1${NC}"
@@ -185,7 +211,7 @@ IFQ1=`echo ${TMP%s*}`
 #将运行多个用来模拟interval（1h） 因为cassandra运行中每个worker最后的进程不会工作并马上结束，所以总查询数位query+worker
 #SELECT max(usage_user) FROM measurements.cpu WHERE hostname in( 'host_a' ,  'host_b' ,  'host_c' ,  'host_d' ,  'host_e' ,  'host_f' ,  'host_g' ,  'host_h') and time >= 'HOUR_START' and time < 'HOUR_END';
 # a,b,c,d,e,f,g,h are random 8 numbers HOUR_END - HOUR_START = 1hour
-IFQS2=`bin/bulk_query_gen  -seed 123 -format cassandra -query-type 8-host-allbyhr -scale-var $scale -queries $((query + workers)) | bin/query_benchmarker_cassandra  -url="127.0.0.1:9042"  -workers $workers -print-interval 0 -aggregation-plan server| grep wall`
+IFQS2=`bin/bulk_query_gen  -seed 123 -format cassandra -query-type 8-host-allbyhr -scale-var $scale -queries $((query + workers)) | bin/query_benchmarker_cassandra  -url=$add  -workers $workers -print-interval 0 -aggregation-plan server| grep wall`
 echo -e "${GREEN}cassandra query test case 2 result:${NC}"
 echo -e "${GREEN}$IFQS2${NC}"
 TMP=`echo $IFQS2|awk '{print($4)}'`
@@ -195,7 +221,7 @@ IFQ2=`echo ${TMP%s*}`
 #将运行多个用来模拟interval（10m） 因为cassandra运行中每个worker最后的进程不会工作并马上结束，所以总查询数位query+worker
 #SELECT max(usage_user) FROM measurements.cpu WHERE hostname in( 'host_a' ,  'host_b' ,  'host_c' ,  'host_d' ,  'host_e' ,  'host_f' ,  'host_g' ,  'host_h') and time >= 'HOUR_START' and time < 'HOUR_END';
 # a,b,c,d,e,f,g,h are random 8 numbers, HOUR_END - HOUR_START = 10m
-IFQS3=`bin/bulk_query_gen  -seed 123 -format cassandra -query-type 8-host-12-hr -scale-var $scale -queries $((query + workers)) | bin/query_benchmarker_cassandra  -url="127.0.0.1:9042"  -workers $workers -print-interval 0 -aggregation-plan server| grep wall`
+IFQS3=`bin/bulk_query_gen  -seed 123 -format cassandra -query-type 8-host-12-hr -scale-var $scale -queries $((query + workers)) | bin/query_benchmarker_cassandra  -url=$add  -workers $workers -print-interval 0 -aggregation-plan server| grep wall`
 echo -e "${GREEN}cassandra query test case 3 result:${NC}"
 echo -e "${GREEN}$IFQS3${NC}"
 TMP=`echo $IFQS3|awk '{print($4)}'`
@@ -205,12 +231,17 @@ IFQ3=`echo ${TMP%s*}`
 #将运行多个用来模拟interval（10m） 因为cassandra运行中每个worker最后的进程不会工作并马上结束，所以总查询数位query+worker
 #SELECT max(usage_user) FROM measurements.cpu WHERE hostname in( 'host_a' ,  'host_b' ,  'host_c' ,  'host_d' ,  'host_e' ,  'host_f' ,  'host_g' ,  'host_h') and time >= 'HOUR_START' and time < 'HOUR_END';
 # a,b,c,d,e,f,g,h are random 8 numbers, HOUR_END - HOUR_START = 1m
-IFQS4=`bin/bulk_query_gen  -seed 123 -format cassandra -query-type 8-host-1-hr -scale-var $scale -queries $((query + workers)) | bin/query_benchmarker_cassandra  -url="127.0.0.1:9042"  -workers $workers -print-interval 0 -aggregation-plan server| grep wall`
+IFQS4=`bin/bulk_query_gen  -seed 123 -format cassandra -query-type 8-host-1-hr -scale-var $scale -queries $((query + workers)) | bin/query_benchmarker_cassandra  -url=$add  -workers $workers -print-interval 0 -aggregation-plan server| grep wall`
 echo -e "${GREEN}cassandra query test case 4 result:${NC}"
 echo -e "${GREEN}$IFQS4${NC}"
 TMP=`echo $IFQS4|awk '{print($4)}'`
 IFQ4=`echo ${TMP%s*}`
 
+
+ssh root@$add << eeooff
+service cassandra stop
+exit
+eeooff
 
 echo
 echo
@@ -252,3 +283,4 @@ docker container rm -f $TDENGINE >>/dev/null 2>&1
 docker network rm tsdbcomp >>/dev/null 2>&1
 #bulk_query_gen/bulk_query_gen  -format influx-http -query-type 1-host-1-hr -scale-var 10 -queries 5 | query_benchmarker_influxdb/query_benchmarker_influxdb  -urls="http://172.26.89.231:8086" 
 #bulk_query_gen/bulk_query_gen  -format tdengine -query-type 1-host-1-hr -scale-var 10 -queries 5 | query_benchmarker_tdengine/query_benchmarker_tdengine  -urls="http://172.26.89.231:6030" 
+
