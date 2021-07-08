@@ -12,13 +12,15 @@ import (
 )
 
 var (
-	fleetQuery, fleetGroupByHostnameQuery, hostsQuery *template.Template
+	fleetQuery, fleetGroupByHostnameQuery, hostsQuery, allHostsQuery, allHostsBy1HourQuery *template.Template
 )
 
 func init() {
 	fleetQuery = template.Must(template.New("fleetQuery").Parse(rawFleetQuery))
 	fleetGroupByHostnameQuery = template.Must(template.New("fleetGroupByHostnameQuery").Parse(rawFleetGroupByHostnameQuery))
 	hostsQuery = template.Must(template.New("hostsQuery").Parse(rawHostsQuery))
+  allHostsQuery = template.Must(template.New("allHostsQuery").Parse(rawAllHostsQuery))
+  allHostsBy1HourQuery = template.Must(template.New("allHostsBy1HourQuery").Parse(rawAllHostsBy1HourQuery))
 }
 
 // ElasticSearchDevops produces ES-specific queries for the devops use case.
@@ -77,6 +79,19 @@ func (d *ElasticSearchDevops) MaxCPUUsage12HoursByMinuteOneHost(q bulkQuerygen.Q
 	d.maxCPUUsageHourByMinuteNHosts(q.(*bulkQuerygen.HTTPQuery), 1, 12*time.Hour)
 }
 
+func (d *ElasticSearchDevops) MaxCPUUsage12HoursByMinuteEightHost(q bulkQuerygen.Query) {
+	d.maxCPUUsageHourByMinuteNHosts(q.(*bulkQuerygen.HTTPQuery), 8, 12*time.Hour)
+}
+
+func (d *ElasticSearchDevops) MaxCPUUsageEightHostAll(q bulkQuerygen.Query) {
+	d.maxCPUUsageHourAllHosts(q.(*bulkQuerygen.HTTPQuery), 8)
+}
+
+func (d *ElasticSearchDevops) MaxCPUUsageEightHostAllByHour(q bulkQuerygen.Query) {
+	d.maxCPUUsageHourAllHostsBy1Hr(q.(*bulkQuerygen.HTTPQuery), 8)
+}
+
+
 func (d *ElasticSearchDevops) maxCPUUsageHourByMinuteNHosts(qi bulkQuerygen.Query, nhosts int, timeRange time.Duration) {
 	interval := d.AllInterval.RandWindow(timeRange)
 	nn := rand.Perm(d.ScaleVar)[:nhosts]
@@ -106,6 +121,69 @@ func (d *ElasticSearchDevops) maxCPUUsageHourByMinuteNHosts(qi bulkQuerygen.Quer
 	q := qi.(*bulkQuerygen.HTTPQuery)
 	q.HumanLabel = humanLabel
 	q.HumanDescription = []byte(fmt.Sprintf("%s: %s", humanLabel, interval.StartString()))
+	q.Method = []byte("POST")
+
+	q.Path = []byte("/cpu/_search")
+	q.Body = body.Bytes()
+}
+
+func (d *ElasticSearchDevops) maxCPUUsageHourAllHosts(qi bulkQuerygen.Query, nhosts int) {
+	nn := rand.Perm(d.ScaleVar)[:nhosts]
+
+	hostnames := []string{}
+	for _, n := range nn {
+		hostnames = append(hostnames, fmt.Sprintf("host_%d", n))
+	}
+
+	hostnameClauses := []string{}
+	for _, s := range hostnames {
+		hostnameClauses = append(hostnameClauses, fmt.Sprintf("\"%s\"", s))
+	}
+
+	combinedHostnameClause := fmt.Sprintf("[ %s ]", strings.Join(hostnameClauses, ", "))
+
+	body := new(bytes.Buffer)
+	mustExecuteTemplate(allHostsQuery, body, AllHostsQueryParams{
+		JSONEncodedHostnames: combinedHostnameClause,
+		Field:                "usage_user",
+	})
+
+	humanLabel := []byte(fmt.Sprintf("Elastic max cpu, rand %4d hosts", nhosts))
+	q := qi.(*bulkQuerygen.HTTPQuery)
+	q.HumanLabel = humanLabel
+	q.HumanDescription = []byte(fmt.Sprintf("%s", humanLabel))
+	q.Method = []byte("POST")
+
+	q.Path = []byte("/cpu/_search")
+	q.Body = body.Bytes()
+}
+
+func (d *ElasticSearchDevops) maxCPUUsageHourAllHostsBy1Hr(qi bulkQuerygen.Query, nhosts int) {
+	nn := rand.Perm(d.ScaleVar)[:nhosts]
+
+	hostnames := []string{}
+	for _, n := range nn {
+		hostnames = append(hostnames, fmt.Sprintf("host_%d", n))
+	}
+
+	hostnameClauses := []string{}
+	for _, s := range hostnames {
+		hostnameClauses = append(hostnameClauses, fmt.Sprintf("\"%s\"", s))
+	}
+
+	combinedHostnameClause := fmt.Sprintf("[ %s ]", strings.Join(hostnameClauses, ", "))
+
+	body := new(bytes.Buffer)
+	mustExecuteTemplate(allHostsBy1HourQuery, body, AllHostsBy1HourQueryParas{
+		JSONEncodedHostnames: combinedHostnameClause,
+    Bucket:               "1h",
+		Field:                "usage_user",
+	})
+
+	humanLabel := []byte(fmt.Sprintf("Elastic max cpu, rand %4d hosts", nhosts))
+	q := qi.(*bulkQuerygen.HTTPQuery)
+	q.HumanLabel = humanLabel
+	q.HumanDescription = []byte(fmt.Sprintf("%s", humanLabel))
 	q.Method = []byte("POST")
 
 	q.Path = []byte("/cpu/_search")
@@ -154,6 +232,61 @@ type HostsQueryParams struct {
 	JSONEncodedHostnames      string
 	Bucket, Start, End, Field string
 }
+
+type AllHostsQueryParams struct {
+	JSONEncodedHostnames      string
+	Field string
+}
+
+type AllHostsBy1HourQueryParas struct {
+  JSONEncodedHostnames      string
+	Bucket, Field string
+}
+
+const rawAllHostsQuery = `
+{
+  "size": 0,
+  "query": {
+      "terms": {
+          "hostname": {{.JSONEncodedHostnames }}
+      }
+  },
+  "aggs": {
+      "max_usage_user": {
+          "max": {
+              "field": "{{.Field}}"
+          }
+      }
+  }
+}
+`
+
+const rawAllHostsBy1HourQuery = `
+{
+  "size": 0,
+  "query": {
+      "terms": {
+          "hostname": {{.JSONEncodedHostnames }}
+      }
+  },
+  "aggs": {
+      "result":{
+        "date_histogram":{
+          "field": "timestamp",
+          "interval": "{{.Bucket}}",
+          "format":"yyyy-MM-dd-HH"
+          },
+          "aggs": {
+              "max_usage_user": {
+                  "max": {
+                      "field": "{{.Field}}"
+                  }
+              }
+          }
+      }
+  }  
+}
+`
 
 const rawFleetQuery = `
 {
@@ -207,7 +340,7 @@ const rawFleetGroupByHostnameQuery = `
           "terms": {
             "size": {{.HostnameCount}},
             "field": "hostname"
-	  },
+	    },
           "aggs": {
             "result2": {
               "date_histogram": {
@@ -253,7 +386,7 @@ const rawHostsQuery = `
               }
             }
           ],
-	  "minimum_should_match" : 1
+	        "minimum_should_match" : 1
         }
       },
       "aggs":{
