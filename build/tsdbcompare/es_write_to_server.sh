@@ -117,6 +117,7 @@ echo "cat data/es.dat |bin/bulk_load_es --batch-size=$batchsize --workers=$worke
 cat data/es.dat |bin/bulk_load_es --batch-size=$batchsize --workers=$workers --urls="http://$add:9200" > res.txt 2>&1
 ELASTICRES=`grep loaded res.txt | head -n 1`
 echo
+echo -e "${GREEN}scale: ${scale}, batchSize: ${batchsize}, worker: ${workers} ${NC}"
 echo -e "${GREEN}Elasticsearch writing result:${NC}"
 echo -e "${GREEN}$ELASTICRES${NC}"
 
@@ -131,7 +132,7 @@ echo -e "${GREEN}sleep 30 seconds${NC}"
 sleep 30
 ssh -tt root@$add "du -sh /data/esdata" > size.txt
 TMP=`grep data size.txt`
-ESDISK=`echo ${TMP%G*}`
+ESDISK=`echo $TMP|awk '{print $1}'`
 
 echo
 echo
@@ -143,5 +144,5 @@ echo -e "       Writing $DATA records test takes:          "
 printf  "       Elasticsearch      |       %-4.2f Seconds    \n" $ESWTM
 echo    "======================================================"
 echo -e "       Writing $DATA records test disk:          "
-printf  "       Elasticsearch      |       %-10s G           \n" $ESDISK
+printf  "       Elasticsearch      |       %-10s             \n" $ESDISK
 echo    "------------------------------------------------------"
