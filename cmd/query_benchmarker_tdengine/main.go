@@ -218,12 +218,14 @@ func (b *TDengineQueryBenchmarker) processQueries(w http.HTTPClient, workersGrou
 	}
 	var queriesSeen int64
 	for queries := range b.queryChan {
+		//fmt.Printf("execute query process\n")
 		if len(queries) == 1 {
 			if !strings.Contains(string(queries[0].Body), "interval") && strings.Count(string(queries[0].HumanLabel), "rand") > 1 {
 				if err := b.processMultipleQuery(w, queries[0], opts, nil, nil, statPool, statChan, i); err != nil {
 					log.Fatal(err)
 				}
 			} else {
+				//fmt.Printf("execute normal process\n")
 				if err := b.processSingleQuery(w, queries[0], opts, nil, nil, statPool, statChan, i); err != nil {
 					log.Fatal(err)
 				}
@@ -246,6 +248,7 @@ func (b *TDengineQueryBenchmarker) processQueries(w http.HTTPClient, workersGrou
 					}
 				}
 			} else {
+				fmt.Printf("execute normal process\n")
 				for _, q := range queries {
 					b.processSingleQuery(w, q, opts, errCh, doneCh, statPool, statChan, i)
 					if bulk_query.Benchmarker.GradualWorkersIncrease() {

@@ -2,12 +2,12 @@ package cassandra
 
 import (
 	"fmt"
-	"log"
+	//"log"
 	"math/rand"
 	"strings"
 	"time"
 
-	"github.com/gocql/gocql"
+	//"github.com/gocql/gocql"
 	bulkQuerygen "github.com/taosdata/timeseriesdatabase-comparisons/bulk_query_gen"
 )
 
@@ -149,30 +149,30 @@ func (d *CassandraDevops) maxCPUUsageHourBy10MinuteNHosts(qi bulkQuerygen.Query,
 // SELECT max(usage_user) from cpu where (hostname = '$HOSTNAME_1' or ... or hostname = '$HOSTNAME_N') and time >= '$HOUR_START' and time < '$HOUR_END' group by time(1h)
 func (d *CassandraDevops) maxCPUUsageAllByHourNHosts(qi bulkQuerygen.Query, nhosts int, timeRange time.Duration) {
 	q := qi.(*CassandraQuery)
-	timeCluster := gocql.NewCluster("localhost:9042")
-	timeCluster.Keyspace = "measurements"
-	timeCluster.Consistency = gocql.Quorum
-	timeCluster.Timeout = 60 * time.Second
-	timeCluster.ProtoVersion = 4
-	session, err := timeCluster.CreateSession()
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer session.Close()
+	// timeCluster := gocql.NewCluster("serv:9042")
+	// timeCluster.Keyspace = "measurements"
+	// timeCluster.Consistency = gocql.Quorum
+	// timeCluster.Timeout = 60 * time.Second
+	// timeCluster.ProtoVersion = 4
+	// session, err := timeCluster.CreateSession()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// defer session.Close()
 
-	var timeReturn int64
+	// var timeReturn int64
 
-	if err := session.Query(`select min(time) from measurements.cpu ;`).Consistency(gocql.One).Scan(&timeReturn); err != nil {
-		log.Fatal(err)
-	}
+	// if err := session.Query(`select min(time) from measurements.cpu ;`).Consistency(gocql.One).Scan(&timeReturn); err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	q.TimeStart = time.Unix(timeReturn/1000000000, timeReturn%1000000000).UTC()
 
-	if err := session.Query(`select max(time) from measurements.cpu ;`).Consistency(gocql.One).Scan(&timeReturn); err != nil {
-		log.Fatal(err)
-	}
 
-	q.TimeEnd = time.Unix(timeReturn/1000000000, timeReturn%1000000000).UTC()
+	// if err := session.Query(`select max(time) from measurements.cpu ;`).Consistency(gocql.One).Scan(&timeReturn); err != nil {
+	// 	log.Fatal(err)
+	// }
+	q.TimeStart, _ = time.Parse(time.RFC3339, d.CommonParams.AllInterval.StartString())
+	q.TimeEnd,_ = time.Parse(time.RFC3339, d.CommonParams.AllInterval.EndString())
 
 	interval := d.AllInterval.NewTimeInterval(q.TimeStart, q.TimeEnd)
 	nn := rand.Perm(d.ScaleVar)[:nhosts]
@@ -206,22 +206,22 @@ func (d *CassandraDevops) maxCPUUsageAllByHourNHosts(qi bulkQuerygen.Query, nhos
 // SELECT max(usage_user) from cpu where (hostname = '$HOSTNAME_1' or ... or hostname = '$HOSTNAME_N') and time >= '$HOUR_START' and time < '$HOUR_END' group by time(1h)
 func (d *CassandraDevops) maxCPUUsageAllNHosts(qi bulkQuerygen.Query, nhosts int, timeRange time.Duration) {
 	q := qi.(*CassandraQuery)
-	timeCluster := gocql.NewCluster("localhost:9042")
-	timeCluster.Keyspace = "measurements"
-	timeCluster.Consistency = gocql.Quorum
-	timeCluster.Timeout = 60 * time.Second
-	timeCluster.ProtoVersion = 4
-	session, err := timeCluster.CreateSession()
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer session.Close()
+	// timeCluster := gocql.NewCluster("serv:9042")
+	// timeCluster.Keyspace = "measurements"
+	// timeCluster.Consistency = gocql.Quorum
+	// timeCluster.Timeout = 60 * time.Second
+	// timeCluster.ProtoVersion = 4
+	// session, err := timeCluster.CreateSession()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// defer session.Close()
 
-	//get the max time and the min from the database, and set the query interval to be the full range
-	var timeReturn int64
-	if err := session.Query(`select min(time) from measurements.cpu ;`).Consistency(gocql.One).Scan(&timeReturn); err != nil {
-		log.Fatal(err)
-	}
+	// //get the max time and the min from the database, and set the query interval to be the full range
+	// var timeReturn int64
+	// if err := session.Query(`select min(time) from measurements.cpu ;`).Consistency(gocql.One).Scan(&timeReturn); err != nil {
+	// 	log.Fatal(err)
+	// }
 	q.TimeEnd = q.TimeStart
 	interval := d.AllInterval.NewTimeInterval(q.TimeStart, q.TimeEnd)
 

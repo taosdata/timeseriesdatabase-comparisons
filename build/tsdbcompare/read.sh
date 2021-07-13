@@ -103,12 +103,12 @@ eeooff
     echo
     echo "Prepare data for Cassandra...."
     bin/bulk_data_gen -seed 123 -format cassandra -sampling-interval $interval -scale-var $scale -use-case devops -timestamp-start "$st" -timestamp-end "$et" >data/cassandra.dat
-    cat data/cassandra.dat  |bin/bulk_load_cassandra --batch-size=2000 --workers=$workers --url $add | grep loaded
+    cat data/cassandra.dat  |bin/bulk_load_cassandra --batch-size=2000 --workers=16 --url $add | grep loaded
 
     echo 
     echo "Prepare data for TDengine...."
     bin/bulk_data_gen -seed 123 -format tdengine -sampling-interval $interval -tdschema-file config/TDengineSchema.toml -scale-var $scale -use-case devops -timestamp-start "$st" -timestamp-end "$et"  > data/tdengine.dat
-    cat data/tdengine.dat |bin/bulk_load_tdengine --url $add --batch-size 5000  -do-load -report-tags n1 -workers $workers -fileout=false -http-api=$interface
+    cat data/tdengine.dat |bin/bulk_load_tdengine --url $add --batch-size 2000  -do-load -report-tags n1 -workers 50 -fileout=false -http-api='false'  | grep loaded
 fi
 
 echo
@@ -116,9 +116,13 @@ echo "------------------Querying Data-----------------"
 echo
 
 ssh root@$add << eeooff
+systemctl stop taosd
 service cassandra stop
+systemctl start taosd
 exit
 eeooff
+
+sleep 30
 
 echo 
 echo  "start query test, query max from 8 hosts group by 1 hour, TDengine"
@@ -187,7 +191,7 @@ ssh root@$add << eeooff
 systemctl stop taosd 
 echo 1 > /proc/sys/vm/drop_caches
 sudo service cassandra start
-sleep 20
+sleep 40
 exit
 eeooff
 
