@@ -47,12 +47,14 @@ batchsize=5000
 workers=16
 usecase='devops'
 gene=1
-add=127.0.0.1
+add=10.2.0.5
 interval='10s'
 scale=100
 st='2018-01-01T00:00:00Z'
 et='2018-01-02T00:00:00Z'
 
+echo -e "${GREEN}====================This test option: scale: ${scale}, batchsize: ${batchsize}, worker: ${workers} =====================${NC}"
+echo -e "${GREEN}------------------------------------- timescaledb test start -------------------------------------${NC}"
 
 while getopts "hb:w:g:a:i:s:t:e:c:" opt
 do
@@ -131,22 +133,22 @@ if [[ $gene == 1 ]];then
 fi
 
 #################### 1 clear the old data ###############
-# ssh -tt root@$add << EOFEOF
+ssh -tt root@$add >/dev/null << EOFEOF
+su - postgres -c "/usr/local/bin/postgresql/bin/pg_ctl -w restart " >/dev/null 2>&1 
+exit
+EOFEOF
+
 # su - postgres -c "$PGDATA/../bin/pg_ctl -w restart " >/dev/null 2>&1 
-# exit
-# EOFEOF
 
-su - postgres -c "$PGDATA/../bin/pg_ctl -w restart " >/dev/null 2>&1 
-
-psql -U postgres << EOF
+psql -U postgres -h $add<< EOF
 	drop database test;
 EOF
 
-# ssh -tt root@$add "du -sm /usr/local/bin/postgresql/data" > size.txt
-du -s /usr/local/bin/postgresql/data > size.txt
+ssh -tt root@$add "du -s /usr/local/bin/postgresql/data" > size.txt
+# du -s /usr/local/bin/postgresql/data > size.txt
 TMP=`grep data size.txt`
 TSDISKINIT=`echo $TMP|awk '{print $1}'`
-# echo TSDISKINIT is :$TSDISKINIT
+echo TSDISKINIT is :$TSDISKINIT
 
 #################### 2 load the new data ###############
 echo
@@ -156,38 +158,42 @@ pwd
 loadcmd="cat ${datafile} | gunzip | ../../bin/timescale_load --workers=$workers --db-name='test' --batch-size=$batchsize --host=$add > tsres.log 2>&1"
 echo $loadcmd
 # $($loadcmd)
-cat ${datafile} | gunzip | ../../bin/timescale_load --workers=$workers --db-name='test' --batch-size=$batchsize --host=$add  > tsres.log 2>&1  
+cat ${datafile} | gunzip | ../../bin/timescale_load --workers=$workers --db-name='test' --batch-size=$batchsize --host=$add  > tsres.log  2>&1  
 
 #################### 3 data processing  ###############
-TIMESCALE=`grep loaded tsres.log | tail -n 1`
+TIMESCALE=`grep "rows/sec" tsres.log | tail -n 1`
+TIMESCALEVALUE=`grep "metrics/sec" tsres.log | tail -n 1`
 
 echo
-echo -e "${GREEN}scale: ${scale}, batchsize: ${batchsize}, worker: ${workers} ${NC}"
 echo -e "${GREEN}timescaledb writing result:${NC}"
 echo -e "${GREEN}$TIMESCALE${NC}"
+echo -e "${GREEN}$TIMESCALEVALUE${NC}"
 
 DATA=`echo $TIMESCALE|awk '{print $2}'`
 TMP=`echo $TIMESCALE|awk '{print($5)}'`
 TSWTM=`echo ${TMP%s*}`
+Pointrate=`echo $TIMESCALE | awk '{print $11}'`
+Valuerate=`echo $TIMESCALEVALUE | awk '{print $11}'`
 
 
 #################### 4 close the server  ###############
 echo -e "${GREEN}Stop Timescaledb ${NC}"
 
-# ssh -tt root@$add << EOFEOF
-# su - postgres -c "$PGDATA/../bin/pg_ctl -w restart " >/dev/null 2>&1
-# exit
-# EOFEOF
+ssh -tt root@$add >/dev/null << EOFEOF
+# su - postgres -c "/usr/local/bin/postgresql/bin/pg_ctl -w stop" >/dev/null 2>&1
+su - postgres -c "/usr/local/bin/postgresql/bin/pg_ctl -w stop " 
+exit
+EOFEOF
 
-su - postgres -c "$PGDATA/../bin/pg_ctl -w stop " >/dev/null 2>&1 
+# su - postgres -c "$PGDATA/../bin/pg_ctl -w stop " >/dev/null 2>&1 
 
 echo -e "${GREEN}sleep 10 seconds${NC}"
 sleep 10
-# ssh -tt root@$add "du -sm /usr/local/bin/postgresql/data" > size.txt
-du -s /usr/local/bin/postgresql/data > size.txt
+ssh -tt root@$add "du -s /usr/local/bin/postgresql/data" > size.txt
+# du -s /usr/local/bin/postgresql/data > size.txt
 TMP=`grep data size.txt`
 TSDISKEND=`echo $TMP|awk '{print $1}'`
-# echo	TSDISKEND is : $TSDISKEND
+echo	TSDISKEND is : $TSDISKEND
 
 # TSDISK=$(awk 'BEGIN{printf "%.2f\n" ,( '$TSDISKEND' - '$TSDISKINIT')/1024.0/1024.0}')
 TSDISK=` echo "scale=2; ($TSDISKEND-$TSDISKINIT)/1024/1024" |bc `
@@ -203,6 +209,12 @@ echo    "------------------------------------------------------"
 echo -e "       Writing $DATA records test takes:          "
 printf  "       Timescaledb      |       %-4.2f Seconds    \n" $TSWTM
 echo    "------------------------------------------------------"
+echo -e "       Writing $DATA records point rate:          "
+printf  "       Timescaledb      |       %-4.2f point/s    \n" $Pointrate
+echo    "------------------------------------------------------"
+echo -e "       Writing $DATA records value rate:          "
+printf  "       Timescaledb      |       %-4.2f value/s    \n" $Valuerate
+echo    "------------------------------------------------------"
 echo -e "       Writing $DATA records test disk:          "
 printf  "       Timescaledb      |       %-4.2f GB          \n" $TSDISK
 echo    "======================================================"
@@ -212,4 +224,8 @@ echo    "======================================================"
 rm -f tsres.log
 rm -f size.txt
 
-su - postgres -c "$PGDATA/../bin/pg_ctl -w start " >/dev/null 2>&1 
+ssh -tt root@$add >/dev/null << EOFEOF
+su - postgres -c "/usr/local/bin/postgresql/bin/pg_ctl -w start " >/dev/null 2>&1 
+exit
+EOFEOF
+echo -e "${GREEN}------------------------------------- timescaledb test stop -------------------------------------${NC}"
