@@ -12,7 +12,7 @@ batchsize=5000
 workers=16
 interface='false'
 gene=1
-add='serv'
+add='bschang1'
 interval='10s'
 scale=100
 st='2018-01-01T00:00:00Z'
@@ -106,7 +106,7 @@ ssh root@$add << eeooff
 rm -rf /data/lib/taos/*
 sudo service cassandra start
 sleep 30
-echo 'drop keyspace if exists measurements;' | cqlsh serv
+echo 'drop keyspace if exists measurements;' | cqlsh $add
 echo 1 > /proc/sys/vm/drop_caches
 sudo service cassandra stop
 systemctl start taosd
@@ -130,7 +130,7 @@ echo -e "${GREEN}$TDENGINERES${NC}"
 DATA=`echo $TDENGINERES|awk '{print($2)}'`
 TMP=`echo $TDENGINERES|awk '{print($5)}'`
 TDWTM=`echo ${TMP%s*}`
-ssh root@$add << eeooff
+ssh  root@$add << eeooff
 systemctl stop taosd 
 echo 1 > /proc/sys/vm/drop_caches
 service cassandra start

@@ -9,7 +9,7 @@ GREEN_UNDERLINE='\033[4;32m'
 NC='\033[0m'
 
 workers=16
-interface='cgo'
+interface='fast'
 gene=0
 add='bschang1'
 interval='10s'
@@ -87,12 +87,7 @@ if [[ $gene == 1 ]];then
 
     ssh root@$add << eeooff
     rm -rf /data/lib/taos/*
-    sudo service cassandra start
-    sleep 30
-    echo 'drop keyspace if exists measurements;' | cqlsh serv
-    echo 1 > /proc/sys/vm/drop_caches
     systemctl start taosd
-    rm -rf /data/cassandra/data/measurements
     sleep 10
     exit
 eeooff
@@ -100,11 +95,6 @@ eeooff
 
     echo
     echo "---------------Generating && Inserting Data-----------------"
-    echo
-    echo "Prepare data for Cassandra...."
-    bin/bulk_data_gen -seed 123 -format cassandra -sampling-interval $interval -scale-var $scale -use-case devops -timestamp-start "$st" -timestamp-end "$et" >data/cassandra.dat
-    cat data/cassandra.dat  |bin/bulk_load_cassandra --batch-size=2000 --workers=16 --url $add | grep loaded
-
     echo 
     echo "Prepare data for TDengine...."
     bin/bulk_data_gen -seed 123 -format tdengine -sampling-interval $interval -tdschema-file config/TDengineSchema.toml -scale-var $scale -use-case devops -timestamp-start "$st" -timestamp-end "$et"  > data/tdengine.dat
@@ -117,7 +107,6 @@ echo
 
 ssh root@$add << eeooff
 systemctl stop taosd
-service cassandra stop
 systemctl start taosd
 exit
 eeooff
@@ -132,7 +121,7 @@ echo
 #测试用例1，查询所有数据中，用8个hostname标签进行匹配，匹配出这8个hostname对应的模拟服务器CPU数据中的usage_user这个监控数据的最大值。
 #select max(usage_user) from cpu where(hostname='host_a' and hostname='host_b'and hostname='host_c'and hostname='host_d'and hostname='host_e'and hostname='host_f' and hostname='host_g'and hostname='host_h') ;
 # a,b,c,d,e,f,g,h are random 8 numbers.
-TDQS1=`bin/bulk_query_gen  -seed 123 -format tdengine -query-type 8-host-all -scale-var $scale -queries $query | bin/query_benchmarker_tdengine  -urls=$add -workers $workers -threads $workers -print-interval 0 -http-client-type $interface | grep wall`
+TDQS1=`bin/bulk_query_gen  -seed 123 -format tdengine -query-type 8-host-all -scale-var $scale -queries $query | bin/query_benchmarker_tdengine  -urls="http://$add:6041"  -workers $workers -threads $workers -print-interval 0 -http-client-type $interface | grep wall`
 echo
 echo -e "${GREEN}TDengine query test case 1 result:${NC}"
 echo -e "${GREEN}$TDQS1${NC}"
@@ -143,7 +132,7 @@ TDQ1=`echo ${TMP%s*}`
 #测试用例2，查询所有数据中，用8个hostname标签进行匹配，匹配出这8个hostname对应的模拟服务器CPU数据中的usage_user这个监控数据，以1小时为粒度，查询每1小时的最大值。
 #select max(usage_user) from cpu where(hostname='host_a' and hostname='host_b'and hostname='host_c'and hostname='host_d'and hostname='host_e'and hostname='host_f' and hostname='host_g'and hostname='host_h') interval(1h);
 # a,b,c,d,e,f,g,h are random 8 numbers
-TDQS2=`bin/bulk_query_gen  -seed 123 -format tdengine -query-type 8-host-allbyhr -scale-var $scale -queries $query | bin/query_benchmarker_tdengine  -urls=$add -workers $workers -threads $workers -print-interval 0 -http-client-type $interface | grep wall`
+TDQS2=`bin/bulk_query_gen  -seed 123 -format tdengine -query-type 8-host-allbyhr -scale-var $scale -queries $query | bin/query_benchmarker_tdengine  -urls="http://$add:6041" -workers $workers -threads $workers -print-interval 0 -http-client-type $interface | grep wall`
 
 echo
 echo -e "${GREEN}TDengine query test case 2 result:${NC}"
@@ -155,7 +144,7 @@ TDQ2=`echo ${TMP%s*}`
 #测试用例3，测试用例3，随机查询12个小时的数据，用8个hostname标签进行匹配，匹配出这8个hostname对应的模拟服务器CPU数据中的usage_user这个监控数据，以10分钟为粒度，查询每10分钟的最大值
 #select max(usage_user) from cpu where(hostname='host_a' and hostname='host_b'and hostname='host_c'and hostname='host_d'and hostname='host_e'and hostname='host_f' and hostname='host_g'and hostname='host_h') and time >x and time <y interval(10m);
 # a,b,c,d,e,f,g,h are random 8 numbers, y-x =12 hour
-TDQS3=`bin/bulk_query_gen  -seed 123 -format tdengine -query-type 8-host-12-hr -scale-var $scale -queries $query | bin/query_benchmarker_tdengine  -urls=$add -workers $workers -threads $workers -print-interval 0 -http-client-type $interface | grep wall`
+TDQS3=`bin/bulk_query_gen  -seed 123 -format tdengine -query-type 8-host-12-hr -scale-var $scale -queries $query | bin/query_benchmarker_tdengine  -urls="http://$add:6041" -workers $workers -threads $workers -print-interval 0 -http-client-type $interface | grep wall`
 echo
 echo -e "${GREEN}TDengine query test case 3 result:${NC}"
 echo -e "${GREEN}$TDQS3${NC}"
@@ -166,7 +155,7 @@ TDQ3=`echo ${TMP%s*}`
 #测试用例4，随机查询1个小时的数据，用8个hostname标签进行匹配，匹配出这8个hostname对应的模拟服务器CPU数据中的usage_user这个监控数据，以1分钟为粒度，查询每1分钟的最大值
 #select max(usage_user) from cpu where(hostname='host_a' and hostname='host_b'and hostname='host_c'and hostname='host_d'and hostname='host_e'and hostname='host_f' and hostname='host_g'and hostname='host_h') and time >x and time <y interval(10m);
 # a,b,c,d,e,f,g,h are random 8 numbers, y-x =1 hours
-TDQS4=`bin/bulk_query_gen  -seed 123 -format tdengine -query-type 8-host-1-hr -scale-var $scale -queries $query | bin/query_benchmarker_tdengine  -urls=$add -workers $workers -threads $workers -print-interval 0 -http-client-type $interface | grep wall`
+TDQS4=`bin/bulk_query_gen  -seed 123 -format tdengine -query-type 8-host-1-hr -scale-var $scale -queries $query | bin/query_benchmarker_tdengine  -urls="http://$add:6041" -workers $workers -threads $workers -print-interval 0 -http-client-type $interface | grep wall`
 echo
 echo -e "${GREEN}TDengine query test case 4 result:${NC}"
 echo -e "${GREEN}$TDQS4${NC}"
@@ -178,7 +167,7 @@ TDQ4=`echo ${TMP%s*}`
 #为了与cassandra的查询方式保持一致，本测试将不会使用interval。 查询的方式将改为运行多个select语句，并依靠 ts> and ts< 模拟interval
 #select max(usage_user) from cpu where(hostname='host_a' and hostname='host_b'and hostname='host_c'and hostname='host_d'and hostname='host_e'and hostname='host_f' and hostname='host_g'and hostname='host_h') and time >x and time <y;
 # a,b,c,d,e,f,g,h are random 8 numbers, y-x =1 hours
-TDQS5=`bin/bulk_query_gen  -seed 123 -format tdengine -query-type 8-host-1-hr-no-interval -scale-var $scale -queries $query | bin/query_benchmarker_tdengine  -urls=$add -workers $workers -threads $workers -print-interval 0 -http-client-type $interface | grep wall`
+TDQS5=`bin/bulk_query_gen  -seed 123 -format tdengine -query-type 8-host-1-hr-no-interval -scale-var $scale -queries $query | bin/query_benchmarker_tdengine  -urls="http://$add:6041" -workers $workers -threads $workers -print-interval 0 -http-client-type $interface | grep wall`
 echo
 echo -e "${GREEN}TDengine query test case 5 result:${NC}"
 echo -e "${GREEN}$TDQS5${NC}"
@@ -189,93 +178,35 @@ sleep 10
 
 ssh root@$add << eeooff
 systemctl stop taosd 
-echo 1 > /proc/sys/vm/drop_caches
-sudo service cassandra start
-sleep 40
 exit
 eeooff
 
-echo 
-echo  "start query test, query max from 8 hosts group by 1hour, cassandra"
-echo
-#cassandra Test case 1
-#测试用例1，查询所有数据中，用8个hostname标签进行匹配，匹配出这8个hostname对应的模拟服务器CPU数据中的usage_user这个监控数据的最大值。
-#因为cassandra运行中每个worker最后的进程不会工作并马上结束，所以总查询数位query+worker
-#SELECT max(usage_user) FROM measurements.cpu WHERE hostname in( 'host_a' ,  'host_b' ,  'host_c' ,  'host_d' ,  'host_e' ,  'host_f' ,  'host_g' ,  'host_h') ;
-# a,b,c,d,e,f,g,h are random 8 numbers.
-sum=$((query + workers))
-IFQS1=`bin/bulk_query_gen  -seed 123 -format cassandra -query-type 8-host-all -scale-var $scale -queries $((query + workers)) | bin/query_benchmarker_cassandra  -url=$add  -workers $workers -print-interval 0 -aggregation-plan server| grep wall`
-#`bin/bulk_query_gen  -seed 123 -format influx-http -query-type 8-host-all -scale-var $scale -queries 5 | bin/query_benchmarker_influxdb  -urls="http://$add:8086"  -workers $workers -print-interval 0|grep wall`
-echo -e "${GREEN}cassandra query test case 1 result:${NC}"
-echo -e "${GREEN}$IFQS1${NC}"
-TMP=`echo $IFQS1|awk '{print($4)}'`
-IFQ1=`echo ${TMP%s*}`
-#Test case 2
-#测试用例2，查询所有数据中，用8个hostname标签进行匹配，匹配出这8个hostname对应的模拟服务器CPU数据中的usage_user这个监控数据，以1小时为粒度，查询每1小时的最大值。
-#将运行多个用来模拟interval（1h） 因为cassandra运行中每个worker最后的进程不会工作并马上结束，所以总查询数位query+worker
-#SELECT max(usage_user) FROM measurements.cpu WHERE hostname in( 'host_a' ,  'host_b' ,  'host_c' ,  'host_d' ,  'host_e' ,  'host_f' ,  'host_g' ,  'host_h') and time >= 'HOUR_START' and time < 'HOUR_END';
-# a,b,c,d,e,f,g,h are random 8 numbers HOUR_END - HOUR_START = 1hour
-IFQS2=`bin/bulk_query_gen  -seed 123 -format cassandra -query-type 8-host-allbyhr -scale-var $scale -queries $((query + workers)) | bin/query_benchmarker_cassandra  -url=$add  -workers $workers -print-interval 0 -aggregation-plan server| grep wall`
-echo -e "${GREEN}cassandra query test case 2 result:${NC}"
-echo -e "${GREEN}$IFQS2${NC}"
-TMP=`echo $IFQS2|awk '{print($4)}'`
-IFQ2=`echo ${TMP%s*}`
-#Test case 3
-#测试用例3，测试用例3，随机查询12个小时的数据，用8个hostname标签进行匹配，匹配出这8个hostname对应的模拟服务器CPU数据中的usage_user这个监控数据，以10分钟为粒度，查询每10分钟的最大值
-#将运行多个用来模拟interval（10m） 因为cassandra运行中每个worker最后的进程不会工作并马上结束，所以总查询数位query+worker
-#SELECT max(usage_user) FROM measurements.cpu WHERE hostname in( 'host_a' ,  'host_b' ,  'host_c' ,  'host_d' ,  'host_e' ,  'host_f' ,  'host_g' ,  'host_h') and time >= 'HOUR_START' and time < 'HOUR_END';
-# a,b,c,d,e,f,g,h are random 8 numbers, HOUR_END - HOUR_START = 10m
-IFQS3=`bin/bulk_query_gen  -seed 123 -format cassandra -query-type 8-host-12-hr -scale-var $scale -queries $((query + workers)) | bin/query_benchmarker_cassandra  -url=$add  -workers $workers -print-interval 0 -aggregation-plan server| grep wall`
-echo -e "${GREEN}cassandra query test case 3 result:${NC}"
-echo -e "${GREEN}$IFQS3${NC}"
-TMP=`echo $IFQS3|awk '{print($4)}'`
-IFQ3=`echo ${TMP%s*}`
-#Test case 4
-#测试用例4，随机查询1个小时的数据，用8个hostname标签进行匹配，匹配出这8个hostname对应的模拟服务器CPU数据中的usage_user这个监控数据，以1分钟为粒度，查询每1分钟的最大值
-#将运行多个用来模拟interval（10m） 因为cassandra运行中每个worker最后的进程不会工作并马上结束，所以总查询数位query+worker
-#SELECT max(usage_user) FROM measurements.cpu WHERE hostname in( 'host_a' ,  'host_b' ,  'host_c' ,  'host_d' ,  'host_e' ,  'host_f' ,  'host_g' ,  'host_h') and time >= 'HOUR_START' and time < 'HOUR_END';
-# a,b,c,d,e,f,g,h are random 8 numbers, HOUR_END - HOUR_START = 1m
-IFQS4=`bin/bulk_query_gen  -seed 123 -format cassandra -query-type 8-host-1-hr -scale-var $scale -queries $((query + workers)) | bin/query_benchmarker_cassandra  -url=$add  -workers $workers -print-interval 0 -aggregation-plan server| grep wall`
-echo -e "${GREEN}cassandra query test case 4 result:${NC}"
-echo -e "${GREEN}$IFQS4${NC}"
-TMP=`echo $IFQS4|awk '{print($4)}'`
-IFQ4=`echo ${TMP%s*}`
-
-
-ssh root@$add << eeooff
-service cassandra stop
-exit
-eeooff
 
 echo
 echo
 echo    "======================================================"
-echo    "             tsdb performance comparision             "
+echo    "           taosd restful performance test             "
 echo    "======================================================"
 echo    "                   Query test cases:                "
 echo    " case 1: select the max(value) from all data    "
 echo    " filtered out 8 hosts                                 "
 echo    "       Query test case 1 takes:                      "
-printf  "       cassandra          |       %-4.2f Seconds    \n" $IFQ1 
 printf  "       TDengine           |       %-4.2f Seconds    \n" $TDQ1
 echo    "------------------------------------------------------"
 echo    " case 2: select the max(value) from all data          "
 echo    " filtered out 8 hosts with an interval of 1 hour     "
 echo    " case 2 takes:                                       "
-printf  "       cassandra          |       %-4.2f Seconds    \n" $IFQ2 
 printf  "       TDengine           |       %-4.2f Seconds    \n" $TDQ2
 echo    "------------------------------------------------------"
 echo    " case 3: select the max(value) from random 12 hours"
 echo    " data filtered out 8 hosts with an interval of 10 min         "
 echo    " filtered out 8 hosts interval(1h)                   "
 echo    " case 3 takes:                                       "
-printf  "       cassandra          |       %-4.2f Seconds    \n" $IFQ3 
 printf  "       TDengine           |       %-4.2f Seconds    \n" $TDQ3
 echo    "------------------------------------------------------"
 echo    " case 4: select the max(value) from random 1 hour data  "
 echo    " data filtered out 8 hosts with an interval of 1 min         "
 echo    " case 4 takes:                                        "
-printf  "       cassandra          |       %-4.2f Seconds    \n" $IFQ4 
 printf  "       TDengine           |       %-4.2f Seconds    \n" $TDQ4
 printf  "   TDengine no interval   |       %-4.2f Seconds    \n" $TDQ5
 echo    "------------------------------------------------------"
