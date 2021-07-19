@@ -1,3 +1,5 @@
+#!/bin/bash
+
 add='serv'
 compareType='insert'
 queryType='cgo'
