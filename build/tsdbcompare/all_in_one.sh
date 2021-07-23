@@ -1,10 +1,11 @@
 #!/bin/bash
 
-add='serv'
-compareType='insert'
-queryType='cgo'
+add="serv"
+compareType="insert"
+queryType="cgo"
+fsync='false'
 
-while getopts "a:i:q:" opt; do
+while getopts "a:i:q:p:f:" opt; do
     case $opt in
     a)
         add=$OPTARG
@@ -21,7 +22,7 @@ while getopts "a:i:q:" opt; do
         echo "------------------------------------------------------"
         echo "i | the type of comparsion you want to run"
         echo "  | (insert: run insert test | query: run query test)"
-        echo "  | (both: run both insert and query test)"
+        echo "  | (all: run all insert and query test)"
         echo "  | (11: run insert test where worker = 1 batch = 1)"
         echo "  | (default: insert)"
         echo "------------------------------------------------------"
@@ -35,7 +36,20 @@ while getopts "a:i:q:" opt; do
 done
 echo "address: $add, compareType: $compareType, queryType: $queryType"
 
+if [[ $fsync == "false" ]]; then
+        ssh root@$add <<eeooff
+        echo `sed -i "s/.*trickle_fsync.*/trickle_fsync: true/g" /etc/cassandra/cassandra.yaml`
+        sed -i "s/.*walLevel.*/walLevel 2 /g" /etc/taos/taos.cfg
+eeooff
+elif [[ $fsync == "true" ]]; then
+        ssh root@$add <<eeooff
+        echo `sed -i "s/.*trickle_fsync.*/trickle_fsync: false/g" /etc/cassandra/cassandra.yaml`
+        sed -i "s/.*walLevel.*/walLevel 2 /g" /etc/taos/taos.cfg
+eeooff
+fi
+
 if [[ $compareType == "insert" || $compareType == "both" ]]; then
+
     echo "start insert test between TDengine and Cassandra"
     echo "Worker = 1, Batch = 1 is not included"
     for s in {800,1000}; do
@@ -51,7 +65,7 @@ if [[ $compareType == "insert" || $compareType == "both" ]]; then
     done
 fi
 
-if [ $compareType == "11" ]; then
+if [ $compareType == "11" || $compareType == "all" ]; then
     echo "start insert test between TDengine and Cassandra"
     echo "only contain Worker = 1, Batch = 1"
     ./write_to_server.sh -b 1 -w 1 -g 1 -s 100 -a $add
@@ -62,7 +76,7 @@ if [ $compareType == "11" ]; then
     ./write_to_server.sh -b 1 -w 1 -g 1 -s 1000 -a $add
 fi
 
-if [[ $compareType == "query" || $compareType == "both" ]]; then
+if [[ $compareType == "query" || $compareType == "all" ]]; then
     if [ $queryType == "cgo" ]; then
         echo "run query test, query method is cgo"
         for s in {100,1000};do
@@ -71,7 +85,7 @@ if [[ $compareType == "query" || $compareType == "both" ]]; then
                 ./read.sh -w $j -g 0 -s $s -a $add
             done
         done
-    elif [ $queryType == "fast" ]; then
+    elif [ $queryType == "all" ]; then
         echo "run query test, query method is restful"
         for s in {100,1000};do
 	        ./read_2.sh -w 100 -g 1 -s $s -n 'fast' -a $add

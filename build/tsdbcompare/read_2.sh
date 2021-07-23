@@ -105,13 +105,13 @@ echo
 echo "------------------Querying Data-----------------"
 echo
 
-ssh root@$add << eeooff
-systemctl stop taosd
-systemctl start taosd
-exit
-eeooff
+#ssh root@$add << eeooff
+#systemctl stop taosd
+#systemctl start taosd
+#exit
+#eeooff
 
-sleep 30
+#sleep 30
 
 echo 
 echo  "start query test, query max from 8 hosts group by 1 hour, TDengine"

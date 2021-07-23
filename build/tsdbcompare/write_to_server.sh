@@ -111,9 +111,10 @@ echo 1 > /proc/sys/vm/drop_caches
 sudo service cassandra stop
 systemctl start taosd
 rm -rf /data/cassandra/data/measurements
-sleep 30
+sleep 60
 exit
 eeooff
+scp monitor.sh $add:/root
 
 echo
 echo "------------------Writing Data-----------------"
@@ -121,6 +122,8 @@ echo "------------------Writing Data-----------------"
 echo
 echo -e "Start test TDengine, result in ${GREEN}Green line${NC}"
 # taos -s 'drop database devops;'
+
+ssh root@bschang1 -f /root/monitor.sh taosd >/dev/null 2>1
 
 TDENGINERES=`cat data/tdengine.dat |bin/bulk_load_tdengine --url $add --batch-size $batchsize   -do-load -report-tags n1 -workers $workers -fileout=false -http-api=$interface | grep loaded`
 echo $TDENGINERES          
@@ -137,6 +140,7 @@ service cassandra start
 sleep 30
 exit
 eeooff
+ssh root@bschang1 -f /root/monitor.sh java >/dev/null 2>1
 
 echo
 echo -e "Start test cassandra, result in ${GREEN}Green line${NC}"
