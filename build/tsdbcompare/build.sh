@@ -3,6 +3,10 @@
 cpuNUm=`nproc`
 address='bschang1'
 
+address=$1
+
+ssh-copy-id root@address
+
 ## installing java 8
 ## install on client device
 echo "changing java version on client"
@@ -19,7 +23,7 @@ echo `rm -rf /usr/local/go && tar -C /usr/local -xzf go1.16.6.linux-amd64.tar.gz
 echo `export PATH=$PATH:/usr/local/go/bin`
 echo `go version`
 
-#install go on server
+#install go and java on server
 echo "updating go on client"
 ssh root@$address <<eeooff
 #install java
@@ -124,7 +128,7 @@ echo `sed -i "s/truncate_request_timeout_in_ms:.*/truncate_request_timeout_in_ms
 echo `sed -i "s/request_timeout_in_ms:.*/request_timeout_in_ms: 1000000/g" /etc/cassandra/cassandra.yaml`
 echo `sed -i "s/slow_query_log_timeout_in_ms:.*/slow_query_log_timeout_in_ms: 50000/g" /etc/cassandra/cassandra.yaml`
 echo `sed -i "s/data_file_directories.*/slow_query_log_timeout_in_ms: 50000/g" /etc/cassandra/cassandra.yaml`
-echo `sed -i "s/rpc_address:.*/rpc_address: bschang1/g" /etc/cassandra/cassandra.yaml`
+echo `sed -i "s/rpc_address:.*/rpc_address: $address/g" /etc/cassandra/cassandra.yaml`
 echo `sed -i "s/\/var\/lib\/cassandra\/data/\/data\/Cassandra/g" /etc/cassandra/cassandra.yaml`
 echo `sed -i "s/.*trickle_fsync.*/trickle_fsync: false/g" /etc/cassandra/cassandra.yaml`
 echo `sed -i "s/.*trickle_fsync_interval_in_kb.*/trickle_fsync_interval_in_kb: 0/g" /etc/cassandra/cassandra.yaml`
@@ -150,12 +154,12 @@ go mod init github.com/taosdata/timeseriesdatabase-comparisons
 go mod tidy
 
 mkdir -p build/tsdbcompare/bin
-cd cmd/bulk_data_gen ; go build ; cp bulk_data_gen ../../build/tsdbcompare/bin
-cd ../bulk_load_cassandra ; go build ; cp bulk_load_cassandra ../../build/tsdbcompare/bin
-cd ../bulk_load_tdengine ; go build ; cp bulk_load_tdengine ../../build/tsdbcompare/bin
-cd ../bulk_query_gen ; go build ; cp bulk_query_gen ../../build/tsdbcompare/bin
-cd ../query_benchmarker_cassandra ; go build ; cp query_benchmarker_cassandra ../../build/tsdbcompare/bin
-cd ../query_benchmarker_tdengine; go build ; cp query_benchmarker_tdengine ../../build/tsdbcompare/bin
+cd cmd/bulk_data_gen && go build && cp bulk_data_gen ../../build/tsdbcompare/bin
+cd ../bulk_load_cassandra && go build && cp bulk_load_cassandra ../../build/tsdbcompare/bin
+cd ../bulk_load_tdengine && go build && cp bulk_load_tdengine ../../build/tsdbcompare/bin
+cd ../bulk_query_gen && go build && cp bulk_query_gen ../../build/tsdbcompare/bin
+cd ../query_benchmarker_cassandra && go build && cp query_benchmarker_cassandra ../../build/tsdbcompare/bin
+cd ../query_benchmarker_tdengine && go build && cp query_benchmarker_tdengine ../../build/tsdbcompare/bin
 
 cd ../build/tsdbcompare
 
