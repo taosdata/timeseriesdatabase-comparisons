@@ -68,7 +68,7 @@ func (d *TimescaleDevops) MaxCPUUsageAllHour8Hosts(q bulkQuerygen.Query) {
 
 // 测试用例2，查询所有数据中，用8个hostname标签进行匹配，匹配出这8个hostname对应的模拟服务器CPU数据中的usage_user这个监控数据，以1小时为粒度，查询每1小时的最大值。
 func (d *TimescaleDevops) MaxCPUUsageByHour8Hosts(q bulkQuerygen.Query) {
-	d.maxCPUUsageByHourNHosts(q, 8, 12*time.Hour)
+	d.maxCPUUsageByHourNHosts(q, 8)
 }
 
 // 测试用例3，测试用例3，随机查询12个小时的数据，用8个hostname标签进行匹配，匹配出这8个hostname对应的模拟服务器CPU数据中的usage_user这个监控数据，以10分钟为粒度，查询每10分钟的最大值
