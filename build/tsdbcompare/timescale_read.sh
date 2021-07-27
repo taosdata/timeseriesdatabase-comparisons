@@ -150,7 +150,7 @@ echo
 #测试用例1，查询所有数据中，用8个hostname标签进行匹配，匹配出这8个hostname对应的模拟服务器CPU数据中的usage_user这个监控数据的最大值。
 #select max(usage_user) from cpu where(hostname='host_a' and hostname='host_b'and hostname='host_c'and hostname='host_d'and hostname='host_e'and hostname='host_f' and hostname='host_g'and hostname='host_h') ;
 # a,b,c,d,e,f,g,h are random 8 numbers.
-../../bin/timescale_generate_queries --sseed 123 --format="timescaledb" --query-type="cpu-max-all-8"  \
+../../bin/timescale_generate_queries --seed 123 --format="timescaledb" --query-type="cpu-max-all-8"  \
   --queries=1000 --use-case=$usecase --db-name=$dbname  --scale=100 | \
   gzip > data/query_cpu-max-all-8.gz
 cat data/query_cpu-max-all-8.gz | gunzip | ../../bin/timescale_run_queries  --workers=$workers  --db-name=$dbname  --hosts=$add  > /dev/null 2>case1.log
@@ -163,7 +163,7 @@ TSQ1=`echo ${TMP%s*}`
 #测试用例2，查询所有数据中，用8个hostname标签进行匹配，匹配出这8个hostname对应的模拟服务器CPU数据中的usage_user这个监控数据，以1小时为粒度，查询每1小时的最大值。
 #select max(usage_user) from cpu where(hostname='host_a' and hostname='host_b'and hostname='host_c'and hostname='host_d'and hostname='host_e'and hostname='host_f' and hostname='host_g'and hostname='host_h') interval(1h);
 # a,b,c,d,e,f,g,h are random 8 numbers
-../../bin/timescale_generate_queries --sseed 123 --format="timescaledb" --query-type="cpu-max-all-8-by-1hr"  \
+../../bin/timescale_generate_queries --seed 123 --format="timescaledb" --query-type="cpu-max-all-8-by-1hr"  \
   --queries=1000 --use-case=$usecase --db-name=$dbname  --scale=100 | \
   gzip > data/query_cpu-max-all-8.gz
 cat data/query_cpu-max-all-8.gz | gunzip | ../../bin/timescale_run_queries  --workers=$workers  --db-name=$dbname  --hosts=$add  > /dev/null 2>case1.log
@@ -177,7 +177,7 @@ TSQ1=`echo ${TMP%s*}`
 #select max(usage_user) from cpu where(hostname='host_a' and hostname='host_b'and hostname='host_c'and hostname='host_d'and hostname='host_e'and hostname='host_f' and hostname='host_g'and hostname='host_h') and time >x and time <y interval(10m);
 # a,b,c,d,e,f,g,h are random 8 numbers, y-x =12 hour
 #ELASTICSEARCHQUERY=`bin/bulk_query_gen  -seed 123 -format influx-http -query-type 1-host-1-hr -scale-var 10 -queries 1000 | bin/query_benchmarker_es  -urls="http://127.0.0.1:9200"  -workers $workers -print-interval 0|grep wall`
-../../bin/timescale_generate_queries --sseed 123 --format="timescaledb" --query-type="cpu-max-all-8-10-12hr"  \
+../../bin/timescale_generate_queries --seed 123 --format="timescaledb" --query-type="cpu-max-all-8-10-12hr"  \
   --queries=1000 --use-case=$usecase --db-name=$dbname  --scale=100 | \
   gzip > data/query_cpu-max-all-8.gz
 cat data/query_cpu-max-all-8.gz | gunzip | ../../bin/timescale_run_queries  --workers=$workers  --db-name=$dbname  --hosts=$add  > /dev/null 2>case1.log
@@ -191,7 +191,7 @@ TSQ1=`echo ${TMP%s*}`
 #select max(usage_user) from cpu where(hostname='host_a' and hostname='host_b'and hostname='host_c'and hostname='host_d'and hostname='host_e'and hostname='host_f' and hostname='host_g'and hostname='host_h') and time >x and time <y interval(10m);
 # a,b,c,d,e,f,g,h are random 8 numbers, y-x =1 hours
 #ELASTICSEARCHQUERY=`bin/bulk_query_gen  -seed 123 -format influx-http -query-type 1-host-1-hr -scale-var 10 -queries 1000 | bin/query_benchmarker_es  -urls="http://127.0.0.1:9200"  -workers $workers -print-interval 0|grep wall`
-../../bin/timescale_generate_queries --sseed 123 --format="timescaledb" --query-type="cpu-max-all-8-1-1hr"  \
+../../bin/timescale_generate_queries --seed 123 --format="timescaledb" --query-type="cpu-max-all-8-1-1hr"  \
   --queries=1000 --use-case=$usecase --db-name=$dbname  --scale=100 | \
   gzip > data/query_cpu-max-all-8.gz
 cat data/query_cpu-max-all-8.gz | gunzip | ../../bin/timescale_run_queries  --workers=$workers  --db-name=$dbname  --hosts=$add  > /dev/null 2>case1.log
