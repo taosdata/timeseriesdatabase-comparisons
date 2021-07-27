@@ -1,2 +1,8 @@
 /build/tsdbcompare/bin/*
 /build/tsdbcompare/data/*
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/inspectionProfiles/profiles_settings.xml
+/.idea/timeseriesdatabase-comparisons.iml
+/.idea/vcs.xml
+/.idea/workspace.xml

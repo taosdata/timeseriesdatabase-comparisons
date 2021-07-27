@@ -17,6 +17,6 @@ func NewTimescaleDevops8HostsAllBy1Hr(dbConfig bulkQuerygen.DatabaseConfig, quer
 
 func (d *TimescaleDevops8HostsAllBy1Hr) Dispatch(i int) bulkQuerygen.Query {
 	q := NewSQLQuery() // from pool
-	d.MaxCPUUsageByHour8Hostss(q)
+	d.MaxCPUUsage1HourBy1min8Hosts(q)
 	return q
 }

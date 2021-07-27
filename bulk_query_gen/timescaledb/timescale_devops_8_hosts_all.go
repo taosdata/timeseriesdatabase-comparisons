@@ -4,7 +4,7 @@ import "time"
 import bulkQuerygen "github.com/taosdata/timeseriesdatabase-comparisons/bulk_query_gen"
 
 // TimescaleDevops8Hosts produces Timescale-specific queries for the devops single-host case.
-type TimescaleDevops8Hosts1 struct {
+type TimescaleDevops8Hosts struct {
 	TimescaleDevops
 }
 
