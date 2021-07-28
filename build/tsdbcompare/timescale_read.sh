@@ -58,9 +58,6 @@ st='2018-01-01T00:00:00Z'
 et='2018-01-02T00:00:00Z'
 usecase="devops"
 
-echo -e "${GREEN}====================This test option: scale: ${scale}, query_type: ${query_type}, worker: ${workers} =====================${NC}"
-echo -e "${GREEN}------------------------------------- timescaledb query test start -------------------------------------${NC}"
-
 while getopts "hw:n:g:a:s:t:e:c:q:d:" opt
 do
     case $opt in
@@ -115,6 +112,9 @@ do
     esac
 done
 
+echo -e "${GREEN}====================This test option: scale: ${scale}, query_type: ${query_type}, worker: ${workers} =====================${NC}"
+echo -e "${GREEN}------------------------------------- timescaledb query test start -------------------------------------${NC}"
+
 echo "variables :"
 echo "generate data: "
 echo "  scale-var: $scale , query_type: $query_type , timestamp-start: $st , timestamp-stop: $et"
@@ -138,6 +138,7 @@ if [[ $gene == 1 ]];then
 
     cat ${datafile} | gunzip | ../../bin/timescale_load --workers=50 --db-name=$dbname --batch-size=5000 --host=$add  >/dev/null  2>&1
 fi
+rm -f $datafile
 
 echo
 echo "------------------Querying Data-----------------"
@@ -151,7 +152,7 @@ echo
 #select max(usage_user) from cpu where(hostname='host_a' and hostname='host_b'and hostname='host_c'and hostname='host_d'and hostname='host_e'and hostname='host_f' and hostname='host_g'and hostname='host_h') ;
 # a,b,c,d,e,f,g,h are random 8 numbers.
 ../../bin/timescale_generate_queries --seed 123 --format="timescaledb" --query-type="cpu-max-all-8"  \
-  --queries=1000 --use-case=$usecase --db-name=$dbname  --scale=100 | \
+  --queries=$queries --use-case=$usecase --db-name=$dbname  --scale=$scale | \
   gzip > data/query_cpu-max-all-8.gz
 cat data/query_cpu-max-all-8.gz | gunzip | ../../bin/timescale_run_queries  --workers=$workers  --db-name=$dbname  --hosts=$add  > /dev/null 2>case1.log
 TSQS1=`awk '/all queries/{getline; print}' case1.log  |grep "count: 1000" `
@@ -164,7 +165,7 @@ TSQ1=`echo ${TMP%s*}`
 #select max(usage_user) from cpu where(hostname='host_a' and hostname='host_b'and hostname='host_c'and hostname='host_d'and hostname='host_e'and hostname='host_f' and hostname='host_g'and hostname='host_h') interval(1h);
 # a,b,c,d,e,f,g,h are random 8 numbers
 ../../bin/timescale_generate_queries --seed 123 --format="timescaledb" --query-type="cpu-max-all-8-by-1hr"  \
-  --queries=1000 --use-case=$usecase --db-name=$dbname  --scale=100 | \
+  --queries=$queries --use-case=$usecase --db-name=$dbname  --scale=$scale | \
   gzip > data/query_cpu-max-all-8.gz
 cat data/query_cpu-max-all-8.gz | gunzip | ../../bin/timescale_run_queries  --workers=$workers  --db-name=$dbname  --hosts=$add  > /dev/null 2>case2.log
 TSQS2=`awk '/all queries/{getline; print}' case2.log  |grep "count: 1000" `
@@ -178,7 +179,7 @@ TSQ2=`echo ${TMP%s*}`
 # a,b,c,d,e,f,g,h are random 8 numbers, y-x =12 hour
 #ELASTICSEARCHQUERY=`bin/bulk_query_gen  -seed 123 -format influx-http -query-type 1-host-1-hr -scale-var 10 -queries 1000 | bin/query_benchmarker_es  -urls="http://127.0.0.1:9200"  -workers $workers -print-interval 0|grep wall`
 ../../bin/timescale_generate_queries --seed 123 --format="timescaledb" --query-type="cpu-max-all-8-10-12hr"  \
-  --queries=1000 --use-case=$usecase --db-name=$dbname  --scale=100 | \
+  --queries=$queries --use-case=$usecase --db-name=$dbname  --scale=$scale | \
   gzip > data/query_cpu-max-all-8.gz
 cat data/query_cpu-max-all-8.gz | gunzip | ../../bin/timescale_run_queries  --workers=$workers  --db-name=$dbname  --hosts=$add  > /dev/null 2>case3.log
 TSQS3=`awk '/all queries/{getline; print}' case3.log  |grep "count: 1000" `
@@ -192,7 +193,7 @@ TSQ3=`echo ${TMP%s*}`
 # a,b,c,d,e,f,g,h are random 8 numbers, y-x =1 hours
 #ELASTICSEARCHQUERY=`bin/bulk_query_gen  -seed 123 -format influx-http -query-type 1-host-1-hr -scale-var 10 -queries 1000 | bin/query_benchmarker_es  -urls="http://127.0.0.1:9200"  -workers $workers -print-interval 0|grep wall`
 ../../bin/timescale_generate_queries --seed 123 --format="timescaledb" --query-type="cpu-max-all-8-1-1hr"  \
-  --queries=1000 --use-case=$usecase --db-name=$dbname  --scale=100 | \
+  --queries=$queries --use-case=$usecase --db-name=$dbname  --scale=$scale | \
   gzip > data/query_cpu-max-all-8.gz
 cat data/query_cpu-max-all-8.gz | gunzip | ../../bin/timescale_run_queries  --workers=$workers  --db-name=$dbname  --hosts=$add  > /dev/null 2>case4.log
 TSQS4=`awk '/all queries/{getline; print}' case4.log  |grep "count: 1000" `
