@@ -154,10 +154,10 @@ echo
   --queries=1000 --use-case=$usecase --db-name=$dbname  --scale=100 | \
   gzip > data/query_cpu-max-all-8.gz
 cat data/query_cpu-max-all-8.gz | gunzip | ../../bin/timescale_run_queries  --workers=$workers  --db-name=$dbname  --hosts=$add  > /dev/null 2>case1.log
-TSQS1=`awk '/all queries/{getline; print}' case1.log`
+TSQS1=`awk '/all queries/{getline; print}' case1.log  |grep "count: 1000" `
 echo -e "${GREEN}timescaledb query test case 1 result:${NC}"
-echo -e "${GREEN}$ESQS1${NC}"
-TMP=`echo $ESQS1|awk '{print $6}'`
+echo -e "${GREEN}$TSQS1${NC}"
+TMP=`echo $TSQS1|awk '{print $6}'`
 TSQ1=`echo ${TMP%s*}`
 #Test case 2
 #测试用例2，查询所有数据中，用8个hostname标签进行匹配，匹配出这8个hostname对应的模拟服务器CPU数据中的usage_user这个监控数据，以1小时为粒度，查询每1小时的最大值。
@@ -166,12 +166,12 @@ TSQ1=`echo ${TMP%s*}`
 ../../bin/timescale_generate_queries --seed 123 --format="timescaledb" --query-type="cpu-max-all-8-by-1hr"  \
   --queries=1000 --use-case=$usecase --db-name=$dbname  --scale=100 | \
   gzip > data/query_cpu-max-all-8.gz
-cat data/query_cpu-max-all-8.gz | gunzip | ../../bin/timescale_run_queries  --workers=$workers  --db-name=$dbname  --hosts=$add  > /dev/null 2>case1.log
-TSQS1=`awk '/all queries/{getline; print}' case1.log`
+cat data/query_cpu-max-all-8.gz | gunzip | ../../bin/timescale_run_queries  --workers=$workers  --db-name=$dbname  --hosts=$add  > /dev/null 2>case2.log
+TSQS2=`awk '/all queries/{getline; print}' case2.log  |grep "count: 1000" `
 echo -e "${GREEN}timescaledb query test case 1 result:${NC}"
-echo -e "${GREEN}$ESQS1${NC}"
-TMP=`echo $ESQS1|awk '{print $6}'`
-TSQ1=`echo ${TMP%s*}`
+echo -e "${GREEN}$TSQS2${NC}"
+TMP=`echo $TSQS2|awk '{print $6}'`
+TSQ2=`echo ${TMP%s*}`
 #Test case 3
 #测试用例3，测试用例3，随机查询12个小时的数据，用8个hostname标签进行匹配，匹配出这8个hostname对应的模拟服务器CPU数据中的usage_user这个监控数据，以10分钟为粒度，查询每10分钟的最大值
 #select max(usage_user) from cpu where(hostname='host_a' and hostname='host_b'and hostname='host_c'and hostname='host_d'and hostname='host_e'and hostname='host_f' and hostname='host_g'and hostname='host_h') and time >x and time <y interval(10m);
@@ -180,12 +180,12 @@ TSQ1=`echo ${TMP%s*}`
 ../../bin/timescale_generate_queries --seed 123 --format="timescaledb" --query-type="cpu-max-all-8-10-12hr"  \
   --queries=1000 --use-case=$usecase --db-name=$dbname  --scale=100 | \
   gzip > data/query_cpu-max-all-8.gz
-cat data/query_cpu-max-all-8.gz | gunzip | ../../bin/timescale_run_queries  --workers=$workers  --db-name=$dbname  --hosts=$add  > /dev/null 2>case1.log
-TSQS1=`awk '/all queries/{getline; print}' case1.log`
+cat data/query_cpu-max-all-8.gz | gunzip | ../../bin/timescale_run_queries  --workers=$workers  --db-name=$dbname  --hosts=$add  > /dev/null 2>case3.log
+TSQS3=`awk '/all queries/{getline; print}' case3.log  |grep "count: 1000" `
 echo -e "${GREEN}timescaledb query test case 1 result:${NC}"
-echo -e "${GREEN}$ESQS1${NC}"
-TMP=`echo $ESQS1|awk '{print $6}'`
-TSQ1=`echo ${TMP%s*}`
+echo -e "${GREEN}$TSQS3${NC}"
+TMP=`echo $TSQS3|awk '{print $6}'`
+TSQ3=`echo ${TMP%s*}`
 #Test case 4
 #测试用例4，随机查询1个小时的数据，用8个hostname标签进行匹配，匹配出这8个hostname对应的模拟服务器CPU数据中的usage_user这个监控数据，以1分钟为粒度，查询每1分钟的最大值
 #select max(usage_user) from cpu where(hostname='host_a' and hostname='host_b'and hostname='host_c'and hostname='host_d'and hostname='host_e'and hostname='host_f' and hostname='host_g'and hostname='host_h') and time >x and time <y interval(10m);
@@ -194,12 +194,12 @@ TSQ1=`echo ${TMP%s*}`
 ../../bin/timescale_generate_queries --seed 123 --format="timescaledb" --query-type="cpu-max-all-8-1-1hr"  \
   --queries=1000 --use-case=$usecase --db-name=$dbname  --scale=100 | \
   gzip > data/query_cpu-max-all-8.gz
-cat data/query_cpu-max-all-8.gz | gunzip | ../../bin/timescale_run_queries  --workers=$workers  --db-name=$dbname  --hosts=$add  > /dev/null 2>case1.log
-TSQS1=`awk '/all queries/{getline; print}' case1.log`
+cat data/query_cpu-max-all-8.gz | gunzip | ../../bin/timescale_run_queries  --workers=$workers  --db-name=$dbname  --hosts=$add  > /dev/null 2>case4.log
+TSQS4=`awk '/all queries/{getline; print}' case4.log  |grep "count: 1000" `
 echo -e "${GREEN}timescaledb query test case 1 result:${NC}"
-echo -e "${GREEN}$ESQS1${NC}"
-TMP=`echo $ESQS1|awk '{print $6}'`
-TSQ1=`echo ${TMP%s*}`
+echo -e "${GREEN}$TSQS4${NC}"
+TMP=`echo $TSQS1|awk '{print $6}'`
+TSQ4=`echo ${TMP%s*}`
 
 
 echo
@@ -211,23 +211,23 @@ echo    "             Query test cases with wokers:$workers                "
 echo    " case 1: select the max(value) from all data    "
 echo    " filtered out 8 hosts                                 "
 echo    "       Query test case 1 takes:                      "
-printf  "       timescaledb      |       %-4.2f Seconds    \n" $TSQ1
+printf  "       timescaledb      |       %-4.2f ms    \n" $TSQ1
 echo    "------------------------------------------------------"
 echo    " case 2: select the max(value) from all data          "
 echo    " filtered out 8 hosts with an interval of 1 hour     "
 echo    " case 2 takes:                                       "
-printf  "       timescaledb      |       %-4.2f Seconds    \n" $TSQ2
+printf  "       timescaledb      |       %-4.2f ms    \n" $TSQ2
 echo    "------------------------------------------------------"
 echo    " case 3: select the max(value) from random 12 hours"
 echo    " data filtered out 8 hosts with an interval of 10 min         "
 echo    " filtered out 8 hosts interval(1h)                   "
 echo    " case 3 takes:                                       "
-printf  "       timescaledb      |       %-4.2f Seconds    \n" $TSQ3
+printf  "       timescaledb      |       %-4.2f ms    \n" $TSQ3
 echo    "------------------------------------------------------"
 echo    " case 4: select the max(value) from random 1 hour data  "
 echo    " data filtered out 8 hosts with an interval of 1 min         "
 echo    " case 4 takes:                                        "
-printf  "       timescaledb      |       %-4.2f Seconds    \n" $TSQ4
+printf  "       timescaledb      |       %-4.2f ms    \n" $TSQ4
 echo    "------------------------------------------------------"
 echo
 
