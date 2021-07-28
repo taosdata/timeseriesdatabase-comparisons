@@ -136,7 +136,7 @@ if [[ $gene == 1 ]];then
       --scale=$scale --use-case=$usecase \
       --timestamp-start=$st --timestamp-end=$et  | gzip  > ${datafile}
 
-    cat ${datafile} | gunzip | ../../bin/timescale_load --workers=50 --db-name=$dbname --batch-size=5000 --host=$add  > tsres.log  2>&1
+    cat ${datafile} | gunzip | ../../bin/timescale_load --workers=50 --db-name=$dbname --batch-size=5000 --host=$add  >/dev/null  2>&1
 fi
 
 echo
@@ -168,7 +168,7 @@ TSQ1=`echo ${TMP%s*}`
   gzip > data/query_cpu-max-all-8.gz
 cat data/query_cpu-max-all-8.gz | gunzip | ../../bin/timescale_run_queries  --workers=$workers  --db-name=$dbname  --hosts=$add  > /dev/null 2>case2.log
 TSQS2=`awk '/all queries/{getline; print}' case2.log  |grep "count: 1000" `
-echo -e "${GREEN}timescaledb query test case 1 result:${NC}"
+echo -e "${GREEN}timescaledb query test case 2 result:${NC}"
 echo -e "${GREEN}$TSQS2${NC}"
 TMP=`echo $TSQS2|awk '{print $6}'`
 TSQ2=`echo ${TMP%s*}`
@@ -182,7 +182,7 @@ TSQ2=`echo ${TMP%s*}`
   gzip > data/query_cpu-max-all-8.gz
 cat data/query_cpu-max-all-8.gz | gunzip | ../../bin/timescale_run_queries  --workers=$workers  --db-name=$dbname  --hosts=$add  > /dev/null 2>case3.log
 TSQS3=`awk '/all queries/{getline; print}' case3.log  |grep "count: 1000" `
-echo -e "${GREEN}timescaledb query test case 1 result:${NC}"
+echo -e "${GREEN}timescaledb query test case 3 result:${NC}"
 echo -e "${GREEN}$TSQS3${NC}"
 TMP=`echo $TSQS3|awk '{print $6}'`
 TSQ3=`echo ${TMP%s*}`
@@ -196,11 +196,15 @@ TSQ3=`echo ${TMP%s*}`
   gzip > data/query_cpu-max-all-8.gz
 cat data/query_cpu-max-all-8.gz | gunzip | ../../bin/timescale_run_queries  --workers=$workers  --db-name=$dbname  --hosts=$add  > /dev/null 2>case4.log
 TSQS4=`awk '/all queries/{getline; print}' case4.log  |grep "count: 1000" `
-echo -e "${GREEN}timescaledb query test case 1 result:${NC}"
+echo -e "${GREEN}timescaledb query test case 4 result:${NC}"
 echo -e "${GREEN}$TSQS4${NC}"
-TMP=`echo $TSQS1|awk '{print $6}'`
+TMP=`echo $TSQS4|awk '{print $6}'`
 TSQ4=`echo ${TMP%s*}`
 
+rm -f case1.log
+rm -f case2.log
+rm -f case3.log
+rm -f case4.log
 
 echo
 echo
