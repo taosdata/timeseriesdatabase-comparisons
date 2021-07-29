@@ -86,8 +86,10 @@ if [[ $gene == 1 ]];then
     fi
 
     ssh root@$add << eeooff
+    systemctl stop taosd
     rm -rf /data/lib/taos/*
-    systemctl start taosd
+    echo 1 > /proc/sys/vm/drop_caches
+    systemctl restart taosd
     sleep 10
     exit
 eeooff
@@ -105,13 +107,13 @@ echo
 echo "------------------Querying Data-----------------"
 echo
 
-#ssh root@$add << eeooff
-#systemctl stop taosd
-#systemctl start taosd
-#exit
-#eeooff
+ssh root@$add << eeooff
+systemctl stop taosd
+systemctl start taosd
+exit
+eeooff
 
-#sleep 30
+sleep 30
 
 echo 
 echo  "start query test, query max from 8 hosts group by 1 hour, TDengine"
@@ -121,17 +123,23 @@ echo
 #测试用例1，查询所有数据中，用8个hostname标签进行匹配，匹配出这8个hostname对应的模拟服务器CPU数据中的usage_user这个监控数据的最大值。
 #select max(usage_user) from cpu where(hostname='host_a' and hostname='host_b'and hostname='host_c'and hostname='host_d'and hostname='host_e'and hostname='host_f' and hostname='host_g'and hostname='host_h') ;
 # a,b,c,d,e,f,g,h are random 8 numbers.
+ssh root@bschang1 -f /root/monitor.sh taosd >/dev/null 2>1
+nohup ./monitor.sh taos >/dev/null 2>1 &
 TDQS1=`bin/bulk_query_gen  -seed 123 -format tdengine -query-type 8-host-all -scale-var $scale -queries $query | bin/query_benchmarker_tdengine  -urls="http://$add:6041"  -workers $workers -threads $workers -print-interval 0 -http-client-type $interface | grep wall`
 echo
 echo -e "${GREEN}TDengine query test case 1 result:${NC}"
 echo -e "${GREEN}$TDQS1${NC}"
 TMP=`echo $TDQS1|awk '{print($4)}'`
 TDQ1=`echo ${TMP%s*}`
+ssh root@bschang1 -f pkill -9 monitor.sh >/dev/null 2>1
+nohup pkill -9 monitor.sh 2>1 &
 
 #Test case 2
 #测试用例2，查询所有数据中，用8个hostname标签进行匹配，匹配出这8个hostname对应的模拟服务器CPU数据中的usage_user这个监控数据，以1小时为粒度，查询每1小时的最大值。
 #select max(usage_user) from cpu where(hostname='host_a' and hostname='host_b'and hostname='host_c'and hostname='host_d'and hostname='host_e'and hostname='host_f' and hostname='host_g'and hostname='host_h') interval(1h);
 # a,b,c,d,e,f,g,h are random 8 numbers
+ssh root@bschang1 -f /root/monitor.sh taosd >/dev/null 2>1
+nohup ./monitor.sh taos >/dev/null 2>1 &
 TDQS2=`bin/bulk_query_gen  -seed 123 -format tdengine -query-type 8-host-allbyhr -scale-var $scale -queries $query | bin/query_benchmarker_tdengine  -urls="http://$add:6041" -workers $workers -threads $workers -print-interval 0 -http-client-type $interface | grep wall`
 
 echo
@@ -139,40 +147,54 @@ echo -e "${GREEN}TDengine query test case 2 result:${NC}"
 echo -e "${GREEN}$TDQS2${NC}"
 TMP=`echo $TDQS2|awk '{print($4)}'`
 TDQ2=`echo ${TMP%s*}`
+ssh root@bschang1 -f pkill -9 monitor.sh >/dev/null 2>1
+nohup pkill -9 monitor.sh 2>1 &
 
 #Test case 3
 #测试用例3，测试用例3，随机查询12个小时的数据，用8个hostname标签进行匹配，匹配出这8个hostname对应的模拟服务器CPU数据中的usage_user这个监控数据，以10分钟为粒度，查询每10分钟的最大值
 #select max(usage_user) from cpu where(hostname='host_a' and hostname='host_b'and hostname='host_c'and hostname='host_d'and hostname='host_e'and hostname='host_f' and hostname='host_g'and hostname='host_h') and time >x and time <y interval(10m);
 # a,b,c,d,e,f,g,h are random 8 numbers, y-x =12 hour
+ssh root@bschang1 -f /root/monitor.sh taosd >/dev/null 2>1
+nohup ./monitor.sh taos >/dev/null 2>1 &
 TDQS3=`bin/bulk_query_gen  -seed 123 -format tdengine -query-type 8-host-12-hr -scale-var $scale -queries $query | bin/query_benchmarker_tdengine  -urls="http://$add:6041" -workers $workers -threads $workers -print-interval 0 -http-client-type $interface | grep wall`
 echo
 echo -e "${GREEN}TDengine query test case 3 result:${NC}"
 echo -e "${GREEN}$TDQS3${NC}"
 TMP=`echo $TDQS3|awk '{print($4)}'`
 TDQ3=`echo ${TMP%s*}`
+ssh root@bschang1 -f pkill -9 monitor.sh >/dev/null 2>1
+nohup pkill -9 monitor.sh 2>1 &
 
 #Test case 4
 #测试用例4，随机查询1个小时的数据，用8个hostname标签进行匹配，匹配出这8个hostname对应的模拟服务器CPU数据中的usage_user这个监控数据，以1分钟为粒度，查询每1分钟的最大值
 #select max(usage_user) from cpu where(hostname='host_a' and hostname='host_b'and hostname='host_c'and hostname='host_d'and hostname='host_e'and hostname='host_f' and hostname='host_g'and hostname='host_h') and time >x and time <y interval(10m);
 # a,b,c,d,e,f,g,h are random 8 numbers, y-x =1 hours
+ssh root@bschang1 -f /root/monitor.sh taosd >/dev/null 2>1
+nohup ./monitor.sh taos >/dev/null 2>1 &
 TDQS4=`bin/bulk_query_gen  -seed 123 -format tdengine -query-type 8-host-1-hr -scale-var $scale -queries $query | bin/query_benchmarker_tdengine  -urls="http://$add:6041" -workers $workers -threads $workers -print-interval 0 -http-client-type $interface | grep wall`
 echo
 echo -e "${GREEN}TDengine query test case 4 result:${NC}"
 echo -e "${GREEN}$TDQS4${NC}"
 TMP=`echo $TDQS4|awk '{print($4)}'`
 TDQ4=`echo ${TMP%s*}`
+ssh root@bschang1 -f pkill -9 monitor.sh >/dev/null 2>1
+nohup pkill -9 monitor.sh 2>1 &
 
 #Test case 5
 #测试用例4，随机查询1个小时的数据，用8个hostname标签进行匹配，匹配出这8个hostname对应的模拟服务器CPU数据中的usage_user这个监控数据，以1分钟为粒度，查询每1分钟的最大值
 #为了与cassandra的查询方式保持一致，本测试将不会使用interval。 查询的方式将改为运行多个select语句，并依靠 ts> and ts< 模拟interval
 #select max(usage_user) from cpu where(hostname='host_a' and hostname='host_b'and hostname='host_c'and hostname='host_d'and hostname='host_e'and hostname='host_f' and hostname='host_g'and hostname='host_h') and time >x and time <y;
 # a,b,c,d,e,f,g,h are random 8 numbers, y-x =1 hours
+ssh root@bschang1 -f /root/monitor.sh taosd >/dev/null 2>1
+nohup ./monitor.sh taos >/dev/null 2>1 &
 TDQS5=`bin/bulk_query_gen  -seed 123 -format tdengine -query-type 8-host-1-hr-no-interval -scale-var $scale -queries $query | bin/query_benchmarker_tdengine  -urls="http://$add:6041" -workers $workers -threads $workers -print-interval 0 -http-client-type $interface | grep wall`
 echo
 echo -e "${GREEN}TDengine query test case 5 result:${NC}"
 echo -e "${GREEN}$TDQS5${NC}"
 TMP=`echo $TDQS5|awk '{print($4)}'`
 TDQ5=`echo ${TMP%s*}`
+ssh root@bschang1 -f pkill -9 monitor.sh >/dev/null 2>1
+nohup pkill -9 monitor.sh 2>1 &
 
 sleep 10
 

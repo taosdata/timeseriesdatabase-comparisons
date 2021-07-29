@@ -2,7 +2,7 @@
 
 PROG_NAME=$1
 SDIR_PATH="monitor_log"
-USAGE_REPORT=${PROG_NAME}_$(date "+%Y%m%d_%H%M%S").csv
+USAGE_REPORT=${PROG_NAME}_$(date "+%Y%m%d_%H%M%S%3N").csv
 
 if [ ! -d ${SDIR_PATH} ]; then
 	mkdir ${SDIR_PATH}
@@ -63,5 +63,5 @@ do
 	fi
 
 	
-	sleep 1
+	sleep 0.1
 done
