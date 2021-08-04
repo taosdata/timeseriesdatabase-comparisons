@@ -11,7 +11,7 @@ NC='\033[0m'
 workers=16
 interface='cgo'
 gene=0
-add='127.0.0.1'
+add='serv'
 interval='10s'
 scale=100
 st='2018-01-01T00:00:00Z'
@@ -82,17 +82,30 @@ if [[ $gene == 1 ]];then
     if [ ! -d "data" ]; then
         mkdir data
     fi
+    
+    ssh -tt root@$add << eeooff
+        systemctl stop influxd
+        systemctl stop taosd
+        echo 1 > /proc/sys/vm/drop_caches
+        rm -rf /data/lib/taos/*
+        rm -rf /data/lib/influxdb/*
+        systemctl start taosd 
+        systemctl start influxd
+        sleep 10
+        exit
+eeooff
+
     echo
     echo "---------------Generating && Inserting Data-----------------"
     echo
     echo "Prepare data for InfluxDB...."
-    bin/bulk_data_gen -seed 123 -format influx-bulk -sampling-interval $interval -scale-var $scale -use-case devops -timestamp-start "$st" -timestamp-end "$et" >data/influx.dat
+    #bin/bulk_data_gen -seed 123 -format influx-bulk -sampling-interval $interval -scale-var $scale -use-case devops -timestamp-start "$st" -timestamp-end "$et" >data/influx.dat
     cat data/influx.dat  |bin/bulk_load_influx --batch-size=5000 --workers=$workers --urls="http://$add:8086" | grep loaded
 
     echo 
     echo "Prepare data for TDengine...."
-    bin/bulk_data_gen -seed 123 -format tdengine -sampling-interval $interval -tdschema-file config/TDengineSchema.toml -scale-var $scale -use-case devops -timestamp-start "$st" -timestamp-end "$et"  > data/tdengine.dat
-    cat data/tdengine.dat |bin/bulk_load_tdengine --url $add --batch-size 5000  -do-load -report-tags n1 -workers $workers -fileout=false -http-api=$interface
+    #bin/bulk_data_gen -seed 123 -format tdengine -sampling-interval $interval -tdschema-file config/TDengineSchema.toml -scale-var $scale -use-case devops -timestamp-start "$st" -timestamp-end "$et"  > data/tdengine.dat
+    cat data/tdengine.dat |bin/bulk_load_tdengine --url $add --batch-size 5000  -do-load -report-tags n1 -workers $workers -fileout=false -http-api=false
 fi
 
 echo
@@ -103,7 +116,14 @@ echo
 echo 
 echo  "start query test, query max from 8 hosts group by 1 hour, TDengine"
 echo
-
+ssh -tt root@$add << eeooff
+    systemctl stop influxd
+    systemctl stop taosd
+    echo 1 > /proc/sys/vm/drop_caches
+    systemctl start taosd 
+    sleep 5
+    exit
+eeooff
 #Test case 1
 #测试用例1，查询所有数据中，用8个hostname标签进行匹配，匹配出这8个hostname对应的模拟服务器CPU数据中的usage_user这个监控数据的最大值。
 #select max(usage_user) from cpu where(hostname='host_a' and hostname='host_b'and hostname='host_c'and hostname='host_d'and hostname='host_e'and hostname='host_f' and hostname='host_g'and hostname='host_h') ;
@@ -154,6 +174,14 @@ sleep 10
 echo 
 echo  "start query test, query max from 8 hosts group by 1hour, Influxdb"
 echo
+ssh -tt root@$add << eeooff
+        systemctl stop influxd
+        systemctl stop taosd
+        echo 1 > /proc/sys/vm/drop_caches
+        systemctl start influxd
+        sleep 5
+        exit
+eeooff
 #Test case 1
 #测试用例1，查询所有数据中，用8个hostname标签进行匹配，匹配出这8个hostname对应的模拟服务器CPU数据中的usage_user这个监控数据的最大值。
 #select max(usage_user) from cpu where(hostname='host_a' and hostname='host_b'and hostname='host_c'and hostname='host_d'and hostname='host_e'and hostname='host_f' and hostname='host_g'and hostname='host_h') ;
@@ -203,33 +231,33 @@ echo    "                   Query test cases:                "
 echo    " case 1: select the max(value) from all data    "
 echo    " filtered out 8 hosts                                 "
 echo    "       Query test case 1 takes:                      "
-printf  "       InfluxDB           |       %-4.2f Seconds    \n" $IFQ1 
+printf  "       InfluxDB           |       %-4.2f s    %-4.2f s \n" $IFQ1 $TDQ1
 printf  "       TDengine           |       %-4.2f Seconds    \n" $TDQ1
 echo    "------------------------------------------------------"
 echo    " case 2: select the max(value) from all data          "
 echo    " filtered out 8 hosts with an interval of 1 hour     "
 echo    " case 2 takes:                                       "
-printf  "       InfluxDB           |       %-4.2f Seconds    \n" $IFQ2 
+printf  "       InfluxDB           |       %-4.2f s    %-4.2f s \n" $IFQ2 $TDQ2
 printf  "       TDengine           |       %-4.2f Seconds    \n" $TDQ2
 echo    "------------------------------------------------------"
 echo    " case 3: select the max(value) from random 12 hours"
 echo    " data filtered out 8 hosts with an interval of 10 min         "
 echo    " filtered out 8 hosts interval(1h)                   "
 echo    " case 3 takes:                                       "
-printf  "       InfluxDB           |       %-4.2f Seconds    \n" $IFQ3 
+printf  "       InfluxDB           |       %-4.2f s    %-4.2f s \n" $IFQ3 $TDQ3
 printf  "       TDengine           |       %-4.2f Seconds    \n" $TDQ3
 echo    "------------------------------------------------------"
 echo    " case 4: select the max(value) from random 1 hour data  "
 echo    " data filtered out 8 hosts with an interval of 1 min         "
 echo    " case 4 takes:                                        "
-printf  "       InfluxDB           |       %-4.2f Seconds    \n" $IFQ4 
+printf  "       InfluxDB           |       %-4.2f s    %-4.2f s \n" $IFQ4 $TDQ4
 printf  "       TDengine           |       %-4.2f Seconds    \n" $TDQ4
 echo    "------------------------------------------------------"
 echo
-docker stop $INFLUX >>/dev/null 2>&1
-docker container rm -f $INFLUX >>/dev/null 2>&1
-docker stop $TDENGINE >>/dev/null 2>&1
-docker container rm -f $TDENGINE >>/dev/null 2>&1
-docker network rm tsdbcomp >>/dev/null 2>&1
+# docker stop $INFLUX >>/dev/null 2>&1
+# docker container rm -f $INFLUX >>/dev/null 2>&1
+# docker stop $TDENGINE >>/dev/null 2>&1
+# docker container rm -f $TDENGINE >>/dev/null 2>&1
+# docker network rm tsdbcomp >>/dev/null 2>&1
 #bulk_query_gen/bulk_query_gen  -format influx-http -query-type 1-host-1-hr -scale-var 10 -queries 1000 | query_benchmarker_influxdb/query_benchmarker_influxdb  -urls="http://172.26.89.231:8086" 
 #bulk_query_gen/bulk_query_gen  -format tdengine -query-type 1-host-1-hr -scale-var 10 -queries 1000 | query_benchmarker_tdengine/query_benchmarker_tdengine  -urls="http://172.26.89.231:6030" 

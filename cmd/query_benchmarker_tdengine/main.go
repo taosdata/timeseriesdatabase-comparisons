@@ -334,8 +334,11 @@ func taosQuery(sqlstr string, taos unsafe.Pointer) (int, error) {
 	csqlstr := C.CString(sqlstr)
 	defer C.free(unsafe.Pointer(csqlstr))
 
-	result := unsafe.Pointer(C.taos_query(taos, csqlstr))
-	code := C.taos_errno(result)
+	// result := unsafe.Pointer(C.taos_query(taos, csqlstr))
+	// code := C.taos_errno(result)
+	code := C.taos_query(taos, csqlstr)
+	//fmt.Println(code)
+	result := C.taos_use_result(taos)
 	if 0 != code {
 
 		errStr := C.GoString(C.taos_errstr(result))

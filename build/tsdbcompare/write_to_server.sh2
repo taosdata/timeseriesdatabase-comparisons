@@ -12,7 +12,7 @@ batchsize=5000
 workers=16
 interface='false'
 gene=1
-add='127.0.0.1'
+add='serv'
 interval='10s'
 scale=100
 st='2018-01-01T00:00:00Z'
@@ -102,11 +102,14 @@ if [[ $gene == 1 ]];then
 fi
 echo
 echo "---------------  Clean  -----------------"
-rm -rf /mnt/lib/taos/*
-rm -rf /mnt/lib/influxdb/*
+ssh -tt root@$add << eeooff
+rm -rf /data/lib/taos/*
+rm -rf /data/lib/influxdb/*
 echo 1 > /proc/sys/vm/drop_caches
 systemctl start taosd 
 sleep 10
+exit
+eeooff
 
 echo
 echo "------------------Writing Data-----------------"
@@ -123,13 +126,16 @@ echo -e "${GREEN}$TDENGINERES${NC}"
 DATA=`echo $TDENGINERES|awk '{print($2)}'`
 TMP=`echo $TDENGINERES|awk '{print($5)}'`
 TDWTM=`echo ${TMP%s*}`
+ssh -tt root@$add << eeooff
 systemctl stop taosd 
 echo 1 > /proc/sys/vm/drop_caches
-systemctl start influxd
+systemctl start influxdb
 sleep 10
+exit
+eeooff
 echo
 echo -e "Start test InfluxDB, result in ${GREEN}Green line${NC}"
- curl 'http://localhost:8086/query?q=drop%20database%20benchmark_db' -X POST
+#curl "http://$add:8086/query?q=drop%20database%20benchmark_db" -X POST
 INFLUXRES=`cat data/influx.dat  |bin/bulk_load_influx --batch-size=$batchsize --workers=$workers --urls="http://$add:8086" | grep loaded`
 echo
 echo -e "${GREEN}InfluxDB writing result:${NC}"
@@ -137,9 +143,12 @@ echo -e "${GREEN}$INFLUXRES${NC}"
 
 TMP=`echo $INFLUXRES|awk '{print($5)}'`
 IFWTM=`echo ${TMP%s*}`
+ssh root@$add << eeooff
 systemctl stop influxd
-TDDISK=`du -sh /mnt/lib/taos/vnode | awk '{print $1}' `
-IFDISK=`du -sh /mnt/lib/influxdb/data | awk '{print $1}' `
+exit
+eeooff
+TDDISK=`ssh root@$add "du -sh /data/lib/taos/vnode | cut -d '	' -f 1 " `
+IFDISK=`ssh root@$add "du -sh /data/lib/influxdb/data | cut -d '	' -f 1" `
 
 echo
 echo

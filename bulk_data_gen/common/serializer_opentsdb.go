@@ -55,6 +55,9 @@ func (m *SerializerOpenTSDB) SerializePoint(w io.Writer, p *Point) (err error) {
 		key := string(p.TagKeys[i])
 		val := string(p.TagValues[i])
 		wp.Tags[key] = val
+		if i >= 7 {
+			break;
+		}
 	}
 
 	// for each Value, generate a new line in the output:
