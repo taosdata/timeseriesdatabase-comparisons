@@ -22,6 +22,8 @@ echo "go 1.16 installing finished"
 
 echo "install influxDB and TDengine"
 wget https://dl.influxdata.com/influxdb/releases/influxdb_1.8.7_amd64.deb
+dpkg -r influxdb
+dpkg -r influxdb2
 dpkg -i influxdb_1.8.7_amd64.deb
 echo `rm -rf TDengine`
 git clone https://github.com/taosdata/TDengine.git && cd TDengine
@@ -35,6 +37,8 @@ sudo mkdir /data /data/taos /data/taos/data
 
 ssh root@$address <<eeooff
 wget https://dl.influxdata.com/influxdb/releases/influxdb_1.8.7_amd64.deb
+dpkg -r influxdb
+dpkg -r influxdb2
 dpkg -i influxdb_1.8.7_amd64.deb
 echo `rm -rf TDengine`
 git clone https://github.com/taosdata/TDengine.git && cd TDengine
@@ -74,3 +78,5 @@ cd ../query_benchmarker_tdengine && go build
 cp query_benchmarker_tdengine ../../build/tsdbcompare/bin/
 
 cd ../../build/tsdbcompare/
+rm go1.16.6*
+rm influxdb_1.8.7*
