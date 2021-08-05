@@ -5,7 +5,7 @@ address='bschang1'
 
 address=$1
 
-ssh-copy-id root@address
+ssh-copy-id root@$address
 
 ## installing java 8
 ## install on client device
