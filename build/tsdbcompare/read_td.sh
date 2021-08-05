@@ -98,7 +98,7 @@ eeooff
     echo 
     echo "Prepare data for TDengine...."
     bin/bulk_data_gen -seed 123 -format tdengine -sampling-interval $interval -tdschema-file config/TDengineSchema.toml -scale-var $scale -use-case devops -timestamp-start "$st" -timestamp-end "$et"  > data/tdengine.dat
-    cat data/tdengine.dat |bin/bulk_load_tdengine --url $add --batch-size 5000  -do-load -report-tags n1 -workers $workers -fileout=false -http-api=false| grep loaded
+    cat data/tdengine.dat |bin/bulk_load_tdengine --url $add --batch-size 1000  -do-load -report-tags n1 -workers 16 -fileout=false -http-api=false| grep loaded
 fi
 
 echo
