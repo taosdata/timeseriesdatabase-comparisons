@@ -3,6 +3,10 @@
 cpuNUm=`nproc`
 address='bschang1'
 
+echo "please make sure this ubuntu does not have java or golang installed. the program is going to install java 8 and golang 1.16.6"
+echo "if you want to continue, press enter, or otherwise exit the program"
+read input
+
 address=$1
 
 ssh-copy-id root@$address
