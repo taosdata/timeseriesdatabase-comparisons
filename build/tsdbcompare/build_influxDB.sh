@@ -2,6 +2,10 @@
 address='localhost'
 address=$1
 
+echo "please make sure this ubuntu does not have java or golang installed. the program is going to install golang 1.16.6"
+echo "if you want to continue, press enter, or otherwise exit the program"
+read input
+
 ssh-copy-id root@$address
 
 echo "installing go1.16"
