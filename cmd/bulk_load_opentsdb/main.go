@@ -16,26 +16,23 @@ import (
 	"sync"
 	"time"
 
-	"github.com/taosdata/timeseriesdatabase-comparisons/util/report"
 	"github.com/klauspost/compress/gzip"
+	"github.com/taosdata/timeseriesdatabase-comparisons/util/report"
 )
 
 type OpenTsdbBulkLoad struct {
 	// Program option vars:
 	csvDaemonUrls string
 	daemonUrls    []string
-	backoff       time.Duration
 
 	// Global vars
-	bufPool        sync.Pool
-	batchChan      chan *bytes.Buffer
-	inputDone      chan struct{}
-	backingOffChan chan bool
-	backingOffDone chan struct{}
-	valuesRead     int64
-	itemsRead      int64
-	bytesRead      int64
-	scanFinished   bool
+	bufPool      sync.Pool
+	batchChan    chan *bytes.Buffer
+	inputDone    chan struct{}
+	valuesRead   int64
+	itemsRead    int64
+	bytesRead    int64
+	scanFinished bool
 }
 
 var load = &OpenTsdbBulkLoad{}
@@ -58,7 +55,6 @@ func main() {
 
 func (l *OpenTsdbBulkLoad) Init() {
 	flag.StringVar(&l.csvDaemonUrls, "urls", "http://localhost:8086", "OpenTSDB URLs, comma-separated. Will be used in a round-robin fashion.")
-	//flag.DurationVar(&l.backoff, "backoff", time.Second, "Time to sleep between requests when server indicates backpressure is needed.")
 }
 
 func (l *OpenTsdbBulkLoad) Validate() {
@@ -70,31 +66,20 @@ func (l *OpenTsdbBulkLoad) Validate() {
 }
 
 func (l *OpenTsdbBulkLoad) CreateDb() {
-	// check that there are no pre-existing databases:
-	existingDatabases, err := listDatabases(l.daemonUrls[0])
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if len(existingDatabases) > 0 {
-		log.Fatalf("There are databases already in the data store. If you know what you are doing, run the command:\ncurl 'http://localhost:8086/query?q=drop%%20database%%20%s'\n", existingDatabases[0])
-	}
+	//不需要创建db
+	return
 }
 
 func (l *OpenTsdbBulkLoad) PrepareWorkers() {
 	l.bufPool = sync.Pool{
 		New: func() interface{} {
-			return bytes.NewBuffer(make([]byte, 0, 4*1024*1024))
+			return bytes.NewBuffer(make([]byte, 0, 4*1024*1024)) //4M
 		},
 	}
 
 	l.batchChan = make(chan *bytes.Buffer, bulk_load.Runner.Workers)
 	l.inputDone = make(chan struct{})
 
-	l.backingOffChan = make(chan bool, 100)
-	l.backingOffDone = make(chan struct{})
-
-	go l.processBackoffMessages()
 }
 
 func (l *OpenTsdbBulkLoad) GetBatchProcessor() bulk_load.BatchProcessor {
@@ -111,8 +96,7 @@ func (l *OpenTsdbBulkLoad) SyncEnd() {
 }
 
 func (l *OpenTsdbBulkLoad) CleanUp() {
-	close(l.backingOffChan)
-	<-l.backingOffDone
+
 }
 
 func (l *OpenTsdbBulkLoad) UpdateReport(params *report.LoadReportParams) (reportTags [][2]string, extraVals []report.ExtraVal) {
@@ -123,10 +107,11 @@ func (l *OpenTsdbBulkLoad) UpdateReport(params *report.LoadReportParams) (report
 }
 
 func (l *OpenTsdbBulkLoad) PrepareProcess(i int) {
-
+	//开始测试前的准备
 }
 
 func (l *OpenTsdbBulkLoad) RunProcess(i int, waitGroup *sync.WaitGroup, telemetryPoints chan *report.Point, reportTags [][2]string) error {
+	//开始任务
 	daemonUrl := l.daemonUrls[i%len(l.daemonUrls)]
 	cfg := HTTPWriterConfig{
 		Host: daemonUrl,
@@ -165,8 +150,6 @@ func (l *OpenTsdbBulkLoad) RunScanner(r io.Reader, syncChanDone chan int) {
 	buf := l.bufPool.Get().(*bytes.Buffer)
 	zw := gzip.NewWriter(buf)
 
-	var n int
-
 	openbracket := []byte("[")
 	closebracket := []byte("]")
 	commaspace := []byte(", ")
@@ -175,52 +158,57 @@ func (l *OpenTsdbBulkLoad) RunScanner(r io.Reader, syncChanDone chan int) {
 	zw.Write(openbracket)
 	zw.Write(newline)
 
-	scanner := bufio.NewScanner(bufio.NewReaderSize(r, 4*1024*1024))
-
+	reader := bufio.NewReaderSize(r, 4*1024*1024)
 	var deadline time.Time
 	if bulk_load.Runner.TimeLimit > 0 {
 		deadline = time.Now().Add(bulk_load.Runner.TimeLimit)
 	}
-outer:
-	for scanner.Scan() {
-		l.itemsRead++
-		if n > 0 {
+	var n = 0
+	needComma := false
+	for {
+		if needComma {
 			zw.Write(commaspace)
 			zw.Write(newline)
 		}
-
-		zw.Write(scanner.Bytes())
-
-		n++
-		if n >= bulk_load.Runner.BatchSize {
-			zw.Write(newline)
-			zw.Write(closebracket)
-			zw.Close()
-
-			l.batchChan <- buf
-
-			buf = l.bufPool.Get().(*bytes.Buffer)
-			zw = gzip.NewWriter(buf)
-			zw.Write(openbracket)
-			zw.Write(newline)
-			n = 0
-			if bulk_load.Runner.TimeLimit > 0 && time.Now().After(deadline) {
-				bulk_load.Runner.SetPrematureEnd("Timeout elapsed")
-				break outer
+		strBytes, hasMore, err := reader.ReadLine()
+		if err != nil {
+			if err == io.EOF {
+				break
+			} else {
+				log.Fatalf("Error reading input: %s", err.Error())
 			}
+		}
+		zw.Write(strBytes)
+		if !hasMore {
+			if n >= bulk_load.Runner.BatchSize {
+				zw.Write(newline)
+				zw.Write(closebracket)
+				zw.Close()
 
+				l.batchChan <- buf
+				buf = l.bufPool.Get().(*bytes.Buffer)
+				zw = gzip.NewWriter(buf)
+				zw.Write(openbracket)
+				zw.Write(newline)
+				n = 0
+				if bulk_load.Runner.TimeLimit > 0 && time.Now().After(deadline) {
+					bulk_load.Runner.SetPrematureEnd("Timeout elapsed")
+					break
+				}
+				needComma = false
+			} else {
+				n += 1
+				needComma = true
+			}
+		} else {
+			needComma = false
 		}
 		select {
 		case <-syncChanDone:
-			break outer
+			break
 		default:
 		}
 	}
-
-	if err := scanner.Err(); err != nil {
-		log.Fatalf("Error reading input: %s", err.Error())
-	}
-
 	// Finished reading input, make sure last batch goes out.
 	if n > 0 {
 		zw.Write(newline)
@@ -236,56 +224,26 @@ outer:
 
 // processBatches reads byte buffers from batchChan and writes them to the target server, while tracking stats on the write.
 func (l *OpenTsdbBulkLoad) processBatches(w LineProtocolWriter, workersGroup *sync.WaitGroup) error {
-	var rerr error
+	var returnErr error
 	for batch := range l.batchChan {
 		// Write the batch: try until backoff is not needed.
 		if bulk_load.Runner.DoLoad {
 			var err error
 			for {
 				_, err = w.WriteLineProtocol(batch.Bytes())
-				if err == BackoffError {
-					l.backingOffChan <- true
-					time.Sleep(l.backoff)
-				} else {
-					l.backingOffChan <- false
+				if err != nil {
 					break
 				}
 			}
 			if err != nil {
-				rerr = fmt.Errorf("Error writing: %s\n", err.Error())
+				returnErr = fmt.Errorf("Error writing: %s\n", err.Error())
 			}
 		}
-		//fmt.Println(string(batch.Bytes()))
-
 		// Return the batch buffer to the pool.
 		batch.Reset()
 		l.bufPool.Put(batch)
+		time.Sleep(time.Second)
 	}
 	workersGroup.Done()
-	return rerr
-}
-
-func (l *OpenTsdbBulkLoad) processBackoffMessages() {
-	var totalBackoffSecs float64
-	var start time.Time
-	last := false
-	for this := range l.backingOffChan {
-		if this && !last {
-			start = time.Now()
-			last = true
-		} else if !this && last {
-			took := time.Now().Sub(start)
-			fmt.Printf("backoff took %.02fsec\n", took.Seconds())
-			totalBackoffSecs += took.Seconds()
-			last = false
-			start = time.Now()
-		}
-	}
-	fmt.Printf("backoffs took a total of %fsec of runtime\n", totalBackoffSecs)
-	l.backingOffDone <- struct{}{}
-}
-
-// TODO(rw): listDatabases lists the existing data in OpenTSDB.
-func listDatabases(daemonUrl string) ([]string, error) {
-	return nil, nil
+	return returnErr
 }

@@ -1,16 +1,10 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"time"
 
 	"github.com/valyala/fasthttp"
-)
-
-var (
-	BackoffError error = fmt.Errorf("backpressure is needed")
-	backoffMagicWords []byte = []byte("engine: cache maximum memory size exceeded")
 )
 
 // LineProtocolWriter is the interface used to write OpenTSDB bulk data.
@@ -50,7 +44,7 @@ func NewHTTPWriter(c HTTPWriterConfig) LineProtocolWriter {
 }
 
 var (
-	post      = []byte("POST")
+	post                  = []byte("POST")
 	applicationJsonHeader = []byte("application/json")
 )
 
@@ -71,10 +65,8 @@ func (w *HTTPWriter) WriteLineProtocol(body []byte) (int64, error) {
 	lat := time.Since(start).Nanoseconds()
 	if err == nil {
 		sc := resp.StatusCode()
-		//if sc == 500 && backpressurePred(resp.Body()) {
-		//	err = BackoffError
-		if (sc != fasthttp.StatusNoContent && sc != fasthttp.StatusOK) {
-			err = fmt.Errorf("Invalid write response (status %d): %s", sc, resp.Body())
+		if sc != fasthttp.StatusNoContent && sc != fasthttp.StatusOK {
+			err = fmt.Errorf("invalid write response (status %d): %s", sc, resp.Body())
 		}
 	}
 
@@ -82,8 +74,4 @@ func (w *HTTPWriter) WriteLineProtocol(body []byte) (int64, error) {
 	fasthttp.ReleaseRequest(req)
 
 	return lat, err
-}
-
-func backpressurePred(body []byte) bool {
-	return bytes.Contains(body, backoffMagicWords)
 }
