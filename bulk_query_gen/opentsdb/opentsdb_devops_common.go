@@ -92,42 +92,33 @@ func (d *OpenTSDBDevops) maxCPUUsageHourByMinuteNHosts(qi bulkQuerygen.Query, nh
 	endTimestamp := interval.EndUnixNano() / 1e6
 
 	const tmplString = `
-{
-   "time": {
-       "start": {{.StartTimestamp}},
-       "end": {{.EndTimestamp}},
-       "timezone": "UTC",
-       "aggregator":"max",
-       "downsampler":{"interval":"1m","aggregator":"max"}
-   },
-   "filters": [
-       {
-           "tags": [
-               {
-                   "type": "literal_or",
-                   "tagk": "hostname",
-                   "filter": "{{.CombinedHostnameClause}}",
-                   "groupBy": false
-               }
-           ],
-           "id": "f1"
-       }
-   ],
-   "metrics": [
-       {
-           "id": "a",
-           "metric": "cpu.usage_user",
-           "filter": "f1",
-           "fillPolicy":{"policy":"zero"}
-       }
-   ],
-    "expressions":[
-   ],
-    "outputs":[
-      {"id":"a", "alias":"output"}
-    ]
-}
-`
+	{
+		"start": {{.StartTimestamp}},
+		"end": {{.EndTimestamp}},
+		"timezone": "UTC",
+		"queries": [
+		{
+			"aggregator":"max",
+			"metric": "cpu.usage_user",
+			"downsampler":"1m-max",
+			"filters": [
+			{
+				"type": "literal_or",
+				"tagk": "hostname",
+				"filter": "{{.CombinedHostnameClause}}",
+				"groupBy": false
+			}
+			],
+			"expressions":[],
+			"outputs":[
+			{
+				"alias":"output"
+			}
+			]
+		}
+		]
+	}
+	`
 
 	tmpl := template.Must(template.New("tmpl").Parse(tmplString))
 	bodyWriter := new(bytes.Buffer)
@@ -176,41 +167,32 @@ func (d *OpenTSDBDevops) maxCPUUsageNHosts(qi bulkQuerygen.Query, nhosts int, ti
 	endTimestamp := interval.EndUnixNano() / 1e6
 
 	const tmplString = `
-{
-   "time": {
-       "start": {{.StartTimestamp}},
-       "end": {{.EndTimestamp}},
-       "timezone": "UTC",
-       "aggregator":"max",
-       "downsampler":{"interval":"1d","aggregator":"max"}
-   },
-   "filters": [
-       {
-           "tags": [
-               {
-                   "type": "literal_or",
-                   "tagk": "hostname",
-                   "filter": "{{.CombinedHostnameClause}}",
-                   "groupBy": false
-               }
-           ],
-           "id": "f1"
+	{
+		"start": {{.StartTimestamp}},
+		"end": {{.EndTimestamp}},
+		"timezone": "UTC",
+		"queries": [
+		{
+			"aggregator":"max",
+			"metric": "cpu.usage_user",
+			"downsample":"1d-max",
+			"filters": [
+			{
+				"type": "literal_or",
+				"tagk": "hostname",
+				"filter": "{{.CombinedHostnameClause}}",
+				"groupBy": false
+			}
+			],
+			"expressions":[],
+			"outputs":[
+			{
+				"alias":"output"
+			}
+			]
+		}
+		]
        }
-   ],
-   "metrics": [
-       {
-           "id": "a",
-           "metric": "cpu.usage_user",
-           "filter": "f1",
-           "fillPolicy":{"policy":"zero"}
-       }
-   ],
-    "expressions":[
-   ],
-    "outputs":[
-      {"id":"a", "alias":"output"}
-    ]
-}
 `
 
 	tmpl := template.Must(template.New("tmpl").Parse(tmplString))
@@ -259,42 +241,33 @@ func (d *OpenTSDBDevops) maxCPUUsageHourByTenMinuteNHosts(qi bulkQuerygen.Query,
 	endTimestamp := interval.EndUnixNano() / 1e6
 
 	const tmplString = `
-{
-   "time": {
-       "start": {{.StartTimestamp}},
-       "end": {{.EndTimestamp}},
-       "timezone": "UTC",
-       "aggregator":"max",
-       "downsampler":{"interval":"10m","aggregator":"max"}
-   },
-   "filters": [
-       {
-           "tags": [
-               {
-                   "type": "literal_or",
-                   "tagk": "hostname",
-                   "filter": "{{.CombinedHostnameClause}}",
-                   "groupBy": false
-               }
-           ],
-           "id": "f1"
-       }
-   ],
-   "metrics": [
-       {
-           "id": "a",
-           "metric": "cpu.usage_user",
-           "filter": "f1",
-           "fillPolicy":{"policy":"zero"}
-       }
-   ],
-    "expressions":[
-   ],
-    "outputs":[
-      {"id":"a", "alias":"output"}
-    ]
-}
-`
+	{
+		"start": {{.StartTimestamp}},
+		"end": {{.EndTimestamp}},
+		"timezone": "UTC",
+		"queries": [
+		{
+			"aggregator":"max",
+			"metric": "cpu.usage_user",
+			"downsampler":"10m-max",
+			"filters": [
+			{
+				"type": "literal_or",
+				"tagk": "hostname",
+				"filter": "{{.CombinedHostnameClause}}",
+				"groupBy": false
+			}
+			],
+			"expressions":[],
+			"outputs":[
+			{
+				"alias":"output"
+			}
+			]
+		}
+		]
+	}
+	`
 
 	tmpl := template.Must(template.New("tmpl").Parse(tmplString))
 	bodyWriter := new(bytes.Buffer)
@@ -342,42 +315,33 @@ func (d *OpenTSDBDevops) maxCPUUsageHourByHourNHosts(qi bulkQuerygen.Query, nhos
 	endTimestamp := interval.EndUnixNano() / 1e6
 
 	const tmplString = `
-{
-   "time": {
-       "start": {{.StartTimestamp}},
-       "end": {{.EndTimestamp}},
-       "timezone": "UTC",
-       "aggregator":"max",
-       "downsampler":{"interval":"1h","aggregator":"max"}
-   },
-   "filters": [
-       {
-           "tags": [
-               {
-                   "type": "literal_or",
-                   "tagk": "hostname",
-                   "filter": "{{.CombinedHostnameClause}}",
-                   "groupBy": false
-               }
-           ],
-           "id": "f1"
-       }
-   ],
-   "metrics": [
-       {
-           "id": "a",
-           "metric": "cpu.usage_user",
-           "filter": "f1",
-           "fillPolicy":{"policy":"zero"}
-       }
-   ],
-    "expressions":[
-   ],
-    "outputs":[
-      {"id":"a", "alias":"output"}
-    ]
-}
-`
+	{
+		"start": {{.StartTimestamp}},
+		"end": {{.EndTimestamp}},
+		"timezone": "UTC",
+		"queries": [
+		{
+			"aggregator":"max",
+			"metric": "cpu.usage_user",
+			"downsampler":"1h-max",
+			"filters": [
+			{
+				"type": "literal_or",
+				"tagk": "hostname",
+				"filter": "{{.CombinedHostnameClause}}",
+				"groupBy": false
+			}
+			],
+			"expressions":[],
+			"outputs":[
+			{
+				"alias":"output"
+			}
+			]
+		}
+		]
+	}
+	`
 
 	tmpl := template.Must(template.New("tmpl").Parse(tmplString))
 	bodyWriter := new(bytes.Buffer)
