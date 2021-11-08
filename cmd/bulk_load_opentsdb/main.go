@@ -9,12 +9,13 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
-	"github.com/taosdata/timeseriesdatabase-comparisons/bulk_load"
 	"io"
 	"log"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/taosdata/timeseriesdatabase-comparisons/bulk_load"
 
 	"github.com/klauspost/compress/gzip"
 	"github.com/taosdata/timeseriesdatabase-comparisons/util/report"
@@ -54,7 +55,7 @@ func main() {
 }
 
 func (l *OpenTsdbBulkLoad) Init() {
-	flag.StringVar(&l.csvDaemonUrls, "urls", "http://localhost:8086", "OpenTSDB URLs, comma-separated. Will be used in a round-robin fashion.")
+	flag.StringVar(&l.csvDaemonUrls, "urls", "http://localhost:4242", "OpenTSDB URLs, comma-separated. Will be used in a round-robin fashion.")
 }
 
 func (l *OpenTsdbBulkLoad) Validate() {
@@ -150,27 +151,22 @@ func (l *OpenTsdbBulkLoad) RunScanner(r io.Reader, syncChanDone chan int) {
 	buf := l.bufPool.Get().(*bytes.Buffer)
 	zw := gzip.NewWriter(buf)
 
-	openbracket := []byte("[")
-	closebracket := []byte("]")
-	commaspace := []byte(", ")
-	newline := []byte("\n")
+	//openbracket := []byte("[")
+	//closebracket := []byte("]")
+	//commaspace := []byte(", ")
+	//newline := []byte("\n")
 
-	zw.Write(openbracket)
-	zw.Write(newline)
-
-	reader := bufio.NewReaderSize(r, 4*1024*1024)
+	zw.Write([]byte{'[', '\n'})
+	reader := bufio.NewReader(r)
 	var deadline time.Time
 	if bulk_load.Runner.TimeLimit > 0 {
 		deadline = time.Now().Add(bulk_load.Runner.TimeLimit)
 	}
-	var n = 0
+	var lineCounter = 0
 	needComma := false
 	for {
-		if needComma {
-			zw.Write(commaspace)
-			zw.Write(newline)
-		}
-		strBytes, hasMore, err := reader.ReadLine()
+		//reader.ReadString('\n')
+		jsonRow, hasMore, err := reader.ReadLine()
 		if err != nil {
 			if err == io.EOF {
 				break
@@ -178,26 +174,29 @@ func (l *OpenTsdbBulkLoad) RunScanner(r io.Reader, syncChanDone chan int) {
 				log.Fatalf("Error reading input: %s", err.Error())
 			}
 		}
-		zw.Write(strBytes)
+		if needComma {
+			zw.Write([]byte{',', '\n'})
+		}
+		l.bytesRead += int64(len(jsonRow))
+		l.itemsRead += 1
+		//l.valuesRead +=
+		zw.Write(jsonRow)
 		if !hasMore {
-			if n >= bulk_load.Runner.BatchSize {
-				zw.Write(newline)
-				zw.Write(closebracket)
+			if lineCounter >= bulk_load.Runner.BatchSize {
+				zw.Write([]byte{'\n', ']'})
 				zw.Close()
-
 				l.batchChan <- buf
 				buf = l.bufPool.Get().(*bytes.Buffer)
 				zw = gzip.NewWriter(buf)
-				zw.Write(openbracket)
-				zw.Write(newline)
-				n = 0
+				zw.Write([]byte{'[', '\n'})
+				lineCounter = 0
 				if bulk_load.Runner.TimeLimit > 0 && time.Now().After(deadline) {
 					bulk_load.Runner.SetPrematureEnd("Timeout elapsed")
 					break
 				}
 				needComma = false
 			} else {
-				n += 1
+				lineCounter += 1
 				needComma = true
 			}
 		} else {
@@ -210,9 +209,8 @@ func (l *OpenTsdbBulkLoad) RunScanner(r io.Reader, syncChanDone chan int) {
 		}
 	}
 	// Finished reading input, make sure last batch goes out.
-	if n > 0 {
-		zw.Write(newline)
-		zw.Write(closebracket)
+	if lineCounter > 0 {
+		zw.Write([]byte{'\n', ']'})
 		zw.Close()
 		l.batchChan <- buf
 	}
@@ -229,9 +227,9 @@ func (l *OpenTsdbBulkLoad) processBatches(w LineProtocolWriter, workersGroup *sy
 		// Write the batch: try until backoff is not needed.
 		if bulk_load.Runner.DoLoad {
 			var err error
-			for {
+			for i := 0; i < 3; i++ {
 				_, err = w.WriteLineProtocol(batch.Bytes())
-				if err != nil {
+				if err == nil {
 					break
 				}
 			}
@@ -242,7 +240,6 @@ func (l *OpenTsdbBulkLoad) processBatches(w LineProtocolWriter, workersGroup *sy
 		// Return the batch buffer to the pool.
 		batch.Reset()
 		l.bufPool.Put(batch)
-		time.Sleep(time.Second)
 	}
 	workersGroup.Done()
 	return returnErr
