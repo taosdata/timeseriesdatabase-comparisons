@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"io/ioutil"
 	"time"
 
+	"github.com/klauspost/compress/gzip"
 	"github.com/valyala/fasthttp"
 )
 
@@ -52,6 +55,9 @@ var (
 // It returns the latency in nanoseconds and any error received while sending the data over HTTP,
 // or it returns a new error if the HTTP response isn't as expected.
 func (w *HTTPWriter) WriteLineProtocol(body []byte) (int64, error) {
+	r := bytes.NewReader(body)
+	reader, _ := gzip.NewReader(r)
+	d, _ := ioutil.ReadAll(reader)
 	req := fasthttp.AcquireRequest()
 	req.Header.SetContentTypeBytes(applicationJsonHeader)
 	req.Header.Set("Content-Encoding", "gzip")
@@ -67,7 +73,10 @@ func (w *HTTPWriter) WriteLineProtocol(body []byte) (int64, error) {
 		sc := resp.StatusCode()
 		if sc != fasthttp.StatusNoContent && sc != fasthttp.StatusOK {
 			err = fmt.Errorf("invalid write response (status %d): %s", sc, resp.Body())
+			fmt.Println(string(d), err)
 		}
+	} else {
+		fmt.Println(string(d), err)
 	}
 
 	fasthttp.ReleaseResponse(resp)
