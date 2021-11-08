@@ -3,12 +3,13 @@ package opentsdb
 import (
 	"bytes"
 	"fmt"
-	bulkQuerygen "github.com/taosdata/timeseriesdatabase-comparisons/bulk_query_gen"
 	"math/rand"
 	"net/url"
 	"strings"
 	"text/template"
 	"time"
+
+	bulkQuerygen "github.com/taosdata/timeseriesdatabase-comparisons/bulk_query_gen"
 )
 
 // OpenTSDBDevops produces OpenTSDB-specific queries for all the devops query types.
@@ -51,7 +52,6 @@ func (d *OpenTSDBDevops) MaxCPUUsageHourByHourEightHosts(q bulkQuerygen.Query) {
 	d.maxCPUUsageHourByHourNHosts(q.(*bulkQuerygen.HTTPQuery), 8, 24*time.Hour)
 }
 
-
 func (d *OpenTSDBDevops) MaxCPUUsageHourByMinuteSixteenHosts(q bulkQuerygen.Query) {
 	d.maxCPUUsageHourByMinuteNHosts(q.(*bulkQuerygen.HTTPQuery), 16, time.Hour)
 }
@@ -71,7 +71,6 @@ func (d *OpenTSDBDevops) MaxCPUUsage12HourByTenMinuteNHosts(q bulkQuerygen.Query
 func (d *OpenTSDBDevops) MaxCPUUsage8Hosts(q bulkQuerygen.Query) {
 	d.maxCPUUsageNHosts(q.(*bulkQuerygen.HTTPQuery), 8, 24*time.Hour)
 }
-
 
 // MaxCPUUsageHourByMinute8Hosts populates a Query with a query that looks like:
 // SELECT max(usage_user) from cpu where (hostname = '$HOSTNAME_1' or ... or hostname = '$HOSTNAME_N') and time >= '$HOUR_START' and time < '$HOUR_END' group by time(1m)
@@ -141,15 +140,14 @@ func (d *OpenTSDBDevops) maxCPUUsageHourByMinuteNHosts(qi bulkQuerygen.Query, nh
 	q.HumanLabel = []byte(humanLabel)
 	q.HumanDescription = []byte(fmt.Sprintf("%s: %s", humanLabel, interval.StartString()))
 	q.Method = []byte("POST")
-	q.Path = []byte("/api/v1/query/exp")
+	q.Path = []byte("api/v1/query")
 	q.Body = bodyWriter.Bytes()
 	q.StartTimestamp = interval.StartUnixNano()
 	q.EndTimestamp = interval.EndUnixNano()
 }
 
-
 // MaxCPUUsage8Hosts populates a Query with a query that looks like:
-// SELECT max(usage_user) from cpu where (hostname = '$HOSTNAME_1' or ... or hostname = '$HOSTNAME_N') and time >= '$HOUR_START' and time < '$HOUR_END' 
+// SELECT max(usage_user) from cpu where (hostname = '$HOSTNAME_1' or ... or hostname = '$HOSTNAME_N') and time >= '$HOUR_START' and time < '$HOUR_END'
 func (d *OpenTSDBDevops) maxCPUUsageNHosts(qi bulkQuerygen.Query, nhosts int, timeRange time.Duration) {
 	interval := d.AllInterval.RandWindow(timeRange)
 	nn := rand.Perm(d.ScaleVar)[:nhosts]
@@ -216,7 +214,7 @@ func (d *OpenTSDBDevops) maxCPUUsageNHosts(qi bulkQuerygen.Query, nhosts int, ti
 	q.HumanLabel = []byte(humanLabel)
 	q.HumanDescription = []byte(fmt.Sprintf("%s: %s", humanLabel, interval.StartString()))
 	q.Method = []byte("POST")
-	q.Path = []byte("/api/v1/query/exp")
+	q.Path = []byte("api/v1/query")
 	q.Body = bodyWriter.Bytes()
 	q.StartTimestamp = interval.StartUnixNano()
 	q.EndTimestamp = interval.EndUnixNano()
@@ -290,7 +288,7 @@ func (d *OpenTSDBDevops) maxCPUUsageHourByTenMinuteNHosts(qi bulkQuerygen.Query,
 	q.HumanLabel = []byte(humanLabel)
 	q.HumanDescription = []byte(fmt.Sprintf("%s: %s", humanLabel, interval.StartString()))
 	q.Method = []byte("POST")
-	q.Path = []byte("/api/v1/query/exp")
+	q.Path = []byte("api/v1/query")
 	q.Body = bodyWriter.Bytes()
 	q.StartTimestamp = interval.StartUnixNano()
 	q.EndTimestamp = interval.EndUnixNano()
@@ -364,7 +362,7 @@ func (d *OpenTSDBDevops) maxCPUUsageHourByHourNHosts(qi bulkQuerygen.Query, nhos
 	q.HumanLabel = []byte(humanLabel)
 	q.HumanDescription = []byte(fmt.Sprintf("%s: %s", humanLabel, interval.StartString()))
 	q.Method = []byte("POST")
-	q.Path = []byte("/api/v1/query/exp")
+	q.Path = []byte("api/v1/query")
 	q.Body = bodyWriter.Bytes()
 	q.StartTimestamp = interval.StartUnixNano()
 	q.EndTimestamp = interval.EndUnixNano()

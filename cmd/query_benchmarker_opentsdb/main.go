@@ -11,12 +11,13 @@ import (
 	"encoding/gob"
 	"flag"
 	"fmt"
-	"github.com/taosdata/timeseriesdatabase-comparisons/bulk_query"
-	"github.com/taosdata/timeseriesdatabase-comparisons/util/report"
 	"io"
 	"log"
 	"strings"
 	"sync"
+
+	"github.com/taosdata/timeseriesdatabase-comparisons/bulk_query"
+	"github.com/taosdata/timeseriesdatabase-comparisons/util/report"
 )
 
 type OpenTsdbQueryBenchmarker struct {
@@ -67,6 +68,7 @@ func (b *OpenTsdbQueryBenchmarker) Prepare() {
 			}
 		},
 	}
+	b.queryChan = make(chan *Query)
 }
 
 func (b *OpenTsdbQueryBenchmarker) GetProcessor() bulk_query.Processor {
