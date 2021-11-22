@@ -36,6 +36,23 @@ func (d *OpenTSDBDevops) MaxCPUUsageHourByMinuteOneHost(q bulkQuerygen.Query) {
 	d.maxCPUUsageHourByMinuteNHosts(q.(*bulkQuerygen.HTTPQuery), 1, time.Hour)
 }
 
+func (d *OpenTSDBDevops) MaxCPUUsageHourByMinute64Hosts(q bulkQuerygen.Query) {
+	d.maxCPUUsageHourByMinuteNHosts(q.(*bulkQuerygen.HTTPQuery), 64, time.Hour)
+}
+
+func (d *OpenTSDBDevops) MaxCPUUsageHourByMinute128Hosts(q bulkQuerygen.Query) {
+	d.maxCPUUsageHourByMinuteNHosts(q.(*bulkQuerygen.HTTPQuery), 128, time.Hour)
+}
+
+func (d *OpenTSDBDevops) MaxCPUUsageHourByMinute256Hosts(q bulkQuerygen.Query) {
+	d.maxCPUUsageHourByMinuteNHosts(q.(*bulkQuerygen.HTTPQuery), 256, time.Hour)
+}
+
+func (d *OpenTSDBDevops) MaxCPUUsageHourByMinute512Hosts(q bulkQuerygen.Query) {
+	d.maxCPUUsageHourByMinuteNHosts(q.(*bulkQuerygen.HTTPQuery), 512, time.Hour)
+}
+
+
 func (d *OpenTSDBDevops) MaxCPUUsageHourByMinuteTwoHosts(q bulkQuerygen.Query) {
 	d.maxCPUUsageHourByMinuteNHosts(q.(*bulkQuerygen.HTTPQuery), 2, time.Hour)
 }
@@ -64,8 +81,36 @@ func (d *OpenTSDBDevops) MaxCPUUsageHourByMinuteEightHosts12Hr(q bulkQuerygen.Qu
 	d.maxCPUUsageHourByMinuteNHosts(q.(*bulkQuerygen.HTTPQuery), 8, 12*time.Hour)
 }
 
+func (d *OpenTSDBDevops) MaxCPUUsageHourByHour1Hosts(q bulkQuerygen.Query) {
+	d.maxCPUUsageHourByHourNHosts(q.(*bulkQuerygen.HTTPQuery), 1, 24*time.Hour)
+}
+
 func (d *OpenTSDBDevops) MaxCPUUsageHourByHourEightHosts(q bulkQuerygen.Query) {
 	d.maxCPUUsageHourByHourNHosts(q.(*bulkQuerygen.HTTPQuery), 8, 24*time.Hour)
+}
+
+func (d *OpenTSDBDevops) MaxCPUUsageHourByHour16Hosts(q bulkQuerygen.Query) {
+	d.maxCPUUsageHourByHourNHosts(q.(*bulkQuerygen.HTTPQuery), 16, 24*time.Hour)
+}
+
+func (d *OpenTSDBDevops) MaxCPUUsageHourByHour32Hosts(q bulkQuerygen.Query) {
+	d.maxCPUUsageHourByHourNHosts(q.(*bulkQuerygen.HTTPQuery), 32, 24*time.Hour)
+}
+
+func (d *OpenTSDBDevops) MaxCPUUsageHourByHour64Hosts(q bulkQuerygen.Query) {
+	d.maxCPUUsageHourByHourNHosts(q.(*bulkQuerygen.HTTPQuery), 64, 24*time.Hour)
+}
+
+func (d *OpenTSDBDevops) MaxCPUUsageHourByHour128Hosts(q bulkQuerygen.Query) {
+	d.maxCPUUsageHourByHourNHosts(q.(*bulkQuerygen.HTTPQuery), 128, 24*time.Hour)
+}
+
+func (d *OpenTSDBDevops) MaxCPUUsageHourByHour256Hosts(q bulkQuerygen.Query) {
+	d.maxCPUUsageHourByHourNHosts(q.(*bulkQuerygen.HTTPQuery), 256, 24*time.Hour)
+}
+
+func (d *OpenTSDBDevops) MaxCPUUsageHourByHour512Hosts(q bulkQuerygen.Query) {
+	d.maxCPUUsageHourByHourNHosts(q.(*bulkQuerygen.HTTPQuery), 512, 24*time.Hour)
 }
 
 func (d *OpenTSDBDevops) MaxCPUUsageHourByMinuteSixteenHosts(q bulkQuerygen.Query) {
@@ -83,6 +128,35 @@ func (d *OpenTSDBDevops) MaxCPUUsage12HoursByMinuteOneHost(q bulkQuerygen.Query)
 func (d *OpenTSDBDevops) MaxCPUUsage12HourByTenMinuteNHosts(q bulkQuerygen.Query) {
 	d.maxCPUUsageHourByTenMinuteNHosts(q.(*bulkQuerygen.HTTPQuery), 8, 12*time.Hour)
 }
+
+func (d *OpenTSDBDevops) MaxCPUUsage12HourByTenMinute1Hosts(q bulkQuerygen.Query) {
+	d.maxCPUUsageHourByTenMinuteNHosts(q.(*bulkQuerygen.HTTPQuery), 1, 12*time.Hour)
+}
+
+func (d *OpenTSDBDevops) MaxCPUUsage12HourByTenMinute16Hosts(q bulkQuerygen.Query) {
+	d.maxCPUUsageHourByTenMinuteNHosts(q.(*bulkQuerygen.HTTPQuery), 16, 12*time.Hour)
+}
+
+func (d *OpenTSDBDevops) MaxCPUUsage12HourByTenMinute32Hosts(q bulkQuerygen.Query) {
+	d.maxCPUUsageHourByTenMinuteNHosts(q.(*bulkQuerygen.HTTPQuery), 32, 12*time.Hour)
+}
+
+func (d *OpenTSDBDevops) MaxCPUUsage12HourByTenMinute64Hosts(q bulkQuerygen.Query) {
+	d.maxCPUUsageHourByTenMinuteNHosts(q.(*bulkQuerygen.HTTPQuery), 64, 12*time.Hour)
+}
+
+func (d *OpenTSDBDevops) MaxCPUUsage12HourByTenMinute128Hosts(q bulkQuerygen.Query) {
+	d.maxCPUUsageHourByTenMinuteNHosts(q.(*bulkQuerygen.HTTPQuery), 128, 12*time.Hour)
+}
+
+func (d *OpenTSDBDevops) MaxCPUUsage12HourByTenMinute256Hosts(q bulkQuerygen.Query) {
+	d.maxCPUUsageHourByTenMinuteNHosts(q.(*bulkQuerygen.HTTPQuery), 256, 12*time.Hour)
+}
+
+func (d *OpenTSDBDevops) MaxCPUUsage12HourByTenMinute512Hosts(q bulkQuerygen.Query) {
+	d.maxCPUUsageHourByTenMinuteNHosts(q.(*bulkQuerygen.HTTPQuery), 512, 12*time.Hour)
+}
+
 
 func (d *OpenTSDBDevops) MaxCPUUsage8Hosts(q bulkQuerygen.Query) {
 	d.maxCPUUsageNHosts(q.(*bulkQuerygen.HTTPQuery), 8, 24*time.Hour)
