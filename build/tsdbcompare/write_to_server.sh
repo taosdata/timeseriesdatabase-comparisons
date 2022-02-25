@@ -12,12 +12,14 @@ batchsize=5000
 workers=16
 interface='false'
 gene=1
-add='tdvs'
+add='test217'
 interval='10s'
 scale=100
 st='2018-01-01T00:00:00Z'
 et='2018-01-02T00:00:00Z'
-while getopts "b:w:n:g:a:i:s:t:e:" opt
+TDPath="/var/lib/taos/"
+InfPath="/var/lib/influxdb/"
+while getopts "b:w:n:g:a:i:s:t:e:T:I:" opt
 do
     case $opt in
         b)
@@ -56,6 +58,14 @@ do
         echo "timestamp-end:$OPTARG"
         et=$OPTARG
         ;;
+        T)
+        echo "TDengine rootPath:$OPTARG"
+        TDPath=$OPTARG
+        ;;
+        I)
+        echo "Influxdb rootPath:$OPTARG"
+        InfPath=$OPTARG
+        ;;
         ?)
         echo    "======================================================"
         echo    "b | batchsize(1~5000)"
@@ -75,6 +85,10 @@ do
         echo    "e | timestamp-end(default:'2018-01-02T00:00:00Z')"
         echo    "------------------------------------------------------"
         echo    "g | genate data(0:no,1:yes)"
+        echo    "------------------------------------------------------"
+        echo    "T | TDengine rootPath (default:/var/lib/taos)"
+        echo    "------------------------------------------------------"
+        echo    "I | Influxdb rootPath (default:/var/lib/taos)"
         echo    "======================================================"
         exit 1;;
     esac
@@ -103,8 +117,8 @@ fi
 echo
 echo "---------------  Clean  -----------------"
 ssh root@$add << eeooff
-rm -rf /mnt/lib/taos/*
-rm -rf /mnt/lib/influxdb/*
+rm -rf ${TDPath}/*
+rm -rf ${InfPath}/*
 echo 1 > /proc/sys/vm/drop_caches
 systemctl start taosd 
 sleep 10
@@ -126,29 +140,29 @@ echo -e "${GREEN}$TDENGINERES${NC}"
 DATA=`echo $TDENGINERES|awk '{print($2)}'`
 TMP=`echo $TDENGINERES|awk '{print($5)}'`
 TDWTM=`echo ${TMP%s*}`
-# ssh root@$add << eeooff
-# systemctl stop taosd 
-# echo 1 > /proc/sys/vm/drop_caches
-# systemctl start influxdb
-# sleep 10
-# exit
-# eeooff
-# echo
-# echo -e "Start test InfluxDB, result in ${GREEN}Green line${NC}"
-# #curl "http://$add:8086/query?q=drop%20database%20benchmark_db" -X POST
-# INFLUXRES=`cat data/influx.dat  |bin/bulk_load_influx --batch-size=$batchsize --workers=$workers --urls="http://$add:8086" | grep loaded`
-# echo
-# echo -e "${GREEN}InfluxDB writing result:${NC}"
-# echo -e "${GREEN}$INFLUXRES${NC}"
-# 
-# TMP=`echo $INFLUXRES|awk '{print($5)}'`
-# IFWTM=`echo ${TMP%s*}`
-# ssh root@$add << eeooff
-# systemctl stop influxd
-# exit
-# eeooff
-# TDDISK=`ssh root@$add "du -sh /mnt/lib/taos/vnode | cut -d '	' -f 1 " `
-# IFDISK=`ssh root@$add "du -sh /mnt/lib/influxdb/data | cut -d '	' -f 1" `
+ssh root@$add << eeooff
+systemctl stop taosd 
+echo 1 > /proc/sys/vm/drop_caches
+systemctl start influxdb
+sleep 10
+exit
+eeooff
+echo
+echo -e "Start test InfluxDB, result in ${GREEN}Green line${NC}"
+curl "http://$add:8086/query?q=drop%20database%20benchmark_db" -X POST
+INFLUXRES=`cat data/influx.dat  |bin/bulk_load_influx --batch-size=$batchsize --workers=$workers --urls="http://$add:8086" | grep loaded`
+echo
+echo -e "${GREEN}InfluxDB writing result:${NC}"
+echo -e "${GREEN}$INFLUXRES${NC}"
+
+TMP=`echo $INFLUXRES|awk '{print($5)}'`
+IFWTM=`echo ${TMP%s*}`
+ssh root@$add << eeooff
+systemctl stop influxd
+exit
+eeooff
+TDDISK=`ssh root@$add "du -sh ${TDPath}/vnode | cut -d '	' -f 1 " `
+IFDISK=`ssh root@$add "du -sh ${InfPath}/data | cut -d '	' -f 1" `
 # 
 echo
 echo
@@ -157,11 +171,11 @@ echo    "             tsdb performance comparision             "
 printf  "       worker:%-4.2f      |       batch:%-4.2f      \n" $workers $batchsize
 echo    "======================================================"
 echo -e "       Writing $DATA records test takes:          "
-# printf  "       InfluxDB           |       %-4.2f Seconds    \n" $IFWTM 
+printf  "       InfluxDB           |       %-4.2f Seconds    \n" $IFWTM 
 printf  "       TDengine           |       %-4.2f Seconds    \n" $TDWTM
 echo    "======================================================"
 echo -e "       Writing $DATA records test disk:          "
-# printf  "       InfluxDB           |       %-10s     \n" $IFDISK
+printf  "       InfluxDB           |       %-10s     \n" $IFDISK
 printf  "       TDengine           |       %-10s     \n" $TDDISK
 echo    "------------------------------------------------------"
 
