@@ -1,9 +1,10 @@
-# new work dir
-mkdir /tscompar-tests
-cd /tscompar-tests
-# clone project and prepare to compile and compile program
-git clone https://github.com/taosdata/timeseriesdatabase-comparisons
-cd timeseriesdatabase-comparisons && rm -rf go.mod go.sum 
+# init path
+scriptDir=$(dirname $(readlink -f $0))
+workDir=${scriptDir=}/../../
+echo "${workDir}"
+
+#prepare to compile and compile program
+cd ${workDir} && rm -rf go.mod go.sum 
 go mod init github.com/taosdata/timeseriesdatabase-comparisons
 go get github.com/golang/protobuf/proto
 go get github.com/google/flatbuffers/go
