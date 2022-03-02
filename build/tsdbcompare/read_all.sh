@@ -8,6 +8,76 @@ GREEN_DARK='\033[0;32m'
 GREEN_UNDERLINE='\033[4;32m'
 NC='\033[0m'
 
+workers=16
+interface='cgo'
+gene=0
+add='127.0.0.1'
+interval='10s'
+scale=100
+st='2018-01-01T00:00:00Z'
+et='2018-01-02T00:00:00Z'
+
+while getopts "w:n:g:a:i:s:t:e:" opt
+do
+    case $opt in
+        w)
+        echo "workers:$OPTARG"
+        workers=$OPTARG
+        ;;
+        n)
+        echo "TD's interface:$OPTARG"
+        interface=$OPTARG
+        ;;
+        g)
+        echo "whether generate data:$OPTARG"
+        gene=$OPTARG
+        ;;
+        i)
+        echo "sampling interval:$OPTARG"
+        interval=$OPTARG
+        ;;
+        a)
+        echo "address:$OPTARG"
+        add=$OPTARG
+        ;;
+        s)
+        echo "scale-var:$OPTARG"
+        scale=$OPTARG
+        ;;
+        t)
+        echo "timestamp-start:$OPTARG"
+        st=$OPTARG
+        ;;
+        e)
+        echo "timestamp-end:$OPTARG"
+        et=$OPTARG
+        ;;
+        ?)
+        echo    "======================================================"
+        echo    "w | query workers"
+        echo    "------------------------------------------------------"
+        echo    "n | TD's interface(cgo,fast)"
+        echo    "------------------------------------------------------"
+        echo    "i | sampling interval(default:10s)"
+        echo    "------------------------------------------------------"
+        echo    "a | address of TD & influx"
+        echo    "------------------------------------------------------"
+        echo    "s | scale-var(default:100)"
+        echo    "------------------------------------------------------"
+        echo    "t | timestamp-start(default:'2018-01-01T00:00:00Z')"
+        echo    "------------------------------------------------------"
+        echo    "e | timestamp-end(default:'2018-01-02T00:00:00Z')"
+        echo    "------------------------------------------------------"
+        echo    "g | genate data(0:no ,1:yes ,default:0)"
+        echo    "======================================================"
+        exit 1;;
+    esac
+done
+
+echo "variables :"
+echo "generate data: scale-var: $scale ,interval: $interval ,timestamp-start: $st ,timestamp-stop: $et"
+echo "workers:$workers ,TD's interface: $interface ,generate data: $gene , address: $add"
+
 
 query()
 {
@@ -74,7 +144,7 @@ cp ../../bulk_query_gen/influxdb/influx_devops_common.go_1host ../../bulk_query_
 ls -l ../../bulk_query_gen/influxdb/influx_devops_common.go
 query
 # 执行对比程序
-./read_1host.sh
+./read_1host.sh -a ${add}
 
 # echo 
 # echo  "------------------Test case 1.1 : Comparison use 1 random host by rest-----------------"
@@ -95,7 +165,7 @@ cp ../../bulk_query_gen/influxdb/influx_devops_common.go_8host ../../bulk_query_
 ls -l ../../bulk_query_gen/influxdb/influx_devops_common.go
 query
 # 执行对比程序
-./read_8host.sh
+./read_8host.sh -a ${add}
 
 # echo 
 # echo  "------------------Test case 1.2 : Comparison use 8 random hosts by rest-----------------"
@@ -116,7 +186,7 @@ cp ../../bulk_query_gen/influxdb/influx_devops_common.go_16host ../../bulk_query
 ls -l ../../bulk_query_gen/influxdb/influx_devops_common.go
 query
 # 执行对比程序
-./read_16host.sh
+./read_16host.sh -a ${add}
 
 # echo 
 # echo  "------------------Test case 1.3 : Comparison use 16 random hosts by rest-----------------"
@@ -138,7 +208,7 @@ cp ../../bulk_query_gen/influxdb/influx_devops_common.go_32host ../../bulk_query
 ls -l ../../bulk_query_gen/influxdb/influx_devops_common.go
 query
 # 执行对比程序
-./read_32host.sh
+./read_32host.sh -a ${add}
 
 # echo 
 # echo  "------------------Test case 1.4 : Comparison use 32 random hosts by rest-----------------"
@@ -160,7 +230,7 @@ cp ../../bulk_query_gen/influxdb/influx_devops_common.go_64host ../../bulk_query
 ls -l ../../bulk_query_gen/influxdb/influx_devops_common.go
 query
 # 执行对比程序
-./read_64host.sh
+./read_64host.sh -a ${add}
 
 # echo 
 # echo  "------------------Test case 1.5 : Comparison use 64 random hosts by rest-----------------"
@@ -182,7 +252,7 @@ cp ../../bulk_query_gen/influxdb/influx_devops_common.go_128host ../../bulk_quer
 ls -l ../../bulk_query_gen/influxdb/influx_devops_common.go
 query
 # 执行对比程序
-./read_128host.sh
+./read_128host.sh -a ${add}
 
 # echo 
 # echo  "------------------Test case 1.6 : Comparison use 128 random hosts by rest-----------------"
@@ -204,7 +274,7 @@ cp ../../bulk_query_gen/influxdb/influx_devops_common.go_256host ../../bulk_quer
 ls -l ../../bulk_query_gen/influxdb/influx_devops_common.go
 query
 # 执行对比程序
-./read_256host.sh
+./read_256host.sh -a ${add}
 
 # echo 
 # echo  "------------------Test case 1.7 : Comparison use 256 random hosts by rest-----------------"
@@ -226,7 +296,7 @@ cp ../../bulk_query_gen/influxdb/influx_devops_common.go_512host ../../bulk_quer
 ls -l ../../bulk_query_gen/influxdb/influx_devops_common.go
 query
 # 执行对比程序
-./read_512host.sh
+./read_512host.sh -a ${add}
 
 # echo 
 # echo  "------------------Test case 1.8 : Comparison use 512 random hosts by rest-----------------"
@@ -254,7 +324,7 @@ cp ../../bulk_query_gen/influxdb/influx_devops_common.go_1hour ../../bulk_query_
 ls -l ../../bulk_query_gen/influxdb/influx_devops_common.go
 query
 # 执行对比程序
-./read_1hour.sh
+./read_1hour.sh -a ${add} 
 
 
 
@@ -270,7 +340,7 @@ cp ../../bulk_query_gen/influxdb/influx_devops_common.go_2hour ../../bulk_query_
 ls -l ../../bulk_query_gen/influxdb/influx_devops_common.go
 query
 # 执行对比程序
-./read_2hour.sh
+./read_2hour.sh -a ${add}
 
 
 
@@ -286,7 +356,7 @@ cp ../../bulk_query_gen/influxdb/influx_devops_common.go_4hour ../../bulk_query_
 ls -l ../../bulk_query_gen/influxdb/influx_devops_common.go
 query
 # 执行对比程序
-./read_4hour.sh
+./read_4hour.sh -a ${add}
 
 
 
@@ -302,7 +372,7 @@ cp ../../bulk_query_gen/influxdb/influx_devops_common.go_8hour ../../bulk_query_
 ls -l ../../bulk_query_gen/influxdb/influx_devops_common.go
 query
 # 执行对比程序
-./read_8hour.sh
+./read_8hour.sh -a ${add}
 
 
 
@@ -318,7 +388,7 @@ cp ../../bulk_query_gen/influxdb/influx_devops_common.go_12hour ../../bulk_query
 ls -l ../../bulk_query_gen/influxdb/influx_devops_common.go
 query
 # 执行对比程序
-./read_12hour.sh
+./read_12hour.sh -a ${add}
 
 
 
@@ -340,7 +410,7 @@ cp ../../bulk_query_gen/influxdb/influx_devops_common.go_count ../../bulk_query_
 ls -l ../../bulk_query_gen/influxdb/influx_devops_common.go
 query
 # 执行对比程序
-./read_count.sh
+./read_count.sh -a ${add}
 
 
 
@@ -356,7 +426,7 @@ cp ../../bulk_query_gen/influxdb/influx_devops_common.go_top10 ../../bulk_query_
 ls -l ../../bulk_query_gen/influxdb/influx_devops_common.go
 query
 # 执行对比程序
-./read_top.sh
+./read_top.sh -a ${add}
 
 
 
@@ -372,7 +442,7 @@ cp ../../bulk_query_gen/influxdb/influx_devops_common.go_count_percentile ../../
 ls -l ../../bulk_query_gen/influxdb/influx_devops_common.go
 query
 # 执行对比程序
-./read_count_percentile.sh
+./read_count_percentile.sh -a ${add}
 
 
 
@@ -394,7 +464,7 @@ cp ../../bulk_query_gen/influxdb/influx_devops_common.go_select16 ../../bulk_que
 ls -l ../../bulk_query_gen/influxdb/influx_devops_common.go
 query
 # 执行对比程序
-./read_select16.sh
+./read_select16.sh -a ${add}
 
 
 
@@ -410,7 +480,7 @@ cp ../../bulk_query_gen/influxdb/influx_devops_common.go_select32 ../../bulk_que
 ls -l ../../bulk_query_gen/influxdb/influx_devops_common.go
 query
 # 执行对比程序
-./read_select32.sh
+./read_select32.sh -a ${add}
 
 
 
@@ -426,7 +496,7 @@ cp ../../bulk_query_gen/influxdb/influx_devops_common.go_select64 ../../bulk_que
 ls -l ../../bulk_query_gen/influxdb/influx_devops_common.go
 query
 # 执行对比程序
-./read_select64.sh
+./read_select64.sh -a ${add}
 
 
 
@@ -442,7 +512,7 @@ cp ../../bulk_query_gen/influxdb/influx_devops_common.go_select128 ../../bulk_qu
 ls -l ../../bulk_query_gen/influxdb/influx_devops_common.go
 query
 # 执行对比程序
-./read_select128.sh
+./read_select128.sh -a ${add}
 
 
 
@@ -458,5 +528,5 @@ cp ../../bulk_query_gen/influxdb/influx_devops_common.go_select256 ../../bulk_qu
 ls -l ../../bulk_query_gen/influxdb/influx_devops_common.go
 query
 # 执行对比程序
-./read_select256.sh
+./read_select256.sh -a ${add}
 

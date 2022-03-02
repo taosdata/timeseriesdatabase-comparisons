@@ -12,7 +12,7 @@ batchsize=5000
 workers=16
 interface='false'
 gene=1
-add='test217'
+add='127.0.0.1'
 interval='10s'
 scale=100
 st='2018-01-01T00:00:00Z'
@@ -107,11 +107,13 @@ if [[ $gene == 1 ]];then
     echo
     echo "---------------Generating Data-----------------"
     echo
-#    echo "Prepare data for InfluxDB...."
-#     bin/bulk_data_gen -seed 123 -format influx-bulk -sampling-interval $interval -scale-var $scale -use-case devops -timestamp-start "$st" -timestamp-end "$et" >data/influx.dat
+    echo "Prepare data for InfluxDB...."
+    echo " bin/bulk_data_gen -seed 123 -format influx-bulk -sampling-interval $interval -scale-var $scale -use-case devops -timestamp-start "$st" -timestamp-end "$et" >data/influx.dat"
+    bin/bulk_data_gen -seed 123 -format influx-bulk -sampling-interval $interval -scale-var $scale -use-case devops -timestamp-start "$st" -timestamp-end "$et" >data/influx.dat
 
     echo 
     echo "Prepare data for TDengine...."
+    echo "bin/bulk_data_gen -seed 123 -format tdengine -sampling-interval $interval -tdschema-file config/TDengineSchema.toml -scale-var $scale -use-case devops -timestamp-start "$st" -timestamp-end "$et"  > data/tdengine.dat"
     bin/bulk_data_gen -seed 123 -format tdengine -sampling-interval $interval -tdschema-file config/TDengineSchema.toml -scale-var $scale -use-case devops -timestamp-start "$st" -timestamp-end "$et"  > data/tdengine.dat
 fi
 echo
@@ -120,7 +122,7 @@ ssh root@$add << eeooff
 rm -rf ${TDPath}/*
 rm -rf ${InfPath}/*
 echo 1 > /proc/sys/vm/drop_caches
-systemctl start taosd 
+systemctl restart taosd 
 sleep 10
 exit
 eeooff
@@ -143,7 +145,7 @@ TDWTM=`echo ${TMP%s*}`
 ssh root@$add << eeooff
 systemctl stop taosd 
 echo 1 > /proc/sys/vm/drop_caches
-systemctl start influxdb
+systemctl restart influxdb
 sleep 10
 exit
 eeooff
