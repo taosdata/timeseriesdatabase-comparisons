@@ -324,7 +324,7 @@ cp ../../bulk_query_gen/influxdb/influx_devops_common.go_1hour ../../bulk_query_
 ls -l ../../bulk_query_gen/influxdb/influx_devops_common.go
 query
 # 执行对比程序
-./read_1hour.sh -a ${add} -a ${add}
+./read_1hour.sh -a ${add} 
 
 
 

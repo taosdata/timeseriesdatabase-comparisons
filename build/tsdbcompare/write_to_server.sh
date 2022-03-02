@@ -122,7 +122,7 @@ ssh root@$add << eeooff
 rm -rf ${TDPath}/*
 rm -rf ${InfPath}/*
 echo 1 > /proc/sys/vm/drop_caches
-systemctl start taosd 
+systemctl restart taosd 
 sleep 10
 exit
 eeooff
@@ -145,7 +145,7 @@ TDWTM=`echo ${TMP%s*}`
 ssh root@$add << eeooff
 systemctl stop taosd 
 echo 1 > /proc/sys/vm/drop_caches
-systemctl start influxdb
+systemctl restart influxdb
 sleep 10
 exit
 eeooff
